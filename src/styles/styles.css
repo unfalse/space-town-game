@@ -1,0 +1,54 @@
+body {
+    background-color: black;
+}
+
+#titleBlock {
+    text-align: center;
+}
+
+#gameOverBlock {
+    position: absolute;
+    display: none;
+    text-transform: uppercase;
+    color: #fff;
+    font-weight: bold;
+    font-family: Comic;
+    font-size: 25pt;
+}
+
+#playAgainBtn {
+    width: 100px;
+    height: 20px;
+    position: absolute;
+    top: 520px;
+    display: none;
+    background-color: black;
+    color: white;
+    border: 1px solid green;
+}
+
+#editorBlock {
+    display: none;
+    text-align: center;
+}
+
+#editorCurrentBlock {
+    width: 40px;
+    height: 40px;
+}
+
+#editorFileList {
+    position: absolute;
+    top: 60px;
+    background-color: blue;
+    border: 1px yellow solid;
+    display: none;
+}
+
+#editorFileList ul li:hover {
+    border: 1px white solid;
+}
+
+#editorFileList ul {
+    list-style: none;
+}

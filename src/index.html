@@ -1,0 +1,61 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+
+  <head>
+    <title>Space Town</title>
+    <meta http-equiv="content-type" content="text/html;charset=utf-8" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+
+  <body>
+
+    <div id="titleBlock">
+
+      <!-- <canvas id="gameInfo" height="70" width="500"></canvas> -->
+
+      <div id="editorBlock">
+        <div id="editorCurrentObject">
+
+        </div>
+        <button id="editorNewBtn">
+          Neww
+        </button>
+        <button id="editorSaveBtn">
+          Save
+        </button>
+        <button id="editorSaveAsBtn">
+          Save As
+        </button>
+        <button id="editorLoadBtn">
+          Load
+        </button>
+        <button id="editorPlayBtn">
+          Play
+        </button>
+      </div>
+      <div id="editorFileList"></div>
+    </div>
+
+    <div style="display: flex; justify-content: center; align-items: center;">
+
+      <div id="gameOverBlock"></div>
+      <button id="playAgainBtn" onclick="location.reload();">
+        Play again
+      </button>
+
+      <canvas
+        id="gameField"
+        height="1000"
+        width="1000"
+        style="border: 1px solid white;"
+        >Please, upgrade your browser.</canvas
+      >
+
+    </div>
+
+    <div style="text-align: center; color: gray;">
+      Controls:<br />
+      arrow keys - to move; eng. "a" - to shoot
+    </div>
+</body>
+</html>
