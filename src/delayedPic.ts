@@ -1,6 +1,6 @@
 import { BaseCoordinates } from './baseCoord';
 
-export const DelayedPic = class extends BaseCoordinates {
+export class DelayedPic extends BaseCoordinates {
     constructor() {
         super();
     }

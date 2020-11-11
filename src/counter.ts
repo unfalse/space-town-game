@@ -1,4 +1,4 @@
-import { BaseCSW } from './baseCsw';
+import { BaseCSW } from './base/baseCsw';
 import { BTankManager } from './btank';
 import { CONST } from './const';
 import { Who } from './types';
@@ -8,6 +8,8 @@ export const Counter = class extends BaseCSW {
     type: number; // TODO: it exists in BaseCSW too!
     counter: number;
     counterMax: number;
+    y: number;
+    x: number;
 
     constructor(BTankInst: BTankManager) {
       super();
@@ -26,7 +28,7 @@ export const Counter = class extends BaseCSW {
       this.BTankInst.drawCounter(this.x, this.y, this.counter);
     }
 
-    update(timestamp) {
+    update(timestamp: number) {
       this.counter++;
       this.counter = this.counter > 9 ? 0 : this.counter;
       super.update(timestamp);

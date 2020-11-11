@@ -10,7 +10,7 @@ export declare const BaseCPU: {
         fire(timestamp: number): void;
         draw(): void;
         hitByBullet(bulletInstance: Bullet): void;
-        plusShapedScan(distance: number): number;
+        plusShapedScan(distance: number): Direction;
         lastBulletTimeStamp: number;
         CSWSPEED: number;
         inertiaDirections: {

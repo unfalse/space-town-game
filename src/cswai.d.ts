@@ -1,4 +1,5 @@
 import { BTankManager } from './btank';
+import { Bullet } from './bullet';
 import { Direction, PathUnit, Who } from './types';
 declare const CSWAI_0: {
     new (): {
@@ -12,8 +13,8 @@ declare const CSWAI_0: {
         pathsPresets: PathUnit[];
         fire(timestamp: number): void;
         draw(): void;
-        hitByBullet(bulletInstance: import("./bullet").Bullet): void;
-        plusShapedScan(distance: number): number;
+        hitByBullet(bulletInstance: Bullet): void;
+        plusShapedScan(distance: number): Direction;
         lastBulletTimeStamp: number;
         CSWSPEED: number;
         inertiaDirections: {
@@ -64,12 +65,12 @@ declare const CSWAI_1: {
         dirs: number[];
         init(mx: number, my: number, who: Who, BTankInst: BTankManager): void;
         AI_generateNewPath(): {
-            d: number;
+            d: Direction;
             accel: number;
             ms: number;
         };
         AI_generateNewFireTime(): number;
-        update(timestamp: any): void;
+        update(timestamp: number): void;
         CPU_BULLETS_INTERVAL: number;
         fireStartTime: number;
         pathUnit: PathUnit;
@@ -77,8 +78,8 @@ declare const CSWAI_1: {
         pathsPresets: PathUnit[];
         fire(timestamp: number): void;
         draw(): void;
-        hitByBullet(bulletInstance: import("./bullet").Bullet): void;
-        plusShapedScan(distance: number): number;
+        hitByBullet(bulletInstance: Bullet): void;
+        plusShapedScan(distance: number): Direction;
         lastBulletTimeStamp: number;
         CSWSPEED: number;
         inertiaDirections: {
@@ -116,10 +117,15 @@ declare const CSWAI_1: {
         initCoords(nx: number, ny: number, nd: any): void;
     };
 };
+declare type Wp = number[];
 declare const CSWAI_customPaths: {
     new (): {
-        init(mx: any, my: any, who: any, BTankInst: any, wayPoints: any): void;
-        update(timestamp: any): void;
+        wpCounter: number;
+        wpStartTime: number;
+        currentWp: Wp;
+        wayPoints: Wp[];
+        init(mx: number, my: number, who: Who, BTankInst: BTankManager, wayPoints?: Wp[]): void;
+        update(timestamp: number): void;
         CPU_BULLETS_INTERVAL: number;
         fireStartTime: number;
         pathUnit: PathUnit;
@@ -127,8 +133,8 @@ declare const CSWAI_customPaths: {
         pathsPresets: PathUnit[];
         fire(timestamp: number): void;
         draw(): void;
-        hitByBullet(bulletInstance: import("./bullet").Bullet): void;
-        plusShapedScan(distance: number): number;
+        hitByBullet(bulletInstance: Bullet): void;
+        plusShapedScan(distance: number): Direction;
         lastBulletTimeStamp: number;
         CSWSPEED: number;
         inertiaDirections: {
@@ -254,7 +260,7 @@ declare const Border: {
 };
 declare const StaticShip: {
     new (): {
-        init(mx: any, my: any, who: any, BTankInst: any, wayPoints: any): void;
+        init(mx: number, my: number, who: Who, BTankInst: BTankManager): void;
         draw(): void;
         lastBulletTimeStamp: number;
         CSWSPEED: number;
@@ -286,7 +292,7 @@ declare const StaticShip: {
         stop(): void;
         move(direction: Direction): void;
         update(timestamp: number): void;
-        hitByBullet(bulletInstance: import("./bullet").Bullet): void;
+        hitByBullet(bulletInstance: Bullet): void;
         getVXY(d: any): {
             vx: number;
             vy: number;
@@ -297,9 +303,9 @@ declare const StaticShip: {
 };
 declare const SpaceBrick: {
     new (): {
-        init(mx: any, my: any, who: any, BTankInst: any): void;
+        init(mx: number, my: number, who: Who, BTankInst: BTankManager): void;
         draw(): void;
-        hitByBullet(bulletInstance: any): void;
+        hitByBullet(_bulletInstance: Bullet): void;
         lastBulletTimeStamp: number;
         CSWSPEED: number;
         inertiaDirections: {

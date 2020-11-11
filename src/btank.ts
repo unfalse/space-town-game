@@ -26,20 +26,22 @@ export class BTankManager {
     infoContext: any;
     againBtn: any;
     gameOverBlock: any;
-    crashImages: any[];
-    backgroundImage: any;
-    counterImages: any;
+
+    crashImages: Images[];
+    backgroundImage: Images;
+    counterImages: Images[];
+
     cswAI: any;
     delayedPic: any;
     gameInfo: HTMLElement;
     titleBlock: any;
     gameFieldBlock: HTMLElement;
-    cpuImages: {};
-    crashImage: any[];
-    blackbackgroundImage: any;
-    obstacleImage: any;
-    borderImage: any;
-    spaceBrickImages: any[];
+    cpuImages: Images[];
+    // crashImage: Images[];
+    blackbackgroundImage: Images;
+    obstacleImage: Images;
+    borderImage: Images;
+    spaceBrickImages: Images[];
     gameCam: any;
     constructor(
         cswAI,
@@ -73,7 +75,7 @@ export class BTankManager {
         // Counter = Counter;
         // Camera = Camera;
         // Border = Border;
-        Images = Images;
+        // Images = Images;
         this.delayedPic = DelayedPic;
     }
 
@@ -92,13 +94,14 @@ export class BTankManager {
         this.gameFieldBlock = gameField;
 
         this.drawContext = gameField.getContext("2d");
+        Images.drawContext = this.drawContext;
         //this.infoContext = this.gameInfo.getContext("2d");
 
         // TODO: make separate editor class?
         // current object chosen to place on the map
         this.playerImages = [];
-        this.cpuImages = {};
-        this.crashImage = [];
+        this.cpuImages = [];
+        this.crashImages = [];
         this.backgroundImage = null;
         this.blackbackgroundImage = null;
         this.obstacleImage = null;
@@ -115,8 +118,7 @@ export class BTankManager {
         // Every class will have a variable with image. Now it can only call the "draw" function.
         // Image field should be in csw class. This way player should have a separate class.
         const promises = [
-            loadManyImages.call(
-                this,
+            loadManyImages(
                 [
                     "images/csw-mt9bigger2x_90.png",
                     "images/csw-mt9bigger2x_180.png",
@@ -126,8 +128,7 @@ export class BTankManager {
                 this.playerImages
             ),
 
-            loadManyImages.call(
-                this,
+            loadManyImages(
                 [
                     "images/csw-mt5bigger2x_90.png",
                     "images/csw-mt5bigger2x_180.png",
@@ -137,8 +138,7 @@ export class BTankManager {
                 this.cpuImages
             ),
 
-            loadManyImages.call(
-                this,
+            loadManyImages(
                 [
                     "images/crash.png",
                     "images/crash1.png",
@@ -154,20 +154,19 @@ export class BTankManager {
             //     this.backgroundImage = image;
             // }),
 
-            loadImage.call(this, "images/background.png", function (image) {
+            loadImage("images/background.png", function (image: HTMLImageElement) {
                 this.backgroundImage = image;
             }),
 
-            loadImage.call(this, "images/blackbackground.png", function (image) {
+            loadImage("images/blackbackground.png", function (image: HTMLImageElement) {
                 this.blackbackgroundImage = image;
             }),
 
-            loadImage.call(this, "images/obstacle3.png", function (image) {
+            loadImage("images/obstacle3.png", function (image: HTMLImageElement) {
                 this.obstacleImage = image;
             }),
 
-            loadManyImages.call(
-                this,
+            loadManyImages(
                 [
                     "images/space_brick-4.png",
                     "images/space_brick-3.png",
@@ -178,14 +177,13 @@ export class BTankManager {
                 this.spaceBrickImages
             ),
 
-            loadImage.call(this, "images/border.png", function (image) {
+            loadImage("images/border.png", function (image: HTMLImageElement) {
                 this.borderImage = image;
             }),
 
             // loadImage.call(this, "images/border.png", this.borderImage),
 
-            loadManyImages.call(
-                this,
+            loadManyImages(
                 [
                     "images/counter-0.png",
                     "images/counter-1.png",
