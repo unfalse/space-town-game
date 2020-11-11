@@ -1,8 +1,11 @@
-import { BaseCSW } from './baseCsw';
+import { BaseCSW } from './base/baseCsw';
+import { Bullet } from './bullet';
 import { CONST } from './const';
-// import { Bullet } from './bullet';
+import { Direction, Who } from './types';
 
-export const Player = class extends BaseCSW {
+export class Player extends BaseCSW {
+    PLAYER_BULLETS_INTERVAL: number;
+    accel: number;
     constructor() {
         super();
         this.type = CONST.USER;
@@ -10,17 +13,17 @@ export const Player = class extends BaseCSW {
     }
 
     // TODO: move BTankInst to a constructor
-    init(mx, my, who, BTankInst) {
+    init(mx: number, my: number, who: Who, BTankInst: any) {
         super.init(mx, my, who, BTankInst);
         this.maxlife = 10000;
         this.life = this.maxlife;
     }
 
-    addAccel(value) {
+    addAccel(value: number) {
         this.accel += value;
     }
 
-    draw(ghost) {
+    draw(ghost?: boolean) {
         if (ghost) {
             this.BTankInst.drawcswmt9ghost(
                 this.x,
@@ -29,20 +32,20 @@ export const Player = class extends BaseCSW {
             );
         } else {
             this.BTankInst.drawcswmt9(
-                this.CONST.CAM.CENTERX,
-                this.CONST.CAM.CENTERY,
+                CONST.CAM.CENTERX,
+                CONST.CAM.CENTERY,
                 this.d
             );
         }
     }
 
-    fire(timestamp) {
+    fire(timestamp: number) {
         if (
             timestamp - this.lastBulletTimeStamp >=
             this.PLAYER_BULLETS_INTERVAL
         ) {
             this.lastBulletTimeStamp = timestamp;
-            this.createNewBullet(this.x, this.y, this.d, this);
+            this.createNewBullet(this.x, this.y, this.d, this.type);
             // this.createNewBullet(this.x, this.y, { vx: 1, vy: 0 }, this);
             // this.createNewBullet(this.x, this.y, { vx: 0, vy: 1 }, this);
             // this.createNewBullet(this.x, this.y, { vx: -1, vy: 0 }, this);
@@ -56,13 +59,14 @@ export const Player = class extends BaseCSW {
     }
 
     // TODO: maybe move acceleration, direction and inertia control functions into the separate class
-    setDirectionAndAddAccel(d, accel) {
+    setDirectionAndAddAccel(d: Direction, accel: number) {
         this.d = d;
 
-        if (this.inertiaDirections[this.CONST.DIR_OPPOSITES[d]] > 0) {
-            this.inertiaDirections[this.CONST.DIR_OPPOSITES[d]] -= accel;
-            if (this.inertiaDirections[this.CONST.DIR_OPPOSITES[d]] < 0) {
-                this.inertiaDirections[this.CONST.DIR_OPPOSITES[d]] = 0;
+        // TODO: not sure if it's a right place to change inertia directions
+        if (this.inertiaDirections[CONST.DIR_OPPOSITES[d] as Direction] > 0) {
+            this.inertiaDirections[CONST.DIR_OPPOSITES[d] as Direction] -= accel;
+            if (this.inertiaDirections[CONST.DIR_OPPOSITES[d] as Direction] < 0) {
+                this.inertiaDirections[CONST.DIR_OPPOSITES[d] as Direction] = 0;
             }
         } else {
             if (this.inertiaDirections[d] + accel > this.MAXIMUM_ACCELERATION) {
@@ -72,9 +76,9 @@ export const Player = class extends BaseCSW {
         }
     }
 
-    hitByBullet(bulletInstance) {
-        if (bulletInstance.parentShip.iam === this.CONST.COMPUTER) {
-            if (this.iam === this.CONST.USER) {
+    hitByBullet(bulletInstance: Bullet) {
+        if (bulletInstance.parentShip.iam === CONST.COMPUTER) {
+            if (this.iam === CONST.USER) {
                 this.life--;
             }
         }

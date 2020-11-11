@@ -5,8 +5,8 @@ import { BTankManager } from './btank';
 import { Editor } from './editor';
 import { Utils } from './utils';
 import { CSWAI_customPaths } from './cswai';
-
-console.log("mainnn!");
+import { Player } from './player';
+import { Camera } from './cam';
 
 // -----------------------------
 //        Основная логика
@@ -28,8 +28,8 @@ const game = function () {
     };
 
     // TODO: move player1 into BTankManager
-    let player1 = null;
-    let gameCam = null;
+    let player1: Player = null;
+    let gameCam: Camera = null;
 
     const gameField = document.getElementById("gameField");
     const BTankInst = new BTankManager(CSWAI_customPaths);
@@ -257,6 +257,7 @@ const game = function () {
     };
 
     this.gameCycle = function (timestamp) {
+
         if (player1.life > 0) {
             this.detectMovement(timestamp);
             player1.update(timestamp);
@@ -427,7 +428,7 @@ const game = function () {
 
     this.detectMovement = function (timestamp) {
         // code here must change ONLY DIRECTION
-        const ACCEL = 0.3;
+        const ACCEL = 0.3; // 0.7; // 0.3;
 
         if (keys[Utils.KEY_CODE.UP]) {
             player1.setDirectionAndAddAccel(

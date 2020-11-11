@@ -1,17 +1,24 @@
 import { BaseCSW } from './baseCsw';
+import { BTankManager } from './btank';
 import { CONST } from './const';
+import { Who } from './types';
 
 export const Counter = class extends BaseCSW {
-    constructor(BTankInst) {
+    BTankInst: BTankManager;
+    type: number; // TODO: it exists in BaseCSW too!
+    counter: number;
+    counterMax: number;
+
+    constructor(BTankInst: BTankManager) {
       super();
-      this.CONST = CONST;
+      // this.CONST = CONST;
       this.BTankInst = BTankInst;
       this.type = CONST.TYPES.COUNTER;
       this.counter = 0;
       this.counterMax = 10;
     }
 
-    init(mx, my, who, BTankInst) {
+    init(mx: number, my: number, who: Who, BTankInst: BTankManager) {
       super.init(mx, my, who, BTankInst);
     }
 

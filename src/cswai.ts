@@ -1,11 +1,17 @@
-import { BaseCPU } from './baseCpu';
-import { BaseCSW } from './baseCsw';
+import { BaseCPU } from './base/baseCpu';
+import { BaseCSW } from './base/baseCsw';
+import { BTankManager } from './btank';
+import { Bullet } from './bullet';
 import { CONST } from './const';
+import { Direction, PathUnit, Who } from './types';
+import { Utils } from './utils';
 
 const CSWAI_0 = class extends BaseCPU {
+    pathPresetCount: number;
+    
     constructor() {
         super();
-        this.path = null; // { d: 0, accel: 0, ms: 0 };
+        this.pathUnit = null; // { d: 0, accel: 0, ms: 0 };
         this.pathStartTime = -1;
         this.fireStartTime = -1;
 
@@ -21,14 +27,14 @@ const CSWAI_0 = class extends BaseCPU {
         const left = 2;
         const up = 3;
         const STOP = 0;
-        const go = (d, accel, ms) => ({ d, accel, ms });
-        const gpStop = () => [
+        const go = (d: Direction, accel: number, ms: number): PathUnit => ({ d, accel, ms });
+        const gpStop = (): Array<PathUnit> => [
             go(left, 0, STOP),
             go(right, 0, STOP),
             go(up, 0, STOP),
             go(down, 0, STOP),
         ];
-        const goLeftAndRight = [
+        const goLeftAndRight: Array<PathUnit> = [
             go(left, 1, 2000),
             ...gpStop(),
 
@@ -69,13 +75,13 @@ const CSWAI_0 = class extends BaseCPU {
         ];
     }
 
-    AI_generateNewPath() {
+    AI_generateNewPath(): PathUnit {
         if (this.pathPresetCount > this.pathsPresets.length - 1) {
             this.pathPresetCount = 0;
         }
-        const path = this.pathsPresets[this.pathPresetCount];
+        const pathUnit = this.pathsPresets[this.pathPresetCount];
         this.pathPresetCount++;
-        return path;
+        return pathUnit;
         // return {
         //     d: this.Utils.getRandomInt(0, 3),
         //     accel: this.Utils.getRandomInt(0, 5) / 10,
@@ -83,34 +89,43 @@ const CSWAI_0 = class extends BaseCPU {
         // };
     }
 
-    AI_update(timestamp) {
-        if (this.path && timestamp - this.pathStartTime <= this.path.ms) {
-            this.setDirectionAndAccel(
-                this.path.d,
-                this.path.accel,
-                this.path.ms
+    AI_update(timestamp: number) {
+        if (this.pathUnit && timestamp - this.pathStartTime <= this.pathUnit.ms) {
+            super.setDirectionAndAccel(
+                this.pathUnit.d,
+                this.pathUnit.accel,
+                this.pathUnit.ms
             );
         } else {
             do {
-                this.path = this.AI_generateNewPath();
-                if (this.path.ms === 0) {
-                    this.setDirectionAndAccel(
-                        this.path.d,
-                        this.path.accel,
-                        this.path.ms
+                this.pathUnit = this.AI_generateNewPath();
+                if (this.pathUnit.ms === 0) {
+                    super.setDirectionAndAccel(
+                        this.pathUnit.d,
+                        this.pathUnit.accel,
+                        this.pathUnit.ms
                     );
                 }
-            } while (this.path.ms === 0);
+            } while (this.pathUnit.ms === 0);
             this.pathStartTime = timestamp;
         }
-        this.fire(timestamp);
+        super.fire(timestamp);
     }
 };
 
+// TODO: make class BaseAI with fields path, pathStartTime etc.
 const CSWAI_1 = class extends BaseCPU {
+    fireLastTime: number;
+    newFireTime: number;
+    disableAI: boolean;
+    msCount: number;
+    msArray: number[];
+    accels: number[];
+    dirs: number[];
+
     constructor() {
         super();
-        this.path = null; // { d: 0, accel: 0, ms: 0 };
+        this.pathUnit = null; // { d: 0, accel: 0, ms: 0 };
         this.pathStartTime = -1;
         this.fireStartTime = -1;
         this.fireLastTime = -1;
@@ -120,7 +135,7 @@ const CSWAI_1 = class extends BaseCPU {
         // d: 0...3, a: 0...1, ms: (0...1) *1000
     }
 
-    init(mx, my, who, BTankInst) {
+    init(mx: number, my: number, who: Who, BTankInst: BTankManager) {
         super.init(mx, my, who, BTankInst);
         this.msCount = 0;
         this.msArray = [1000, 1200, 2000, 5000];
@@ -134,40 +149,40 @@ const CSWAI_1 = class extends BaseCPU {
         return {
             // d: this.Utils.getRandomInt(0, 3),
             // accel: this.Utils.getRandomInt(0, 3),
-            d: this.dirs[this.Utils.getRandomInt(0, this.dirs.length - 1)],
+            d: this.dirs[Utils.getRandomInt(0, this.dirs.length - 1)] as Direction,
             accel: this.accels[
-                this.Utils.getRandomInt(0, this.accels.length - 1)
+                Utils.getRandomInt(0, this.accels.length - 1)
             ],
             ms: this.msArray[
-                this.Utils.getRandomInt(0, this.msArray.length - 1)
+                Utils.getRandomInt(0, this.msArray.length - 1)
             ],
             // ms: this.Utils.getRandomInt(0, 6) * 1000
         };
     }
 
     AI_generateNewFireTime() {
-        return this.Utils.getRandomInt(1, 30) * 100;
+        return Utils.getRandomInt(1, 30) * 100;
     }
 
-    update(timestamp) {
+    update(timestamp: number) {
         if (this.life > 0 && !this.disableAI) {
-            if (this.path && timestamp - this.pathStartTime <= this.path.ms) {
+            if (this.pathUnit && timestamp - this.pathStartTime <= this.pathUnit.ms) {
                 this.setDirectionAndAccel(
-                    this.path.d,
-                    this.path.accel,
-                    this.path.ms
+                    this.pathUnit.d,
+                    this.pathUnit.accel,
+                    this.pathUnit.ms
                 );
             } else {
                 do {
-                    this.path = this.AI_generateNewPath();
-                    if (this.path.ms === 0) {
+                    this.pathUnit = this.AI_generateNewPath();
+                    if (this.pathUnit.ms === 0) {
                         this.setDirectionAndAccel(
-                            this.path.d,
-                            this.path.accel,
-                            this.path.ms
+                            this.pathUnit.d,
+                            this.pathUnit.accel,
+                            this.pathUnit.ms
                         );
                     }
-                } while (this.path.ms === 0);
+                } while (this.pathUnit.ms === 0);
                 this.pathStartTime = timestamp;
             }
         }
@@ -196,7 +211,13 @@ const CSWAI_1 = class extends BaseCPU {
     }
 };
 
+type Wp = number[];
+
 const CSWAI_customPaths = class extends BaseCPU {
+    wpCounter: number;
+    wpStartTime: number;
+    currentWp: Wp;
+    wayPoints: Wp[];
     constructor() {
         super();
         this.type = CONST.TYPES.SHIP;
@@ -206,7 +227,7 @@ const CSWAI_customPaths = class extends BaseCPU {
         this.wayPoints = [];
     }
 
-    init(mx, my, who, BTankInst, wayPoints) {
+    init(mx: number, my: number, who: Who, BTankInst: BTankManager, wayPoints?: Wp[]) {
         super.init(mx, my, who, BTankInst);
         const FIRST_PATH = [
             [80, 0],
@@ -224,7 +245,7 @@ const CSWAI_customPaths = class extends BaseCPU {
     //     this.setDirectionAndAccel(3, 0);
     // }
 
-    update(timestamp) {
+    update(timestamp: number) {
         let currentWp = this.currentWp;
         let accel = 8;
         let d = -1;
@@ -245,33 +266,33 @@ const CSWAI_customPaths = class extends BaseCPU {
             if (x === currentWp[0] && y < currentWp[1]) {
                 // to make corrections if player moved thip ship (not working!)
                 // accel = Math.abs(y - currentWp[1]) <= accel ? 1 : accel;
-                d = this.CONST.DOWN;
+                d = CONST.DOWN;
             }
             if (x > currentWp[0] && y === currentWp[1]) {
                 // accel = Math.abs(x - currentWp[0]) <= accel ? 1 : accel;
-                d = this.CONST.LEFT;
+                d = CONST.LEFT;
             }
             if (x === currentWp[0] && y > currentWp[1]) {
                 // accel = Math.abs(y - currentWp[1]) <= accel ? 1 : accel;
-                d = this.CONST.UP;
+                d = CONST.UP;
             }
             if (x < currentWp[0] && y === currentWp[1]) {
                 // accel = Math.abs(x - currentWp[0]) <= accel ? 1 : accel;
-                d = this.CONST.RIGHT;
+                d = CONST.RIGHT;
             }
         }
 
         const scanResult = this.plusShapedScan(10);
         if (scanResult > -1) {
             this.stop();
-            this.setDirectionAndAccel(scanResult, 0);
+            this.setDirectionAndAccel(scanResult, 0, 0);
             this.fire(timestamp);
         } else {
             if (this.d != d) {
                 this.stop();
             }
-            this.d = d >= 0 ? d : this.d;
-            this.setDirectionAndAccel(this.d, accel);
+            this.d = (d >= 0 ? d : this.d) as Direction;
+            this.setDirectionAndAccel(this.d, accel, 0);
         }
 
         super.update(timestamp);
@@ -308,12 +329,10 @@ const StaticShip = class extends BaseCSW {
     constructor() {
         super();
         this.type = CONST.TYPES.SHIP;
-        this.wayPoints = [];
     }
 
-    init(mx, my, who, BTankInst, wayPoints) {
+    init(mx: number, my: number, who: Who, BTankInst: BTankManager) {
         super.init(mx, my, who, BTankInst);
-        this.wayPoints = wayPoints || [];
     }
 
     draw() {
@@ -327,10 +346,11 @@ const SpaceBrick = class extends BaseCSW {
         this.type = CONST.TYPES.SPACEBRICK;
     }
 
-    init(mx, my, who, BTankInst) {
+    init(mx: number, my: number, who: Who, BTankInst: BTankManager) {
         super.init(mx, my, who, BTankInst);
         this.life = 9;
     }
+
     draw() {
         this.BTankInst.drawSpaceBrick(
             this.x,
@@ -339,7 +359,7 @@ const SpaceBrick = class extends BaseCSW {
         );
     }
 
-    hitByBullet(bulletInstance) {
+    hitByBullet(_bulletInstance: Bullet) {
         this.life--;
     }
 };

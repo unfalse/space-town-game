@@ -1,11 +1,16 @@
+import { Direction } from "./types";
+
 export const BaseCoordinates = class {
+    x: number;
+    y: number;
+    d: Direction;
     constructor() {
         this.x = 0;
         this.y = 0;
         this.d = 0;
     }
 
-    getVXY(d) {
+    getVXY(d: Direction) {
       // returns direction where to go
         return {
           vx: (-(d >> 1) | 1) * ((d & 1) ^ 1),
@@ -17,7 +22,7 @@ export const BaseCoordinates = class {
   //   v  1 - down
   //   <  2 - left
   //   ^  3 - up
-    getVXYAndAngle(d) {
+    getVXYAndAngle(d: Direction) {
         const mapDirections = {
             0: { vx: 1, vy: 0, angle: 90 },
             1: { vx: 0, vy: 1, angle: 180 },
@@ -27,11 +32,10 @@ export const BaseCoordinates = class {
         return mapDirections[d];
     }
 
-    initCoords(nx, ny, nd) {
+    initCoords(nx: number, ny: number, nd: Direction) {
       //x: 0, // x coordinate
       //y: 0, // y coordinate
       //d: 0,  // direction { 0 - right > , 1 - down v, 2 - left <, 3 - up ^ }
-
         this.x = nx;
         this.y = ny;
         this.d = nd;

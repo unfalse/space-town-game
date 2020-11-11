@@ -1,7 +1,7 @@
 console.log("utils!");
 
-export const Utils = new (function () {
-  this.KEY_CODE = {
+export const Utils = {
+  KEY_CODE: {
         LEFT: 37,
         UP: 38,
         RIGHT: 39,
@@ -16,10 +16,10 @@ export const Utils = new (function () {
         N5_KEY: 53,
         N6_KEY: 54,
         N7_KEY: 55,
-    };
+    },
 
     // event.type должен быть keypress
-    this.getChar = function (event) {
+    getChar(event: KeyboardEvent) {
         if (event.which == null) {
             // IE
             if (event.keyCode < 32) return null; // спец. символ
@@ -33,14 +33,14 @@ export const Utils = new (function () {
         }
 
         return null; // спец. символ
-    };
+    },
 
     // использование Math.round() даст неравномерное распределение!
-    this.getRandomInt = function (min, max) {
+    getRandomInt(min: number, max: number) {
         return Math.floor(Math.random() * (max - min + 1)) + min;
-    };
+    },
 
-    this.text = function (str) {
+    text(str: string) {
         console.log(str);
-    };
-})();
+    }
+};

@@ -7,7 +7,7 @@ const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 
 module.exports = {
   mode: "development",
-  entry: "./src/index.js",
+  entry: "./src/index.ts",
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: "space-town-bundle.js"
@@ -27,11 +27,14 @@ module.exports = {
       template: 'src/index.html'
     })
   ],
+  resolve: {
+    extensions: [ '.ts', '.js' ],
+  },
   devtool: 'eval-cheap-module-source-map',
   module: {
     rules: [
       {
-        test: /\.js$/,
+        test: /\.(ts|js)$/,
         exclude: /node_modules/,
         use: {
           loader: "babel-loader",

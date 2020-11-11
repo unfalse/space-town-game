@@ -1,25 +1,40 @@
 // Bullet that is flying every step per pixel
 import { BaseCoordinates } from './baseCoord';
 import { CONST } from './const';
+import { Direction, Who } from './types';
 
-console.log("bulletPixel!");
-export const Bullet = class extends BaseCoordinates {
+type NewXY = {
+    [key in number]: number;
+    // 0: number,
+    // 1: number,
+    // '-1': number
+}
+
+type DirectionObject = {
+    vx: number;
+    vy: number;
+}
+
+export class Bullet extends BaseCoordinates {
+    BULLETSPEED: number;
+    BTankInst: any;
+    parentShip: any;
     // BattleTankGame.deps.baseCoordinates.call(this);
-    constructor(BTankInst, whoFire) {
+    constructor(BTankInst: any, whoFire: Who) {
         super();
         //this.BULLETSPEED = whoFire ? (whoFire.type === CONST.USER ? 2.5 : 2.5) : 2.5;
-        this.BULLETSPEED = whoFire ? (whoFire.type === CONST.USER ? 10 : 5) : 5;
+        // this.BULLETSPEED = whoFire ? (whoFire.type === CONST.USER ? 10 : 5) : 5;
+        this.BULLETSPEED = 30; //100; // 30;
 
-        this.CONST = CONST;
         this.BTankInst = BTankInst;
     }
 
-    init(nx, ny, nd, parentShip) {
+    init(nx: number, ny: number, nd: Direction, parentShip: any) {
         this.parentShip = parentShip;
         this.setCoords(nx, ny, nd);
     }
 
-    setCoords(nx, ny, nd) {
+    setCoords(nx: number, ny: number, nd: Direction|DirectionObject) {
         const { width, height } = this.parentShip.dimensions[typeof nd === 'number' ? nd : 0];
         let x = 0,
             y = 0;
@@ -49,18 +64,18 @@ export const Bullet = class extends BaseCoordinates {
                     break;
             }
         } else if (typeof nd === 'object') {
-            const newX = { 0: width / 2, 1: width, '-1': -1 };
-            const newY = { 0: height / 2, 1: height + 1, '-1': -1 };
+            const newX: NewXY = { 0: width / 2, 1: width, '-1': -1 };
+            const newY: NewXY = { 0: height / 2, 1: height + 1, '-1': -1 };
             x = nx + newX[nd.vx];
             y = ny + newY[nd.vy];
         }
-        this.initCoords(x, y, nd);
+        this.initCoords(x, y, 0);
         return this;
     }
 
     draw() {
         this.BTankInst.drawContext.fillStyle =
-            this.parentShip.iam === this.CONST.USER ? "#F00" : "#FF0";
+            this.parentShip.iam === CONST.USER ? "#F00" : "#FF0";
         const relXY = this.BTankInst.gameCam.getRelCoords(this.x, this.y);
         this.BTankInst.drawContext.fillRect(
             relXY.x,
@@ -109,12 +124,12 @@ export const Bullet = class extends BaseCoordinates {
         this.y = this.y + vy;
         this.draw();
 
-        if (this.x > this.CONST.MAXX * this.CONST.CELLSIZES.MAXX || this.x < 0) {
+        if (this.x > CONST.MAXX * CONST.CELLSIZES.MAXX || this.x < 0) {
             this.BTankInst.removeBullet(this);
             // this.BTankInst.createDelayedPic(this.x - 10, this.y - 10);
         }
 
-        if (this.y > this.CONST.MAXY * this.CONST.CELLSIZES.MAXY || this.y < 0) {
+        if (this.y > CONST.MAXY * CONST.CELLSIZES.MAXY || this.y < 0) {
             this.BTankInst.removeBullet(this);
             // this.BTankInst.createDelayedPic(this.x - 10, this.y - 10);
         }

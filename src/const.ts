@@ -16,7 +16,6 @@ const CONST = {
       WAYPOINTERASER: 6,
       PLAYER: 7
   },
-
   CELLSIZES: {
       MAXX: 40,
       MAXY: 40,

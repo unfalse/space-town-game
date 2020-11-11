@@ -1,11 +1,13 @@
 import { CONST } from './const';
-import { Player } from './player';
-import { Obstacle, Border, SpaceBrick } from './cswai';
+import { Obstacle, SpaceBrick } from './cswai';
 import { Bullet } from './bullet';
 import { Counter } from './counter';
 import { Camera } from './cam';
 import { Images } from './images';
 import { DelayedPic } from './delayedPic';
+import { ObjectType, Who } from './types';
+import { Player } from './player';
+import { BaseCSW } from './base/baseCsw';
 
 // -------------------------------------
 //    TOFIX! bullet dep propagation
@@ -13,7 +15,32 @@ import { DelayedPic } from './delayedPic';
 
 // Tanks manager and draw manager
 // BattleTankGame.deps.BTankManager = function (
-export const BTankManager = class {
+export class BTankManager {
+    playerInstance: Player;
+    playerImages: Images[];
+    cswArr: BaseCSW[];
+    ghosts: BaseCSW[];
+    bulletsArr: any[];
+    delayedPics: any[];
+    drawContext: any;
+    infoContext: any;
+    againBtn: any;
+    gameOverBlock: any;
+    crashImages: any[];
+    backgroundImage: any;
+    counterImages: any;
+    cswAI: any;
+    delayedPic: any;
+    gameInfo: HTMLElement;
+    titleBlock: any;
+    gameFieldBlock: HTMLElement;
+    cpuImages: {};
+    crashImage: any[];
+    blackbackgroundImage: any;
+    obstacleImage: any;
+    borderImage: any;
+    spaceBrickImages: any[];
+    gameCam: any;
     constructor(
         cswAI,
         // obstacle,
@@ -40,24 +67,22 @@ export const BTankManager = class {
         this.counterImages = null;
         this.playerInstance = null;
 
-        this.CONST = CONST;
-        this.player = Player;
         this.cswAI = cswAI;
-        this.obstacle = Obstacle;
-        this.spaceBrick = SpaceBrick;
-        this.bullet = Bullet;
-        this.counter = Counter;
-        this.camera = Camera;
-        this.border = Border;
-        this.images = Images;
+        //this.obstacle = Obstacle;
+        // this.spaceBrick = SpaceBrick;
+        // Counter = Counter;
+        // Camera = Camera;
+        // Border = Border;
+        Images = Images;
         this.delayedPic = DelayedPic;
     }
 
     init() {
-        const gameField = document.getElementById("gameField");
+        const gameField: HTMLCanvasElement = document.getElementById("gameField") as HTMLCanvasElement;
         // TODO: change 20 to CELLSIZES !!
-        gameField.height = this.CONST.SCREENMAXY * this.CONST.CELLSIZES.MAXY * this.CONST.SCALE.Y;
-        gameField.width = this.CONST.SCREENMAXX * this.CONST.CELLSIZES.MAXX * this.CONST.SCALE.X;
+
+        gameField.height = CONST.SCREENMAXY * CONST.CELLSIZES.MAXY * CONST.SCALE.Y;
+        gameField.width = CONST.SCREENMAXX * CONST.CELLSIZES.MAXX * CONST.SCALE.X;
 
         // TODO: create new ui class and move these things to it
         this.gameInfo = document.getElementById("gameInfo");
@@ -71,7 +96,7 @@ export const BTankManager = class {
 
         // TODO: make separate editor class?
         // current object chosen to place on the map
-        this.playerImages = {};
+        this.playerImages = [];
         this.cpuImages = {};
         this.crashImage = [];
         this.backgroundImage = null;
@@ -80,10 +105,10 @@ export const BTankManager = class {
         this.borderImage = null;
         this.spaceBrickImages = [];
         this.counterImages = [];
-        this.gameCam = new this.camera(this);
+        this.gameCam = new Camera(this);
 
-        const loadImage = this.images.loadImage;
-        const loadManyImages = this.images.loadManyImages;
+        const loadImage = Images.loadImage;
+        const loadManyImages = Images.loadManyImages;
 
         // TODO: it should be a function which will preload images.
         // First it should collect paths to images from classes (csw, cswai, obstacle, etc.)
@@ -180,40 +205,40 @@ export const BTankManager = class {
     }
 
     placeBorders() {
-        for (var x = 0; x < this.CONST.MAXX + 2; x++) {
+        for (var x = 0; x < CONST.MAXX + 2; x++) {
             this.createCSW(
-                (x - 1) * this.CONST.CELLSIZES.MAXX,
-                -1 * this.CONST.CELLSIZES.MAXY,
-                this.CONST.COMPUTER,
+                (x - 1) * CONST.CELLSIZES.MAXX,
+                -1 * CONST.CELLSIZES.MAXY,
+                CONST.COMPUTER,
                 0,
-                this.CONST.TYPES.OBSTACLE,
+                CONST.TYPES.OBSTACLE,
                 true
             );
             this.createCSW(
-                (x - 1) * this.CONST.CELLSIZES.MAXX,
-                this.CONST.MAXY * this.CONST.CELLSIZES.MAXY,
-                this.CONST.COMPUTER,
+                (x - 1) * CONST.CELLSIZES.MAXX,
+                CONST.MAXY * CONST.CELLSIZES.MAXY,
+                CONST.COMPUTER,
                 0,
-                this.CONST.TYPES.OBSTACLE,
+                CONST.TYPES.OBSTACLE,
                 true
             );
         }
 
-        for (var y = 0; y < this.CONST.MAXY + 1; y++) {
+        for (var y = 0; y < CONST.MAXY + 1; y++) {
             this.createCSW(
-                -1 * this.CONST.CELLSIZES.MAXX,
-                (y - 1) * this.CONST.CELLSIZES.MAXY,
-                this.CONST.COMPUTER,
+                -1 * CONST.CELLSIZES.MAXX,
+                (y - 1) * CONST.CELLSIZES.MAXY,
+                CONST.COMPUTER,
                 0,
-                this.CONST.TYPES.OBSTACLE,
+                CONST.TYPES.OBSTACLE,
                 true
             );
             this.createCSW(
-                this.CONST.MAXX * this.CONST.CELLSIZES.MAXX,
-                (y - 1) * this.CONST.CELLSIZES.MAXY,
-                this.CONST.COMPUTER,
+                CONST.MAXX * CONST.CELLSIZES.MAXX,
+                (y - 1) * CONST.CELLSIZES.MAXY,
+                CONST.COMPUTER,
                 0,
-                this.CONST.TYPES.OBSTACLE,
+                CONST.TYPES.OBSTACLE,
                 true
             );
         }
@@ -233,30 +258,30 @@ export const BTankManager = class {
 
     // TODO: is it good that BTankManager knows which fields CSW class contains ?
     createCSW(
-        x,
-        y,
-        who, // TODO: this field should be in ship class (csw or cswai or obstacle)
-        delay,
-        typeParam,
-        ghost,
-        wayPoints
+        x: number,
+        y: number,
+        who: Who, // TODO: this field should be in ship class (csw or cswai or obstacle)
+        delay: number,
+        typeParam: ObjectType,
+        ghost: boolean,
+        wayPoints: number[]
     ) {
         let c1 = null;
-        const type = typeParam || this.CONST.TYPES.SHIP;
-        if (who === this.CONST.USER) {
-            c1 = new this.player(this.CONST, this.bullet);
+        const type = typeParam || CONST.TYPES.SHIP;
+        if (who === CONST.USER) {
+            c1 = new Player();
             this.playerInstance = c1;
             c1.init(x, y, who, this);
             this.pushNewObject(c1, ghost);
             return c1;
-        } else if (who === this.CONST.COMPUTER) {
+        } else if (who === CONST.COMPUTER) {
             // TODO: make delayed parameter as a field in class so BTankManager should decide from this field how to create new instance
             setTimeout(
                 function () {
                     // this code should be extendable
                     // TODO: implement some pattern to not write thousands if-s
-                    if (type === this.CONST.TYPES.SHIP) {
-                        c1 = new this.cswAI(this.CONST, this.bullet);
+                    if (type === CONST.TYPES.SHIP) {
+                        c1 = new this.cswAI(CONST, Bullet);
                         c1.init(x, y, who, this, wayPoints);
                         this.pushNewObject(c1, ghost);
                     }
@@ -264,20 +289,20 @@ export const BTankManager = class {
                 delay
             );
 
-            if (type === this.CONST.TYPES.OBSTACLE) {
-                c1 = new this.obstacle(this.CONST, this.bullet);
+            if (type === CONST.TYPES.OBSTACLE) {
+                c1 = new Obstacle(CONST, Bullet);
                 c1.init(x, y, who, this);
                 this.pushNewObject(c1, ghost);
             }
 
-            if (type === this.CONST.TYPES.SPACEBRICK) {
-                c1 = new this.spaceBrick(this.CONST, this.bullet);
+            if (type === CONST.TYPES.SPACEBRICK) {
+                c1 = new SpaceBrick(CONST, Bullet);
                 c1.init(x, y, who, this);
                 this.pushNewObject(c1, ghost);
             }
 
-            if (type === this.CONST.TYPES.COUNTER) {
-                c1 = new this.counter(this.CONST, this);
+            if (type === CONST.TYPES.COUNTER) {
+                c1 = new Counter(CONST, this);
                 c1.init(x, y, who, this);
                 this.pushNewObject(c1);
             }
@@ -304,17 +329,17 @@ export const BTankManager = class {
 
     getShipDimensions(direction, iam, type) {
         const image =
-            iam === this.CONST.COMPUTER
+            iam === CONST.COMPUTER
                 ? this.cpuImages[direction].image
                 : this.playerImages[direction].image;
         // TODO: remove this little hack
-        // if (type === this.CONST.TYPES.OBSTACLE) {
+        // if (type === CONST.TYPES.OBSTACLE) {
         //     image.width = 30;
         //     image.height = 30;
         // }
         return {
-            width: image.width * this.CONST.SCALE.X, // this.CONST.CELLSIZES.MAXX
-            height: image.height * this.CONST.SCALE.Y, // this.CONST.CELLSIZES.MAXY
+            width: image.width * CONST.SCALE.X, // CONST.CELLSIZES.MAXX
+            height: image.height * CONST.SCALE.Y, // CONST.CELLSIZES.MAXY
         };
     }
 
@@ -323,7 +348,7 @@ export const BTankManager = class {
         //     this.drawContext.strokeStyle = "#0f0";
         //     this.drawContext.strokeRect(x, y, w, h);
         // }).bind(this);
-        // const typeToCheck = typeToCheckParam || this.CONST.TYPES.SHIP;
+        // const typeToCheck = typeToCheckParam || CONST.TYPES.SHIP;
 
         const checkSquare = function (csw, x, y) {
             let { width, height } = csw.dimensions[csw.d];
@@ -412,7 +437,7 @@ export const BTankManager = class {
     }
 
     createDelayedPic(x, y) {
-        const dp = new this.delayedPic(this.CONST);
+        const dp = new this.delayedPic(CONST);
         // const relXY = this.gameCam.getRelCoords(x, y);
         // dp.init(relXY.x, relXY.y, this);
         dp.init(x, y, this, this.crashImages.length);
@@ -452,8 +477,8 @@ export const BTankManager = class {
         this.playerImages[d].draw(
             x,
             y,
-            this.CONST.CELLSIZES.MAXX * this.CONST.SCALE.X,
-            this.CONST.CELLSIZES.MAXY * this.CONST.SCALE.Y
+            CONST.CELLSIZES.MAXX * CONST.SCALE.X,
+            CONST.CELLSIZES.MAXY * CONST.SCALE.Y
         );
         // this.drawContext.strokeStyle="#f00";
         // this.drawContext.strokeRect(Math.floor(x), Math.floor(y), 39,39);
@@ -465,8 +490,8 @@ export const BTankManager = class {
         this.playerImages[d].draw(
             relXY.x,
             relXY.y,
-            this.CONST.CELLSIZES.MAXX * this.CONST.SCALE.X,
-            this.CONST.CELLSIZES.MAXY * this.CONST.SCALE.Y
+            CONST.CELLSIZES.MAXX * CONST.SCALE.X,
+            CONST.CELLSIZES.MAXY * CONST.SCALE.Y
         );
     }
 
@@ -476,8 +501,8 @@ export const BTankManager = class {
         this.cpuImages[d].draw(
             relXY.x,
             relXY.y,
-            this.CONST.CELLSIZES.MAXX * this.CONST.SCALE.X,
-            this.CONST.CELLSIZES.MAXY * this.CONST.SCALE.Y
+            CONST.CELLSIZES.MAXX * CONST.SCALE.X,
+            CONST.CELLSIZES.MAXY * CONST.SCALE.Y
         );
         // this.drawContext.strokeStyle="#f00";
         // this.drawContext.strokeRect(x, y, 39,39);
@@ -488,8 +513,8 @@ export const BTankManager = class {
         this.obstacleImage.draw(
             relXY.x,
             relXY.y,
-            this.CONST.CELLSIZES.MAXX * this.CONST.SCALE.X,
-            this.CONST.CELLSIZES.MAXY * this.CONST.SCALE.Y
+            CONST.CELLSIZES.MAXX * CONST.SCALE.X,
+            CONST.CELLSIZES.MAXY * CONST.SCALE.Y
         );
         // this.drawContext.strokeStyle="#f00";
         // this.drawContext.strokeRect(x, y, 39,39);
@@ -500,8 +525,8 @@ export const BTankManager = class {
         this.borderImage.draw(
             relXY.x,
             relXY.y,
-            this.CONST.CELLSIZES.MAXX * this.CONST.SCALE.X,
-            this.CONST.CELLSIZES.MAXY * this.CONST.SCALE.Y
+            CONST.CELLSIZES.MAXX * CONST.SCALE.X,
+            CONST.CELLSIZES.MAXY * CONST.SCALE.Y
         );
         // this.drawContext.strokeStyle="#f00";
         // this.drawContext.strokeRect(x, y, 39,39);
@@ -512,8 +537,8 @@ export const BTankManager = class {
         this.cpuImages[0].draw(
             relXY.x,
             relXY.y,
-            this.CONST.CELLSIZES.MAXX * this.CONST.SCALE.X,
-            this.CONST.CELLSIZES.MAXY * this.CONST.SCALE.Y
+            CONST.CELLSIZES.MAXX * CONST.SCALE.X,
+            CONST.CELLSIZES.MAXY * CONST.SCALE.Y
         );
         // this.drawContext.strokeStyle="#f00";
         // this.drawContext.strokeRect(x, y, 39,39);
@@ -524,8 +549,8 @@ export const BTankManager = class {
         this.spaceBrickImages[n].draw(
             relXY.x,
             relXY.y,
-            this.CONST.CELLSIZES.MAXX * this.CONST.SCALE.X,
-            this.CONST.CELLSIZES.MAXY * this.CONST.SCALE.Y
+            CONST.CELLSIZES.MAXX * CONST.SCALE.X,
+            CONST.CELLSIZES.MAXY * CONST.SCALE.Y
         );
     }
 
@@ -534,8 +559,8 @@ export const BTankManager = class {
         this.counterImages[n].draw(
             relXY.x,
             relXY.y,
-            this.CONST.CELLSIZES.MAXX * this.CONST.SCALE.X,
-            this.CONST.CELLSIZES.MAXY * this.CONST.SCALE.Y
+            CONST.CELLSIZES.MAXX * CONST.SCALE.X,
+            CONST.CELLSIZES.MAXY * CONST.SCALE.Y
         );
     }
 
@@ -544,8 +569,8 @@ export const BTankManager = class {
         this.counterImages[n].draw(
             relXY.x,
             relXY.y,
-            this.CONST.CELLSIZES.MAXX * this.CONST.SCALE.X,
-            this.CONST.CELLSIZES.MAXY * this.CONST.SCALE.Y
+            CONST.CELLSIZES.MAXX * CONST.SCALE.X,
+            CONST.CELLSIZES.MAXY * CONST.SCALE.Y
         );
     }
 
@@ -554,22 +579,22 @@ export const BTankManager = class {
         this.crashImages[frameCounter].draw(
             relXY.x,
             relXY.y,
-            20 * this.CONST.SCALE.X * 2,
-            20 * this.CONST.SCALE.Y * 2
+            20 * CONST.SCALE.X * 2,
+            20 * CONST.SCALE.Y * 2
         );
         // this.crashImage.draw(x, y, 0, onDelayEnd);
     }
 
     drawBackground() {
         const relXY = this.gameCam.getRelCoords(0, 0);
-        const blackHeight = this.CONST.SCREENMAXY * this.CONST.CELLSIZES.MAXY * this.CONST.SCALE.Y;
-        const blackWidth = this.CONST.SCREENMAXX * this.CONST.CELLSIZES.MAXX * this.CONST.SCALE.X;
+        const blackHeight = CONST.SCREENMAXY * CONST.CELLSIZES.MAXY * CONST.SCALE.Y;
+        const blackWidth = CONST.SCREENMAXX * CONST.CELLSIZES.MAXX * CONST.SCALE.X;
         this.blackbackgroundImage.draw(0, 0, blackWidth, blackHeight);
 
         const bWidth = 1920, bHeight = 1080;
         // const bWidth = 1024, bHeight = 1024;
-        const backgroundCountX = (this.CONST.MAXX * this.CONST.CELLSIZES.MAXX) / bWidth;
-        const backgroundCountY = (this.CONST.MAXY * this.CONST.CELLSIZES.MAXY) / bHeight;
+        const backgroundCountX = (CONST.MAXX * CONST.CELLSIZES.MAXX) / bWidth;
+        const backgroundCountY = (CONST.MAXY * CONST.CELLSIZES.MAXY) / bHeight;
         const truncX = Math.trunc(backgroundCountX);
         const truncY = Math.trunc(backgroundCountY);
         const frX = backgroundCountX % 1;
