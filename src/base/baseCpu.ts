@@ -3,7 +3,7 @@ import { Bullet } from '../bullet';
 import { CONST } from '../const';
 import { Direction, PathUnit } from '../types';
 
-export const BaseCPU = class extends BaseCSW {
+export class BaseCPU extends BaseCSW {
     CPU_BULLETS_INTERVAL: number;
     fireStartTime: number;
     pathUnit: PathUnit;

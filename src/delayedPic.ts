@@ -1,11 +1,18 @@
-import { BaseCoordinates } from './baseCoord';
+import { BaseCoordinates } from './base/baseCoord';
+import { BTankManager } from './btank';
 
 export class DelayedPic extends BaseCoordinates {
+    show: boolean;
+    timerStarted: boolean;
+    BTankInst: BTankManager;
+    frameCounter: number;
+    framesLength: number;
+
     constructor() {
         super();
     }
 
-    init(nx, ny, BTankInst, framesLength) {
+    init(nx: number, ny: number, BTankInst: BTankManager, framesLength: number) {
         this.initCoords(nx, ny, 0);
         this.show = true;
         this.timerStarted = false;
@@ -14,7 +21,7 @@ export class DelayedPic extends BaseCoordinates {
         this.framesLength = framesLength;
     }
 
-    setCoords(x, y) {
+    setCoords(x: number, y: number) {
         this.x = x;
         this.y = y;
         this.show = true;

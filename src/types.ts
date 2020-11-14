@@ -5,7 +5,7 @@ enum Who {
     USER = CONST.USER,
 }
 
-type Direction = 0|1|2|3;
+type Direction = 0 | 1 | 2 | 3;
 type RectSize = {
     height: number;
     width: number;
@@ -13,7 +13,19 @@ type RectSize = {
 
 type Dimensions = { [key in Direction]: RectSize; }
 
-type ObjectType = typeof CONST.TYPES;
+// type ObjectType = CONST.TYPES.OBSTACLE;
+
+enum ObjectType {
+    ERASER = -1,
+    SHIP = 0,
+    OBSTACLE = 1,
+    SPACEBRICK = 2,
+    COUNTER = 3,
+    BORDER = 4,
+    WAYPOINT = 5,
+    WAYPOINTERASER = 6,
+    PLAYER = 7
+}
 
 type PathUnit = {
     d: Direction;
@@ -21,5 +33,5 @@ type PathUnit = {
     ms: number;
 }
 
-export { Who };
-export type { Direction, Dimensions, RectSize, ObjectType, PathUnit };
+export { Who, ObjectType };
+export type { Direction, Dimensions, RectSize, PathUnit };

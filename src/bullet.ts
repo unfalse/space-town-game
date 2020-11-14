@@ -1,5 +1,7 @@
 // Bullet that is flying every step per pixel
-import { BaseCoordinates } from './baseCoord';
+import { BaseCoordinates } from './base/baseCoord';
+import { BaseCSW } from './base/baseCsw';
+import { BTankManager } from './btank';
 import { CONST } from './const';
 import { Direction, Who } from './types';
 
@@ -17,10 +19,11 @@ type DirectionObject = {
 
 export class Bullet extends BaseCoordinates {
     BULLETSPEED: number;
-    BTankInst: any;
-    parentShip: any;
+    BTankInst: BTankManager;
+    parentShip: BaseCSW;
+
     // BattleTankGame.deps.baseCoordinates.call(this);
-    constructor(BTankInst: any, whoFire: Who) {
+    constructor(BTankInst: BTankManager, _whoFire: Who) {
         super();
         //this.BULLETSPEED = whoFire ? (whoFire.type === CONST.USER ? 2.5 : 2.5) : 2.5;
         // this.BULLETSPEED = whoFire ? (whoFire.type === CONST.USER ? 10 : 5) : 5;

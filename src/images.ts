@@ -1,6 +1,8 @@
 import { BTankManager } from "./btank";
 
-type OnLoadHandler = () => void;
+type OnLoadHandler = (image: Images) => void;
+
+type InternalOnLoadHandler = () => void;
 
 export class Images {
     image: HTMLImageElement;
@@ -10,14 +12,14 @@ export class Images {
     static loadManyImages: (imagePaths: Array<string>, targetImages: Array<Images>) => Promise<unknown>;
     static drawContext: CanvasRenderingContext2D;
 
-    constructor(src: string, onLoadHandler: OnLoadHandler) {
+    constructor(src: string, onLoadHandler: InternalOnLoadHandler) {
         this.image = new Image();
         this.loaded = false;
 
         this.init(src, onLoadHandler);
     }
 
-    init(src: string, onLoadHandler: OnLoadHandler) {
+    init(src: string, onLoadHandler: InternalOnLoadHandler) {
         this.image.addEventListener(
             "load",
             function () {
@@ -31,7 +33,7 @@ export class Images {
         this.image.src = src;
     }
 
-    draw(sx: number, sy: number, sw: number, sh: number, dx: number, dy: number, dw: number, dh: number) {
+    draw(sx: number, sy: number, sw: number, sh: number, dx?: number, dy?: number, dw?: number, dh?: number) {
         if (this.loaded) {
             if (!dx && !dy && !dw && !dh) {
                 Images.drawContext.drawImage(this.image, sx, sy, sw, sh);
