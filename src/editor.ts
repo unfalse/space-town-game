@@ -1,17 +1,42 @@
+import { BaseCSW } from './base/baseCsw';
+import { BTankManager } from './btank';
 import { CONST } from './const';
-import { Obstacle, StaticShip, SpaceBrick, Border} from './cswai';
+import { Obstacle, StaticShip, SpaceBrick, Border } from './cswai';
 import { Player } from './player';
+import { port as PORT } from './server/server.json';
+import { Ghosts, ObjectType, Point, WayPoints } from './types';
+import { CSWAI_customPaths } from './cswai';
 
-import { PORT } from './server/const';
+type LevelObject = {
+    id: number;
+    name: string;
+    data: string;
+}
 
-export const Editor = class {
+type ObjectBrush = {
+    type: ObjectType;
+    imageUrl: string;
+}
+
+export class Editor {
+    currentLevelObj: LevelObject;
+    BTankInst: BTankManager;
+    editorBlock: HTMLDivElement;
+    editorCurrentObject: HTMLDivElement;
+    editorNewBtn: HTMLButtonElement;
+    editorPlayBtn: HTMLButtonElement;
+    editorSaveBtn: HTMLButtonElement;
+    editorSaveAsBtn: HTMLButtonElement;
+    editorLoadBtn: HTMLButtonElement;
+    editorFileListContainer: HTMLDivElement;
+    editorCurrentObjectBrush: ObjectBrush;
+    editorMode: boolean;
+    editorUnits: BaseCSW[];
+    editorGhosts: Ghosts;
+    currentShipWithWaypoints: CSWAI_customPaths;
+    playerCell: Point;
+
     constructor() {
-        this.CONST = CONST;
-        this.obstacle = Obstacle;
-        this.staticShip = StaticShip;
-        this.spaceBrick = SpaceBrick;
-        this.border = Border;
-        this.player = Player;
         this.currentLevelObj = {
             id: null,
             name: '',
@@ -19,23 +44,22 @@ export const Editor = class {
         };
     }
 
-    init(BTankInst) {
+    init(BTankInst: BTankManager) {
         this.BTankInst = BTankInst;
 
         this.editorBlock = document.querySelector("#editorBlock");
         this.editorCurrentObject = document.querySelector(
             "#editorCurrentObject"
         );
-        this.editorNewBtn  = document.querySelector("#editorNewBtn");
+        this.editorNewBtn = document.querySelector("#editorNewBtn");
         this.editorPlayBtn = document.querySelector("#editorPlayBtn");
         this.editorSaveBtn = document.querySelector("#editorSaveBtn");
         this.editorSaveAsBtn = document.querySelector("#editorSaveAsBtn");
         this.editorLoadBtn = document.querySelector("#editorLoadBtn");
         this.editorFileListContainer = document.querySelector("#editorFileList");
-        window.__editor_load_str = "";
 
         this.editorCurrentObjectBrush = {
-            type: this.CONST.TYPES.OBSTACLE,
+            type: CONST.TYPES.OBSTACLE,
             imageUrl: "url('images/obstacle2.png')",
         };
         this.editorMode = false;
@@ -87,10 +111,10 @@ export const Editor = class {
                 ...this.currentLevelObj
             })
         })
-        .then( (response) => { 
-            //do something awesome that makes the world a better place
-            alert('Level has been added!');
-        });
+            .then((response) => {
+                //do something awesome that makes the world a better place
+                alert('Level has been added!');
+            });
     }
 
     playEditorLevel() {
@@ -98,7 +122,7 @@ export const Editor = class {
         this.BTankInst.destroyAll();
 
         // TODO: add player1 to the empty array
-        player.init(this.playerCell.x, this.playerCell.y, this.CONST.USER, this.BTankInst);
+        player.init(this.playerCell.x, this.playerCell.y, CONST.USER, this.BTankInst);
         this.BTankInst.addShip(player);
 
         this.BTankInst.placeBorders();
@@ -106,34 +130,34 @@ export const Editor = class {
         this.editorUnits.forEach(function (unit) {
             if (
                 unit.type ===
-                this.CONST.TYPES.SHIP /*&& unit.iam !== this.CONST.USER*/
+                CONST.TYPES.SHIP /*&& unit.iam !== CONST.USER*/
             ) {
                 this.BTankInst.createCSW(
                     unit.x,
                     unit.y,
-                    this.CONST.COMPUTER,
+                    CONST.COMPUTER,
                     0,
-                    this.CONST.TYPES.SHIP,
+                    CONST.TYPES.SHIP,
                     false,
-                    unit.wayPoints
+                    (unit as CSWAI_customPaths).wayPoints
                 );
             }
-            if (unit.type === this.CONST.TYPES.OBSTACLE) {
+            if (unit.type === CONST.TYPES.OBSTACLE) {
                 this.BTankInst.createCSW(
                     unit.x,
                     unit.y,
-                    this.CONST.COMPUTER,
+                    CONST.COMPUTER,
                     0,
-                    this.CONST.TYPES.OBSTACLE
+                    CONST.TYPES.OBSTACLE
                 );
             }
-            if (unit.type === this.CONST.TYPES.SPACEBRICK) {
+            if (unit.type === CONST.TYPES.SPACEBRICK) {
                 this.BTankInst.createCSW(
                     unit.x,
                     unit.y,
-                    this.CONST.COMPUTER,
+                    CONST.COMPUTER,
                     0,
-                    this.CONST.TYPES.SPACEBRICK
+                    CONST.TYPES.SPACEBRICK
                 );
             }
         }, this);
@@ -144,10 +168,11 @@ export const Editor = class {
     prepareLevelForSaving() {
         let levelData = [this.playerCell.x, this.playerCell.y].join(";") + "|";
         levelData += this.editorUnits.reduce(
-            function (prev, curr) {
+            function (prev: string, curr: BaseCSW) {
                 let wayPoints = "";
-                if (curr.type === this.CONST.TYPES.SHIP)
-                    wayPoints = JSON.stringify(curr.wayPoints);
+                if (curr.type === CONST.TYPES.SHIP) {
+                    wayPoints = JSON.stringify((curr as CSWAI_customPaths).wayPoints);
+                }
                 return (
                     prev +
                     wayPoints +
@@ -174,16 +199,13 @@ export const Editor = class {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
             },
-
-            //make sure to serialize your JSON body
             body: JSON.stringify({
                 ...this.currentLevelObj
             })
         })
-        .then( (response) => { 
-            //do something awesome that makes the world a better place
-            alert('Level has been saved!');
-        });
+            .then(() => {
+                alert('Level has been saved!');
+            });
     }
 
     saveEditorLevel() {
@@ -195,7 +217,7 @@ export const Editor = class {
         // TODO: show an input to enter the new name and ok and cancel buttons
     }
 
-    setCurrentShipWithWaypoints(ship) {
+    setCurrentShipWithWaypoints(ship: CSWAI_customPaths) {
         this.currentShipWithWaypoints = ship;
     }
 
@@ -208,12 +230,12 @@ export const Editor = class {
                 const title = document.createElement('span');
                 title.innerText = 'Which level to open?';
                 this.editorFileListContainer.append(title);
-                r.forEach(level => {
+                r.forEach((level: LevelObject) => {
                     const li = document.createElement('li');
                     li.innerText = level.name;
                     li.addEventListener(
                         'click',
-                        (function() {
+                        (function () {
                             this.currentLevelObj = {
                                 ...level
                             };
@@ -229,49 +251,49 @@ export const Editor = class {
             });
     }
 
-    loadTheEditorLevel(id) {
+    loadTheEditorLevel(id: string) {
         const DATA_SEPARATOR = '|';
         fetch(`http://localhost:${PORT}/level?id=${id}`)
             .then(r => r.json())
             .then(r => {
-               r.data.split(DATA_SEPARATOR)
-                .forEach(function (objStr, strIndex) {
-                    const fields = objStr.split(";");
-                    if (strIndex === 0) {
-                        //this.playerCell = { x: fields[0], y: fields[1] };
-                        this.createEditorUnit(
-                            fields[0],
-                            fields[1],
-                            this.CONST.TYPES.PLAYER,
-                            true
-                        );
-                    }
-                    if (strIndex > 0 && objStr !== "") {
-                        if (objStr !== "") {
-                            if (fields.length === 1) {
-                                const splitted = fields[0].split(',');
-                                this.createEditorUnit(
-                                    +splitted[1], // x
-                                    +splitted[2], // y
-                                    +splitted[0] // type
-                                );
-                            } else {
-                                this.createEditorUnit(
-                                    +fields[4], // x
-                                    +fields[3], // y
-                                    +fields[2], // type
-                                    //fields[1], // ghost
-                                    false,
-                                    fields[0] ? JSON.parse(fields[0]) : [] // wayPoints
-                                );
+                r.data.split(DATA_SEPARATOR)
+                    .forEach(function (objStr: string, strIndex: number) {
+                        const fields = objStr.split(";");
+                        if (strIndex === 0) {
+                            //this.playerCell = { x: fields[0], y: fields[1] };
+                            this.createEditorUnit(
+                                fields[0],
+                                fields[1],
+                                CONST.TYPES.PLAYER,
+                                true
+                            );
+                        }
+                        if (strIndex > 0 && objStr !== "") {
+                            if (objStr !== "") {
+                                if (fields.length === 1) {
+                                    const splitted = fields[0].split(',');
+                                    this.createEditorUnit(
+                                        +splitted[1], // x
+                                        +splitted[2], // y
+                                        +splitted[0] // type
+                                    );
+                                } else {
+                                    this.createEditorUnit(
+                                        +fields[4], // x
+                                        +fields[3], // y
+                                        +fields[2], // type
+                                        //fields[1], // ghost
+                                        false,
+                                        fields[0] ? JSON.parse(fields[0]) : [] // wayPoints
+                                    );
+                                }
                             }
                         }
-                    }
-                }, this);
+                    }, this);
             });
     }
-    
-    pushNewObject(obj, ghost) {
+
+    pushNewObject(obj: BaseCSW, ghost: boolean) {
         if (ghost) {
             this.editorGhosts.push(obj);
         } else {
@@ -279,120 +301,120 @@ export const Editor = class {
         }
     }
 
-    getEditorUnitAt(x, y) {
+    getEditorUnitAt(x: number, y: number) {
         return this.editorUnits.find(function (unit) {
             return unit.x === x && unit.y === y;
         });
     }
 
-    getEditorWaypointAt(x, y) {
+    getEditorWaypointAt(x: number, y: number) {
         if (!this.currentShipWithWaypoints) return null;
         return this.currentShipWithWaypoints.wayPoints.find(function (wp) {
             return wp[0] === x && wp[1] === y;
         });
     }
 
-    createEditorUnit(x, y, type, ghost, wayPoints) {
+    createEditorUnit(x: number, y: number, type: ObjectType, ghost: boolean, wayPoints?: WayPoints) {
         let newUnit = null;
-        const who = this.CONST.COMPUTER;
+        const who = CONST.COMPUTER;
         if (
-            this.editorUnits.some(function (unit) {
+            this.editorUnits.some(function (unit: BaseCSW) {
                 return unit.x === x && unit.y === y;
             })
         ) {
             return;
         }
         if (
-            this.editorGhosts.some(function (ghost) {
+            this.editorGhosts.some(function (ghost: BaseCSW) {
                 return ghost.x === x && ghost.y === y;
             })
         ) {
             return;
         }
-        if (type === this.CONST.TYPES.OBSTACLE) {
-            newUnit = new this.obstacle(this.CONST);
+        if (type === CONST.TYPES.OBSTACLE) {
+            newUnit = new Obstacle();
             newUnit.init(x, y, who, this.BTankInst);
             this.pushNewObject(newUnit, ghost);
         }
-        if (type === this.CONST.TYPES.SHIP) {
-            newUnit = new this.staticShip(this.CONST, this.bullet);
-            newUnit.init(x, y, who, this.BTankInst, wayPoints);
-            this.pushNewObject(newUnit, ghost);
-        }
-        if (type === this.CONST.TYPES.SPACEBRICK) {
-            newUnit = new this.spaceBrick(this.CONST, this.bullet);
+        if (type === CONST.TYPES.SHIP) {
+            newUnit = new StaticShip();
             newUnit.init(x, y, who, this.BTankInst);
             this.pushNewObject(newUnit, ghost);
         }
-        if (type === this.CONST.TYPES.BORDER) {
-            newUnit = new this.border(this.CONST);
+        if (type === CONST.TYPES.SPACEBRICK) {
+            newUnit = new SpaceBrick();
             newUnit.init(x, y, who, this.BTankInst);
             this.pushNewObject(newUnit, ghost);
         }
-        if (type === this.CONST.TYPES.PLAYER) {
+        if (type === CONST.TYPES.BORDER) {
+            newUnit = new Border();
+            newUnit.init(x, y, who, this.BTankInst);
+            this.pushNewObject(newUnit, ghost);
+        }
+        if (type === CONST.TYPES.PLAYER) {
             this.playerCell = { x: +x, y: +y };
-            newUnit = new this.player(this.CONST, this.bullet);
-            newUnit.init(x, y, this.CONST.USER, this.BTankInst);
+            newUnit = new Player();
+            newUnit.init(x, y, CONST.USER, this.BTankInst);
             this.pushNewObject(newUnit, true);
         }
     }
 
-    addEditorWaypoint(x, y) {
+    addEditorWaypoint(x: number, y: number) {
         if (!this.currentShipWithWaypoints) return;
         const newWp = [x, y];
         this.currentShipWithWaypoints.wayPoints.push(newWp);
     }
 
-    removeEditorObjectAt(x, y) {
-        this.editorUnits = this.editorUnits.filter(function (unit) {
+    removeEditorObjectAt(x: number, y: number) {
+        this.editorUnits = this.editorUnits.filter(function (unit: BaseCSW) {
             return !(unit.x === x && unit.y === y);
         });
     }
 
-    getFirstEditorObjectByType(type) {
-        
+    getFirstEditorObjectByType(type: ObjectType) {
+
     }
 
-    removeEditorWaypointAt(x, y) {
+    removeEditorWaypointAt(x: number, y: number) {
         if (!this.currentShipWithWaypoints) return;
         this.currentShipWithWaypoints.wayPoints = this.currentShipWithWaypoints.wayPoints.filter(
-            function (wp) {
+            function (wp: WayPoints) {
                 return !(wp[0] === x && wp[1] === y);
             }
         );
     }
 
-    setCurrentEditorBrushObject(brushObjectType) {
+    setCurrentEditorBrushObject(brushObjectType: ObjectType) {
         switch (brushObjectType) {
-            case this.CONST.TYPES.SHIP: {
+            case CONST.TYPES.SHIP: {
                 this.editorCurrentObjectBrush = {
                     type: brushObjectType,
                     imageUrl: "url('images/csw-mt5bigger2x_0.png')",
                 };
                 break;
             }
-            case this.CONST.TYPES.OBSTACLE: {
+            case CONST.TYPES.OBSTACLE: {
                 this.editorCurrentObjectBrush = {
                     type: brushObjectType,
                     imageUrl: "url('images/obstacle2.png')",
                 };
                 break;
             }
-            case this.CONST.TYPES.SPACEBRICK: {
+            case CONST.TYPES.SPACEBRICK: {
                 this.editorCurrentObjectBrush = {
                     type: brushObjectType,
                     imageUrl: "url('images/space_brick-0.png')",
                 };
                 break;
             }
-            case this.CONST.TYPES.ERASER: {
+            case CONST.TYPES.ERASER: {
                 this.editorCurrentObjectBrush = {
                     type: brushObjectType,
                     imageUrl: "",
                 };
                 break;
             }
-            case this.CONST.TYPES.WAYPOINT: {
+            case CONST.TYPES.WAYPOINT: {
                 this.editorCurrentObjectBrush = {
                     type: brushObjectType,
                     imageUrl: "url('images/counter-9.png')",
@@ -400,14 +422,14 @@ export const Editor = class {
                 this.setCurrentShipWithWaypoints(null);
                 break;
             }
-            case this.CONST.TYPES.WAYPOINTERASER: {
+            case CONST.TYPES.WAYPOINTERASER: {
                 this.editorCurrentObjectBrush = {
                     type: brushObjectType,
                     imageUrl: "url('images/counter-0.png')",
                 };
                 break;
             }
-            case this.CONST.TYPES.PLAYER: {
+            case CONST.TYPES.PLAYER: {
                 this.editorCurrentObjectBrush = {
                     type: brushObjectType,
                     imageUrl: "url('images/csw-mt9bigger2x_90.png')",
@@ -421,32 +443,32 @@ export const Editor = class {
     }
 
     placeBorders() {
-        for (var x = 0; x < this.CONST.MAXX + 2; x++) {
+        for (var x = 0; x < CONST.MAXX + 2; x++) {
             this.createEditorUnit(
-                (x - 1) * this.CONST.CELLSIZES.MAXX,
-                -1 * this.CONST.CELLSIZES.MAXY,
-                this.CONST.TYPES.BORDER,
+                (x - 1) * CONST.CELLSIZES.MAXX,
+                -1 * CONST.CELLSIZES.MAXY,
+                CONST.TYPES.BORDER,
                 true
             );
             this.createEditorUnit(
-                (x - 1) * this.CONST.CELLSIZES.MAXX,
-                this.CONST.MAXY * this.CONST.CELLSIZES.MAXY,
-                this.CONST.TYPES.BORDER,
+                (x - 1) * CONST.CELLSIZES.MAXX,
+                CONST.MAXY * CONST.CELLSIZES.MAXY,
+                CONST.TYPES.BORDER,
                 true
             );
         }
 
-        for (var y = 0; y < this.CONST.MAXY + 1; y++) {
+        for (var y = 0; y < CONST.MAXY + 1; y++) {
             this.createEditorUnit(
-                -1 * this.CONST.CELLSIZES.MAXX,
-                (y - 1) * this.CONST.CELLSIZES.MAXY,
-                this.CONST.TYPES.BORDER,
+                -1 * CONST.CELLSIZES.MAXX,
+                (y - 1) * CONST.CELLSIZES.MAXY,
+                CONST.TYPES.BORDER,
                 true
             );
             this.createEditorUnit(
-                this.CONST.MAXX * this.CONST.CELLSIZES.MAXX,
-                (y - 1) * this.CONST.CELLSIZES.MAXY,
-                this.CONST.TYPES.BORDER,
+                CONST.MAXX * CONST.CELLSIZES.MAXX,
+                (y - 1) * CONST.CELLSIZES.MAXY,
+                CONST.TYPES.BORDER,
                 true
             );
         }

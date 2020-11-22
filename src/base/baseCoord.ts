@@ -1,4 +1,4 @@
-import { Direction } from "./types";
+import { Direction } from "../types";
 
 export const BaseCoordinates = class {
     x: number;

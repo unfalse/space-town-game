@@ -5,12 +5,10 @@ import { Counter } from './counter';
 import { Camera } from './cam';
 import { Images } from './images';
 import { DelayedPic } from './delayedPic';
-import { Direction, ObjectType, RectSize, Who } from './types';
+import { Direction, Ghosts, ObjectType, RectSize, Who } from './types';
 import { Player } from './player';
 import { BaseCSW } from './base/baseCsw';
 import { BaseCPU } from './base/baseCpu';
-
-type Ghosts = BaseCSW[];
 
 // -------------------------------------
 //    TOFIX! bullet dep propagation

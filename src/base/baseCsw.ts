@@ -1,7 +1,8 @@
 import { BaseCoordinates } from './baseCoord';
 import { CONST } from '../const';
 import { Bullet } from '../bullet';
-import { Dimensions, Direction, Who } from '../types';
+import { Dimensions, Direction, ObjectType, Who } from '../types';
+import { BTankManager } from '../btank';
 
 type InertiaDirections = { [key in Direction]: number; };
 
@@ -17,14 +18,15 @@ export class BaseCSW extends BaseCoordinates {
     stopAccel: boolean;
     MAXIMUM_ACCELERATION: number;
     dimensions: Dimensions;
-    BTankInst: any;
+    BTankInst: BTankManager;
     iam: Who;
     maxlife: number;
     life: number;
     bulletsAmountOnFire: number;
     x: number;
     y: number;
-    type: any;
+    type: ObjectType;
+    ghost: boolean;
 
     constructor() {
         super();
@@ -51,7 +53,7 @@ export class BaseCSW extends BaseCoordinates {
     }
 
     // TODO: place code from init above!
-    init(mx: number, my: number, who: Who, BTankInst: any) {
+    init(mx: number, my: number, who: Who, BTankInst: BTankManager) {
         super.initCoords(mx, my, 0);
         this.iam = who;
         this.maxlife = 5;
@@ -59,10 +61,10 @@ export class BaseCSW extends BaseCoordinates {
         this.bulletsAmountOnFire = CONST.MAXBULLETS;
         this.BTankInst = BTankInst;
         this.dimensions = {
-            0: BTankInst.getShipDimensions(0, who, this.type),
-            1: BTankInst.getShipDimensions(1, who, this.type),
-            2: BTankInst.getShipDimensions(2, who, this.type),
-            3: BTankInst.getShipDimensions(3, who, this.type),
+            0: BTankInst.getShipDimensions(0, who),
+            1: BTankInst.getShipDimensions(1, who),
+            2: BTankInst.getShipDimensions(2, who),
+            3: BTankInst.getShipDimensions(3, who),
         };
         //this.ghost = !!ghost; // only display this object
     }

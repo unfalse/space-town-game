@@ -1,11 +1,18 @@
-#!/usr/bin/env nodejs
-const constants = require('./const');
-const cors = require('cors');
+import * as cors from 'cors';
+import * as express from "express";
+import * as fs from 'fs';
 
-const express = require("express");
-const fs = require('fs');
+import { port as PORT } from './server.json'
 
-const { PORT } = constants;
+type Level = {
+    id: string;
+    name: string;
+    data: string;
+}
+
+type Contents = {
+    levels: Array<Level>;
+}
 
 const filename = 'levels.json';
 
@@ -16,37 +23,37 @@ app.options('*', cors());
 
 console.log('Server is running on port', PORT);
 
-const getFileContents = () => JSON.parse(fs.readFileSync(process.cwd() + "/src/server/" + filename).toString());
+const getFileContents = (): Contents => JSON.parse(fs.readFileSync(process.cwd() + "/src/server/" + filename).toString());
 
-app.get("/list", function(request, response) {
+app.get("/list", function (request, response) {
     const contents = getFileContents();
     const names = contents.levels.map(level => ({ id: level.id, name: level.name }));
     response.send(names);
 });
 
-app.get("/new", function(request, response) {
+app.get("/new", function (request) {
     const newLevelData = request.body;
     const contents = getFileContents();
     const lastId = contents.levels.slice(-1)[0];
     const newId = lastId === undefined ? 0 : +lastId + 1;
-    const levelData = {
-        id: newId,
+    const levelData: Level = {
+        id: newId.toString(),
         name: 'level' + newId,
         data: newLevelData
     };
 
-    const newContents = { levels: levels.concat([levelData]) };
+    const newContents = { levels: contents.levels.concat([levelData]) };
     fs.writeFileSync(process.cwd() + "/src/server/" + "levelsTest.json", JSON.stringify(newContents));
 });
 
-app.get("/level", function(request, response) {
+app.get("/level", function (request, response) {
     const contents = getFileContents();
     const id = request.query.id;
     const level = contents.levels.find(level => level.id === id);
     response.send(level);
 });
 
-app.post("/save", function(request, response) {
+app.post("/save", function (request, response) {
     const newLevel = request.body;
     const contents = getFileContents();
     const newLevels = contents.levels.map(level => {
@@ -57,7 +64,7 @@ app.post("/save", function(request, response) {
     });
     const newContents = { levels: newLevels };
     fs.writeFileSync(process.cwd() + "/src/server/" + filename, JSON.stringify(newContents));
-    response.sendStatus(200);    
+    response.sendStatus(200);
 });
 
 app.listen(PORT);

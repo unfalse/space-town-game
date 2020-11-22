@@ -3,7 +3,7 @@ import { BaseCSW } from './base/baseCsw';
 import { BTankManager } from './btank';
 import { Bullet } from './bullet';
 import { CONST } from './const';
-import { Direction, PathUnit, Who } from './types';
+import { Direction, PathUnit, WayPoints, Who } from './types';
 import { Utils } from './utils';
 
 const CSWAI_0 = class extends BaseCPU {
@@ -211,13 +211,11 @@ const CSWAI_1 = class extends BaseCPU {
     }
 };
 
-type Wp = number[];
-
-const CSWAI_customPaths = class extends BaseCPU {
+class CSWAI_customPaths extends BaseCPU {
     wpCounter: number;
     wpStartTime: number;
-    currentWp: Wp;
-    wayPoints: Wp[];
+    currentWp: WayPoints;
+    wayPoints: WayPoints[];
     constructor() {
         super();
         this.type = CONST.TYPES.SHIP;
@@ -227,7 +225,7 @@ const CSWAI_customPaths = class extends BaseCPU {
         this.wayPoints = [];
     }
 
-    init(mx: number, my: number, who: Who, BTankInst: BTankManager, wayPoints?: Wp[]) {
+    init(mx: number, my: number, who: Who, BTankInst: BTankManager, wayPoints?: WayPoints[]) {
         super.init(mx, my, who, BTankInst);
         const FIRST_PATH = [
             [80, 0],
