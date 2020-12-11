@@ -8,6 +8,7 @@
     "build": "yarn build:types && yarn build:all",
     "build:all": "webpack",
     "build:types": "tsc --emitDeclarationOnly",
+    "compile": "tsc",
     "server": "node src/server/index.js",
     "start": "webpack-dev-server --mode=development",
     "type-check": "tsc --noEmit",

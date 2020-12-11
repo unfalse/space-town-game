@@ -72,7 +72,7 @@ export class Bullet extends BaseCoordinates {
             x = nx + newX[nd.vx];
             y = ny + newY[nd.vy];
         }
-        this.initCoords(x, y, 0);
+        this.initCoords(x, y, nd as Direction);
         return this;
     }
 

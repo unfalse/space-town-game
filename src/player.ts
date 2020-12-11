@@ -6,6 +6,7 @@ import { Direction, Who } from './types';
 export class Player extends BaseCSW {
     PLAYER_BULLETS_INTERVAL: number;
     accel: number;
+    stopAccel: boolean;
     constructor() {
         super();
         this.type = CONST.USER;

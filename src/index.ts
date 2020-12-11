@@ -7,13 +7,24 @@ import { Utils } from './utils';
 import { CSWAI_customPaths } from './cswai';
 import { Player } from './player';
 import { Camera } from './cam';
+import { Direction } from './types';
 
 type Keys = {
-    ArrowRight: string,
-    ArrowLeft: string,
-    ArrowUp: string,
-    ArrowDown: string,
+    ArrowRight: boolean,
+    ArrowLeft: boolean,
+    ArrowUp: boolean,
+    ArrowDown: boolean,
+    a: boolean,
+    s: boolean
 };
+
+type ControlsMap = {
+    ArrowRight: number,
+    ArrowLeft: number,
+    ArrowUp: number,
+    ArrowDown: number,
+    a: number
+}
 
 // -----------------------------
 //        Основная логика
@@ -22,16 +33,16 @@ const game = function () {
     let mainIntervalId = null;
     let gameOver = false;
     let win = false;
-    let keys: keyof Keys;
+    let keys: Keys = {} as Keys;
     // let editor = false;
     // globalCom
 
-    const controlsMap = {
-        [Utils.KEY_CODE.UP]: 3,
-        [Utils.KEY_CODE.LEFT]: 2,
-        [Utils.KEY_CODE.RIGHT]: 0,
-        [Utils.KEY_CODE.DOWN]: 1,
-        [Utils.KEY_CODE.a_KEY]: 4,
+    const controlsMap: ControlsMap = {
+        ArrowUp: 3,
+        ArrowLeft: 2,
+        ArrowRight: 0,
+        ArrowDown: 1,
+        a: 4,
     };
 
     // TODO: move player1 into BTankManager
@@ -42,9 +53,9 @@ const game = function () {
     const BTankInst = new BTankManager();
     const EditorInst = new Editor();
 
-//     fetch('http://localhost:8080').then(r => { console.log(r); });
-//     fetch('http://localhost:8080/list').then(r => { console.log(r); return r.json(); }).then(r => { console.log(r); });
-    
+    //     fetch('http://localhost:8080').then(r => { console.log(r); });
+    //     fetch('http://localhost:8080/list').then(r => { console.log(r); return r.json(); }).then(r => { console.log(r); });
+
     this.start = function () {
         BTankInst.init().then(
             function () {
@@ -334,7 +345,7 @@ const game = function () {
                 );
             }
             if (EditorInst.editorCurrentObjectBrush.type === CONST.TYPES.PLAYER) {
-                
+
                 EditorInst.createEditorUnit(
                     cellx,
                     celly,
@@ -363,7 +374,7 @@ const game = function () {
         }
     };
 
-    this.keyUpHandler = function (kc) {
+    this.keyUpHandler = function (kc: string) {
         // TODO: keysUp array for keys that are up to know which direction isn't getting acceleration
         player1.stopAccel = true;
 
@@ -381,7 +392,7 @@ const game = function () {
         } else {
             event.returnValue = false;
         }
-        const kc: string = event.key;
+        const kc = event.key as keyof Keys;
         keys[kc] = event.type == "keydown";
 
         if (event.type === "keyup") {
@@ -390,7 +401,7 @@ const game = function () {
         this.editorKeys(kc);
     };
 
-    this.editorKeys = function (kc) {
+    this.editorKeys = function (kc: keyof Keys) {
         if (EditorInst.editorMode) {
             if (kc === Utils.KEY_CODE.N1_KEY) {
                 EditorInst.setCurrentEditorBrushObject(CONST.TYPES.ERASER);
@@ -416,87 +427,61 @@ const game = function () {
         }
     };
 
-    this.detectEditorMovement = function (timestamp) {
+    this.detectEditorMovement = function () {
         const DX = 26;
         // TODO: move the screen
-        if (keys[Utils.KEY_CODE.UP]) {
+        if (keys[Utils.KEY_CODE.UP as keyof Keys]) {
             gameCam.setCoords(BTankInst.gameCam.x, BTankInst.gameCam.y - DX);
         }
-        if (keys[Utils.KEY_CODE.LEFT]) {
+        if (keys[Utils.KEY_CODE.LEFT as keyof Keys]) {
             gameCam.setCoords(BTankInst.gameCam.x - DX, BTankInst.gameCam.y);
         }
-        if (keys[Utils.KEY_CODE.RIGHT]) {
+        if (keys[Utils.KEY_CODE.RIGHT as keyof Keys]) {
             gameCam.setCoords(BTankInst.gameCam.x + DX, BTankInst.gameCam.y);
         }
-        if (keys[Utils.KEY_CODE.DOWN]) {
+        if (keys[Utils.KEY_CODE.DOWN as keyof Keys]) {
             gameCam.setCoords(BTankInst.gameCam.x, BTankInst.gameCam.y + DX);
         }
     };
 
-    this.detectMovement = function (timestamp) {
+    this.detectMovement = function (timestamp: number) {
         // code here must change ONLY DIRECTION
         const ACCEL = 0.3; // 0.7; // 0.3;
 
-        if (keys[Utils.KEY_CODE.UP]) {
+        if (keys[Utils.KEY_CODE.UP as keyof Keys]) {
             player1.setDirectionAndAddAccel(
-                controlsMap[Utils.KEY_CODE.UP],
+                controlsMap[Utils.KEY_CODE.UP as keyof ControlsMap] as Direction,
                 ACCEL
             );
         }
-        if (keys[Utils.KEY_CODE.LEFT]) {
+        if (keys[Utils.KEY_CODE.LEFT as keyof Keys]) {
             player1.setDirectionAndAddAccel(
-                controlsMap[Utils.KEY_CODE.LEFT],
+                controlsMap[Utils.KEY_CODE.LEFT as keyof ControlsMap] as Direction,
                 ACCEL
             );
         }
-        if (keys[Utils.KEY_CODE.RIGHT]) {
+        if (keys[Utils.KEY_CODE.RIGHT as keyof Keys]) {
             player1.setDirectionAndAddAccel(
-                controlsMap[Utils.KEY_CODE.RIGHT],
+                controlsMap[Utils.KEY_CODE.RIGHT as keyof ControlsMap] as Direction,
                 ACCEL
             );
         }
-        if (keys[Utils.KEY_CODE.DOWN]) {
+        if (keys[Utils.KEY_CODE.DOWN as keyof Keys]) {
             player1.setDirectionAndAddAccel(
-                controlsMap[Utils.KEY_CODE.DOWN],
+                controlsMap[Utils.KEY_CODE.DOWN as keyof ControlsMap] as Direction,
                 ACCEL
             );
         }
-        if (keys[Utils.KEY_CODE.a_KEY]) {
+        if (keys[Utils.KEY_CODE.a_KEY as keyof Keys]) {
             player1.fire(timestamp);
         }
-        if (keys[Utils.KEY_CODE.s_KEY]) {
+        if (keys[Utils.KEY_CODE.s_KEY as keyof Keys]) {
             player1.stop();
         }
     };
 };
 
-const gameInstance = new game(
-    // BattleTankGame.deps.const,
-    // new BattleTankGame.deps.BTankManager(
-    //     BattleTankGame.deps.const,
-    //     BattleTankGame.deps.csw,
-    //     BattleTankGame.deps.player,
-    //     // BattleTankGame.deps.cswAI_1,
-    //     BattleTankGame.deps.cswAI_customPaths,
-    //     BattleTankGame.deps.obstacle,
-    //     BattleTankGame.deps.staticShip,
-    //     BattleTankGame.deps.spaceBrick,
-    //     BattleTankGame.deps.bulletPixel,
-    //     BattleTankGame.deps.counter,
-    //     BattleTankGame.deps.camera,
-    //     BattleTankGame.deps.border,
-    //     BattleTankGame.deps.images,
-    //     BattleTankGame.deps.delayedPic
-    // ),
-    // new BattleTankGame.deps.editor(
-    //     BattleTankGame.deps.const,
-    //     BattleTankGame.deps.obstacle,
-    //     BattleTankGame.deps.staticShip,
-    //     BattleTankGame.deps.spaceBrick,
-    //     BattleTankGame.deps.border,
-    //     BattleTankGame.deps.player
-    // ),
-    // BattleTankGame.deps.utils
-);
+// @ts-ignore
+const gameInstance = new game();
 
 gameInstance.start();
