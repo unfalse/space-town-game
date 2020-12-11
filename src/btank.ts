@@ -1,11 +1,11 @@
 import { CONST } from './const';
-import { Obstacle, SpaceBrick } from './cswai';
+import { Obstacle, SpaceBrick, CSWAI_customPaths } from './cswai';
 import { Bullet } from './bullet';
 import { Counter } from './counter';
 import { Camera } from './cam';
 import { Images } from './images';
 import { DelayedPic } from './delayedPic';
-import { Direction, Ghosts, ObjectType, RectSize, Who } from './types';
+import { Direction, Ghosts, ObjectType, RectSize, WayPoints, Who } from './types';
 import { Player } from './player';
 import { BaseCSW } from './base/baseCsw';
 import { BaseCPU } from './base/baseCpu';
@@ -32,7 +32,7 @@ export class BTankManager {
     backgroundImage: Images;
     counterImages: Images[];
 
-    cswAI: BaseCPU; // TODO: make it more easy to choose different AIs
+    // cswAI: BaseCPU; // TODO: make it more easy to choose different AIs
     gameInfo: HTMLCanvasElement;
     titleBlock: HTMLDivElement;
     gameFieldBlock: HTMLCanvasElement;
@@ -43,7 +43,7 @@ export class BTankManager {
     spaceBrickImages: Images[];
     gameCam: Camera;
 
-    constructor(cswAI: BaseCPU) {
+    constructor() {
         // TODO: write the full paths to classes
         this.cswArr = [];
         this.ghosts = [];
@@ -56,8 +56,6 @@ export class BTankManager {
         this.backgroundImage = null;
         this.counterImages = null;
         this.playerInstance = null;
-
-        this.cswAI = cswAI;
     }
 
     init(): Promise<unknown[]> {
@@ -134,15 +132,15 @@ export class BTankManager {
             //     this.backgroundImage = image;
             // }),
 
-            loadImage("images/background.png", function (image: Images) {
+            loadImage("images/background.png", (image: Images) => {
                 this.backgroundImage = image;
             }),
 
-            loadImage("images/blackbackground.png", function (image: Images) {
+            loadImage("images/blackbackground.png", (image: Images) => {
                 this.blackbackgroundImage = image;
             }),
 
-            loadImage("images/obstacle3.png", function (image: Images) {
+            loadImage("images/obstacle3.png", (image: Images) => {
                 this.obstacleImage = image;
             }),
 
@@ -157,7 +155,7 @@ export class BTankManager {
                 this.spaceBrickImages
             ),
 
-            loadImage("images/border.png", function (image: Images) {
+            loadImage("images/border.png", (image: Images) => {
                 this.borderImage = image;
             }),
 
@@ -242,7 +240,7 @@ export class BTankManager {
         delay?: number,
         typeParam?: ObjectType,
         ghost?: boolean,
-        wayPoints?: number[]
+        wayPoints?: WayPoints[]
     ): void | Player {
         let c1 = null;
         const type = typeParam || ObjectType.SHIP;
@@ -259,7 +257,7 @@ export class BTankManager {
                     // this code should be extendable
                     // TODO: implement some pattern to not write thousands if-s
                     if (type === ObjectType.SHIP) {
-                        c1 = new this.cswAI(CONST, Bullet);
+                        c1 = new CSWAI_customPaths();
                         c1.init(x, y, who, this, wayPoints);
                         this.pushNewObject(c1, ghost);
                     }

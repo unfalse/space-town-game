@@ -8,6 +8,13 @@ import { CSWAI_customPaths } from './cswai';
 import { Player } from './player';
 import { Camera } from './cam';
 
+type Keys = {
+    ArrowRight: string,
+    ArrowLeft: string,
+    ArrowUp: string,
+    ArrowDown: string,
+};
+
 // -----------------------------
 //        Основная логика
 // -----------------------------
@@ -15,7 +22,7 @@ const game = function () {
     let mainIntervalId = null;
     let gameOver = false;
     let win = false;
-    let keys = {};
+    let keys: keyof Keys;
     // let editor = false;
     // globalCom
 
@@ -32,7 +39,7 @@ const game = function () {
     let gameCam: Camera = null;
 
     const gameField = document.getElementById("gameField");
-    const BTankInst = new BTankManager(CSWAI_customPaths);
+    const BTankInst = new BTankManager();
     const EditorInst = new Editor();
 
 //     fetch('http://localhost:8080').then(r => { console.log(r); });
@@ -45,7 +52,7 @@ const game = function () {
                 BTankInst.showLogo();
                 BTankInst.showNames();
 
-                player1 = BTankInst.createCSW(0, 600, CONST.USER);
+                player1 = BTankInst.createCSW(0, 600, CONST.USER) as Player;
                 gameCam = BTankInst.getGameCam();
 
                 BTankInst.createCSW(10, 10, CONST.COMPUTER, 0, CONST.TYPES.COUNTER);
@@ -217,7 +224,7 @@ const game = function () {
         );
     };
 
-    this.mainCycle = function (timestamp) {
+    this.mainCycle = function (timestamp: number) {
         // console.log(timestamp);
         BTankInst.drawBackground();
 
@@ -232,7 +239,7 @@ const game = function () {
         );
     };
 
-    this.editorCycle = function (timestamp) {
+    this.editorCycle = function (timestamp: number) {
         this.detectEditorMovement(timestamp);
         // player1.update();
         // gameCam.setCoords(player1.x, player1.y);
@@ -243,7 +250,7 @@ const game = function () {
         }, this);
 
         EditorInst.editorGhosts.forEach(function (ghost) {
-            ghost.draw(true);
+            ghost.draw();
         }, this);
 
         if (EditorInst.currentShipWithWaypoints) {
@@ -256,7 +263,7 @@ const game = function () {
         }
     };
 
-    this.gameCycle = function (timestamp) {
+    this.gameCycle = function (timestamp: number) {
 
         if (player1.life > 0) {
             this.detectMovement(timestamp);
@@ -265,7 +272,7 @@ const game = function () {
         }
 
         BTankInst.getAllBullets().forEach(function (bullet) {
-            bullet.fly(timestamp);
+            bullet.fly();
         });
 
         BTankInst.getAllShips().forEach(function (ship) {
@@ -296,11 +303,11 @@ const game = function () {
         //console.log('cswArr = ', BTank.cswArr.length);
     };
 
-    this.editorMouseDownHandler = function (event) {
+    this.editorMouseDownHandler = function (event: MouseEvent) {
         if (EditorInst.editorMode && event.buttons === 1) {
             const leftTop = {
-                x: BTankInst.gameCam.x - BTankInst.CONST.CAM.CENTERX,
-                y: BTankInst.gameCam.y - BTankInst.CONST.CAM.CENTERY,
+                x: BTankInst.gameCam.x - CONST.CAM.CENTERX,
+                y: BTankInst.gameCam.y - CONST.CAM.CENTERY,
             };
             const x = event.offsetX + leftTop.x,
                 y = event.offsetY + leftTop.y;
@@ -337,7 +344,7 @@ const game = function () {
             if (EditorInst.editorCurrentObjectBrush.type === CONST.TYPES.WAYPOINT) {
                 if (!EditorInst.currentShipWithWaypoints) {
                     const unit = EditorInst.getEditorUnitAt(cellx, celly);
-                    EditorInst.setCurrentShipWithWaypoints(unit);
+                    EditorInst.setCurrentShipWithWaypoints(unit as CSWAI_customPaths);
                 } else {
                     if (!EditorInst.getEditorWaypointAt(cellx, celly)) {
                         EditorInst.addEditorWaypoint(cellx, celly);
@@ -368,13 +375,13 @@ const game = function () {
 
     // ----------- END -----------
 
-    this.keysHandler = function (event) {
+    this.keysHandler = function (event: KeyboardEvent) {
         if (event.preventDefault) {
             event.preventDefault();
         } else {
             event.returnValue = false;
         }
-        const kc = event.keyCode || event.which;
+        const kc: string = event.key;
         keys[kc] = event.type == "keydown";
 
         if (event.type === "keyup") {

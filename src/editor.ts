@@ -314,7 +314,7 @@ export class Editor {
         });
     }
 
-    createEditorUnit(x: number, y: number, type: ObjectType, ghost: boolean, wayPoints?: WayPoints) {
+    createEditorUnit(x: number, y: number, type: ObjectType, ghost?: boolean, wayPoints?: WayPoints) {
         let newUnit = null;
         const who = CONST.COMPUTER;
         if (

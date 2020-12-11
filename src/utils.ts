@@ -2,20 +2,20 @@ console.log("utils!");
 
 export const Utils = {
   KEY_CODE: {
-        LEFT: 37,
-        UP: 38,
-        RIGHT: 39,
-        DOWN: 40,
+        LEFT: 'ArrowLeft',
+        UP: 'ArrowUp',
+        RIGHT: 'ArrowRight',
+        DOWN: 'ArrowDown',
         a_KEY: 65,
         s_KEY: 83,
         F1_KEY: 112,
-        N1_KEY: 49,
-        N2_KEY: 50,
-        N3_KEY: 51,
-        N4_KEY: 52,
-        N5_KEY: 53,
-        N6_KEY: 54,
-        N7_KEY: 55,
+        N1_KEY: '1',
+        N2_KEY: '2',
+        N3_KEY: '3',
+        N4_KEY: '4',
+        N5_KEY: '5',
+        N6_KEY: '6',
+        N7_KEY: '7',
     },
 
     // event.type должен быть keypress
