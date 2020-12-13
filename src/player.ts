@@ -46,7 +46,7 @@ export class Player extends BaseCSW {
             this.PLAYER_BULLETS_INTERVAL
         ) {
             this.lastBulletTimeStamp = timestamp;
-            this.createNewBullet(this.x, this.y, this.d, this.type);
+            this.createNewBullet(this.x, this.y, this.d, Who.USER);
             // this.createNewBullet(this.x, this.y, { vx: 1, vy: 0 }, this);
             // this.createNewBullet(this.x, this.y, { vx: 0, vy: 1 }, this);
             // this.createNewBullet(this.x, this.y, { vx: -1, vy: 0 }, this);

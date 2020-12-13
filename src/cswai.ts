@@ -223,6 +223,7 @@ class CSWAI_customPaths extends BaseCPU {
         this.wpStartTime = -1;
         this.currentWp = null;
         this.wayPoints = [];
+        // this.d = 0;
     }
 
     init(mx: number, my: number, who: Who, BTankInst: BTankManager, wayPoints?: WayPoints[]) {

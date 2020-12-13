@@ -9,13 +9,13 @@
     "build:all": "webpack",
     "build:types": "tsc --emitDeclarationOnly",
     "compile": "tsc",
-    "server": "node src/server/index.js",
+    "server": "node build/server/index.js",
     "start": "webpack-dev-server --mode=development",
     "type-check": "tsc --noEmit",
     "watch": "webpack --watch"
   },
   "devDependencies": {
-    "@babel/core": "^7.12.3",
+    "@babel/core": "^7.12.10",
     "@babel/plugin-proposal-class-properties": "^7.12.1",
     "@babel/preset-env": "^7.12.1",
     "@babel/preset-typescript": "^7.12.1",

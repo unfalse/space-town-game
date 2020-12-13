@@ -17,6 +17,7 @@ export class BaseCPU extends BaseCSW {
         this.fireStartTime = -1;
         this.pathUnit = null;
         this.pathStartTime = -1;
+        this.d = 0;
     }
 
     fire(timestamp: number) {

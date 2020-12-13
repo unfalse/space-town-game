@@ -8,7 +8,6 @@ import { DelayedPic } from './delayedPic';
 import { Direction, Ghosts, ObjectType, RectSize, WayPoints, Who } from './types';
 import { Player } from './player';
 import { BaseCSW } from './base/baseCsw';
-import { BaseCPU } from './base/baseCpu';
 
 // -------------------------------------
 //    TOFIX! bullet dep propagation
