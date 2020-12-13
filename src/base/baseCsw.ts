@@ -39,6 +39,7 @@ export class BaseCSW extends BaseCoordinates {
             1: 0,
             2: 0,
             3: 0,
+            '-1': 0,
         };
         this.inertiaTimerIsRunning = false;
         this.d = 0; // direction
@@ -65,10 +66,11 @@ export class BaseCSW extends BaseCoordinates {
             1: BTankInst.getShipDimensions(1, who),
             2: BTankInst.getShipDimensions(2, who),
             3: BTankInst.getShipDimensions(3, who),
+            '-1': { width: 0, height: 0 },
         };
         //this.ghost = !!ghost; // only display this object
     }
-    
+
     draw() {
         this.BTankInst.drawcswmt5(this.x, this.y, this.d);
     }
@@ -137,7 +139,7 @@ export class BaseCSW extends BaseCoordinates {
             }
             // this.draw();
             // setTimeout(this.inertia.bind(this), 10);
-            
+
             this.waitAndCall(this.inertia.bind(this), 10); // TODO: need investigation wtf is this
         } else {
             this.inertiaTimerIsRunning = false;
@@ -185,17 +187,17 @@ export class BaseCSW extends BaseCoordinates {
     }
 
     /*
-
+    
     TODO: make this.x and this.y as the center of csw
     Right now this.x and this.y is point o (upper left point)
-
+    
     o----------
     |
     |
     |
     |
-
-*/
+    
+    */
     move(direction: Direction) {
         const nvxy = super.getVXY(direction);
         const acceleration = this.CSWSPEED + this.inertiaDirections[direction];
@@ -226,7 +228,7 @@ export class BaseCSW extends BaseCoordinates {
 
         if (
             this.y + uy + height >
-                CONST.MAXY * CONST.CELLSIZES.MAXY ||
+            CONST.MAXY * CONST.CELLSIZES.MAXY ||
             this.y + uy < 0
         ) {
             if (this.y + uy < 0) this.y = 0;
@@ -249,20 +251,24 @@ export class BaseCSW extends BaseCoordinates {
         // Actual collision detection
 
         // if (!isOnTheOtherShip) {
-        /*
-        if (ux != 0 || uy != 0) {
-            const found = this.BTankInst.checkIfTwoShipsCross(
-                this.x + ux, //Math.floor(ux), //Math.ceil(ux),
-                this.y + uy, //Math.floor(uy),//Math.ceil(uy),
-                this
-            );
-            if (found) {
-                ux = 0;
-                uy = 0;
-                this.inertiaDirections[direction] = 0;
+        // /*
+        const disableCollisionChecks = false;
+        if (!disableCollisionChecks) {
+            if (ux != 0 || uy != 0) {
+                const found = this.BTankInst.checkIfTwoShipsCross(
+                    this.x + ux, //Math.floor(ux), //Math.ceil(ux),
+                    this.y + uy, //Math.floor(uy),//Math.ceil(uy),
+                    this,
+                    [ObjectType.SHIP]
+                );
+                if (found) {
+                    ux = 0;
+                    uy = 0;
+                    this.inertiaDirections[direction] = 0;
+                }
             }
         }
-        */
+        // */
         this.x = this.x + ux;
         this.y = this.y + uy;
         // console.log(["c:", this.x, this.y, ux, uy]);
@@ -285,5 +291,5 @@ export class BaseCSW extends BaseCoordinates {
         this.draw();
     }
 
-    hitByBullet(bulletInstance: Bullet) {}
+    hitByBullet(bulletInstance: Bullet) { }
 };

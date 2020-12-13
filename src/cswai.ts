@@ -281,7 +281,7 @@ class CSWAI_customPaths extends BaseCPU {
             }
         }
 
-        const scanResult = this.plusShapedScan(10);
+        const scanResult: Direction = this.plusShapedScan(10);
         if (scanResult > -1) {
             this.stop();
             this.setDirectionAndAccel(scanResult, 0, 0);

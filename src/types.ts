@@ -6,7 +6,7 @@ enum Who {
     USER = CONST.USER,
 }
 
-type Direction = 0 | 1 | 2 | 3;
+type Direction = 0 | 1 | 2 | 3 | -1;
 type RectSize = {
     height: number;
     width: number;

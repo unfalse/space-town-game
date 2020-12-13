@@ -17,7 +17,7 @@ export class BaseCPU extends BaseCSW {
         this.fireStartTime = -1;
         this.pathUnit = null;
         this.pathStartTime = -1;
-        this.d = 0;
+        // this.d = 0;
     }
 
     fire(timestamp: number) {
@@ -76,6 +76,6 @@ export class BaseCPU extends BaseCSW {
             player.x <= this.x + width
         )
             return CONST.DOWN as Direction;
-        return null;
+        return -1;
     }
 };

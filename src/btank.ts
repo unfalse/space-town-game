@@ -251,18 +251,13 @@ export class BTankManager {
             return c1;
         } else if (who === CONST.COMPUTER) {
             // TODO: make delayed parameter as a field in class so BTankManager should decide from this field how to create new instance
-            setTimeout(
-                function () {
-                    // this code should be extendable
-                    // TODO: implement some pattern to not write thousands if-s
-                    if (type === ObjectType.SHIP) {
-                        c1 = new CSWAI_customPaths();
-                        c1.init(x, y, who, this, wayPoints);
-                        this.pushNewObject(c1, ghost);
-                    }
-                }.bind(this),
-                delay
-            );
+            // this code should be extendable
+            // TODO: implement some pattern to not write thousands if-s
+            if (type === ObjectType.SHIP) {
+                c1 = new CSWAI_customPaths();
+                c1.init(x, y, who, this, wayPoints);
+                this.pushNewObject(c1, ghost);
+            }
 
             if (type === ObjectType.OBSTACLE) {
                 c1 = new Obstacle();
@@ -287,18 +282,18 @@ export class BTankManager {
     // x, y - coordinates of pixels, not cells
     checkCSWWithPixelPrecision(x: number, y: number, whoAsks: BaseCSW): boolean {
         const result = this.cswArr.filter((csw: BaseCSW) => {
-                // console.log(whoAsks === csw);
-                if (whoAsks === csw) {
-                    return false;
-                }
-                const { width, height } = csw.dimensions[csw.d];
-                return (
-                    x >= csw.x &&
-                    x <= csw.x + width &&
-                    y >= csw.y &&
-                    y <= csw.y + height
-                );
-            });
+            // console.log(whoAsks === csw);
+            if (whoAsks === csw) {
+                return false;
+            }
+            const { width, height } = csw.dimensions[csw.d];
+            return (
+                x >= csw.x &&
+                x <= csw.x + width &&
+                y >= csw.y &&
+                y <= csw.y + height
+            );
+        });
         return result.length > 0;
     }
 
@@ -313,7 +308,7 @@ export class BTankManager {
         };
     }
 
-    checkIfTwoShipsCross(nx: number, ny: number, whoAsks: BaseCSW, _typeToCheckParam: ObjectType): BaseCSW {
+    checkIfTwoShipsCross(nx: number, ny: number, whoAsks: BaseCSW, typesToIgnore: ObjectType[]): BaseCSW {
         // const debugDraw = (function(x,y,w,h) {
         //     this.drawContext.strokeStyle = "#0f0";
         //     this.drawContext.strokeRect(x, y, w, h);
@@ -339,20 +334,20 @@ export class BTankManager {
         height--;
 
         const tArr = this.cswArr.filter((csw: BaseCSW) => {
-                if (whoAsks === csw) {
-                    return false;
-                }
+            if (whoAsks === csw || typesToIgnore.indexOf(csw.type) >= 0) {
+                return false;
+            }
 
-                const checkResult = checkSquare(csw, nx, ny) ||
-                    checkSquare(csw, nx + width, ny) ||
-                    checkSquare(csw, nx, ny + height) ||
-                    checkSquare(csw, nx + width, ny + height) ||
-                    checkSquare(csw, nx + width / 2, ny) ||
-                    checkSquare(csw, nx, ny + height / 2) ||
-                    checkSquare(csw, nx + width, ny + height / 2) ||
-                    checkSquare(csw, nx + width / 2, ny + height);
-                return checkResult;
-            }, this);
+            const checkResult = checkSquare(csw, nx, ny) ||
+                checkSquare(csw, nx + width, ny) ||
+                checkSquare(csw, nx, ny + height) ||
+                checkSquare(csw, nx + width, ny + height) ||
+                checkSquare(csw, nx + width / 2, ny) ||
+                checkSquare(csw, nx, ny + height / 2) ||
+                checkSquare(csw, nx + width, ny + height / 2) ||
+                checkSquare(csw, nx + width / 2, ny + height);
+            return checkResult;
+        }, this);
 
         return tArr.length > 0 ? tArr[0] : null;
     }
