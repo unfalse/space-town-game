@@ -1,0 +1,303 @@
+import { Camera } from "./cam";
+import { CONST } from "./const";
+import { Images } from "./images";
+import { Dimensions, Who, Direction, RectSize } from "./types";
+
+export class ImagesStore {
+
+    crashImages: Images[];
+    backgroundImage: Images;
+    counterImages: Images[];
+    cpuImages: Images[];
+    blackbackgroundImage: Images;
+    obstacleImage: Images;
+    borderImage: Images;
+    spaceBrickImages: Images[];
+    playerImages: Images[];
+
+    constructor() {
+    }
+
+    init(): Promise<unknown[]> {
+        const loadImage = Images.loadImage;
+        const loadManyImages = Images.loadManyImages;
+
+        const promises = [
+            loadManyImages(
+                [
+                    "images/csw-mt9bigger2x_90.png",
+                    "images/csw-mt9bigger2x_180.png",
+                    "images/csw-mt9bigger2x_270.png",
+                    "images/csw-mt9bigger2x_0.png",
+                ],
+                this.playerImages
+            ),
+
+            loadManyImages(
+                [
+                    "images/csw-mt5bigger2x_90.png",
+                    "images/csw-mt5bigger2x_180.png",
+                    "images/csw-mt5bigger2x_270.png",
+                    "images/csw-mt5bigger2x_0.png",
+                ],
+                this.cpuImages
+            ),
+
+            loadManyImages(
+                [
+                    "images/crash.png",
+                    "images/crash1.png",
+                    "images/crash2.png",
+                    "images/crash3.png",
+                    "images/crash4.png",
+                    "images/crash5.png",
+                ],
+                this.crashImages
+            ),
+
+            // loadImage.call(this, "images/background-cats.jpg", function (image) {
+            //     this.backgroundImage = image;
+            // }),
+
+            loadImage("images/background.png", (image: Images) => {
+                this.backgroundImage = image;
+            }),
+
+            loadImage("images/blackbackground.png", (image: Images) => {
+                this.blackbackgroundImage = image;
+            }),
+
+            loadImage("images/obstacle3.png", (image: Images) => {
+                this.obstacleImage = image;
+            }),
+
+            loadManyImages(
+                [
+                    "images/space_brick-4.png",
+                    "images/space_brick-3.png",
+                    "images/space_brick-2.png",
+                    "images/space_brick-1.png",
+                    "images/space_brick-0.png",
+                ],
+                this.spaceBrickImages
+            ),
+
+            loadImage("images/border.png", (image: Images) => {
+                this.borderImage = image;
+            }),
+
+            // loadImage.call(this, "images/border.png", this.borderImage),
+
+            loadManyImages(
+                [
+                    "images/counter-0.png",
+                    "images/counter-1.png",
+                    "images/counter-2.png",
+                    "images/counter-3.png",
+                    "images/counter-4.png",
+                    "images/counter-5.png",
+                    "images/counter-6.png",
+                    "images/counter-7.png",
+                    "images/counter-8.png",
+                    "images/counter-9.png",
+                ],
+                this.counterImages
+            ),
+        ];
+        return Promise.all(promises);
+    }
+}
+
+export class DrawingManager {
+
+    imagesStore: ImagesStore
+    gameCam: Camera;
+    dimensions: Dimensions;
+
+    constructor(imagesStoreInstance: ImagesStore, cameraInstance: Camera) {
+        this.imagesStore = imagesStoreInstance;
+        this.gameCam = cameraInstance;
+    }
+
+    init() {
+        return this.imagesStore.init();
+    }
+
+    initDimensions(who: Who) {
+        this.dimensions = {
+            0: this.getShipDimensions(0, who),
+            1: this.getShipDimensions(1, who),
+            2: this.getShipDimensions(2, who),
+            3: this.getShipDimensions(3, who),
+            '-1': { width: 0, height: 0 },
+        };
+    }
+
+    getShipDimensions(direction: Direction, iam: number): RectSize {
+        const image =
+            iam === CONST.COMPUTER
+                ? this.imagesStore.cpuImages[direction].image
+                : this.imagesStore.playerImages[direction].image;
+        return {
+            width: image.width * CONST.SCALE.X,
+            height: image.height * CONST.SCALE.Y,
+        };
+    }
+
+    // user
+    // TODO: move entirely to the player class
+    drawcswmt9(x: number, y: number, d: Direction) {
+        // console.log(["gamecam:", this.gameCam.x, this.gameCam.y]);
+        this.imagesStore.playerImages[d].draw(
+            x,
+            y,
+            CONST.CELLSIZES.MAXX * CONST.SCALE.X,
+            CONST.CELLSIZES.MAXY * CONST.SCALE.Y
+        );
+        // this.drawContext.strokeStyle="#f00";
+        // this.drawContext.strokeRect(Math.floor(x), Math.floor(y), 39,39);
+        // this.drawContext.lineWidth=0.1;
+    }
+
+    drawcswmt9ghost(x: number, y: number, d: Direction) {
+        const relXY = this.gameCam.getRelCoords(x, y);
+        this.imagesStore.playerImages[d].draw(
+            relXY.x,
+            relXY.y,
+            CONST.CELLSIZES.MAXX * CONST.SCALE.X,
+            CONST.CELLSIZES.MAXY * CONST.SCALE.Y
+        );
+    }
+
+    // cpu
+    drawcswmt5(x: number, y: number, d: Direction) {
+        const relXY = this.gameCam.getRelCoords(x, y);
+        this.imagesStore.cpuImages[d].draw(
+            relXY.x,
+            relXY.y,
+            CONST.CELLSIZES.MAXX * CONST.SCALE.X,
+            CONST.CELLSIZES.MAXY * CONST.SCALE.Y
+        );
+        // this.drawContext.strokeStyle="#f00";
+        // this.drawContext.strokeRect(x, y, 39,39);
+    }
+
+    drawObstacle(x: number, y: number) {
+        const relXY = this.gameCam.getRelCoords(x, y);
+        this.imagesStore.obstacleImage.draw(
+            relXY.x,
+            relXY.y,
+            CONST.CELLSIZES.MAXX * CONST.SCALE.X,
+            CONST.CELLSIZES.MAXY * CONST.SCALE.Y
+        );
+        // this.drawContext.strokeStyle="#f00";
+        // this.drawContext.strokeRect(x, y, 39,39);
+    }
+
+    drawBorder(x: number, y: number) {
+        const relXY = this.gameCam.getRelCoords(x, y);
+        this.imagesStore.borderImage.draw(
+            relXY.x,
+            relXY.y,
+            CONST.CELLSIZES.MAXX * CONST.SCALE.X,
+            CONST.CELLSIZES.MAXY * CONST.SCALE.Y
+        );
+        // this.drawContext.strokeStyle="#f00";
+        // this.drawContext.strokeRect(x, y, 39,39);
+    }
+
+    drawStaticShip(x: number, y: number) {
+        const relXY = this.gameCam.getRelCoords(x, y);
+        this.imagesStore.cpuImages[0].draw(
+            relXY.x,
+            relXY.y,
+            CONST.CELLSIZES.MAXX * CONST.SCALE.X,
+            CONST.CELLSIZES.MAXY * CONST.SCALE.Y
+        );
+        // this.drawContext.strokeStyle="#f00";
+        // this.drawContext.strokeRect(x, y, 39,39);
+    }
+
+    drawSpaceBrick(x: number, y: number, n: number) {
+        const relXY = this.gameCam.getRelCoords(x, y);
+        this.imagesStore.spaceBrickImages[n].draw(
+            relXY.x,
+            relXY.y,
+            CONST.CELLSIZES.MAXX * CONST.SCALE.X,
+            CONST.CELLSIZES.MAXY * CONST.SCALE.Y
+        );
+    }
+
+    drawWayPoint(x: number, y: number, n: number) {
+        const relXY = this.gameCam.getRelCoords(x, y);
+        this.imagesStore.counterImages[n].draw(
+            relXY.x,
+            relXY.y,
+            CONST.CELLSIZES.MAXX * CONST.SCALE.X,
+            CONST.CELLSIZES.MAXY * CONST.SCALE.Y
+        );
+    }
+
+    drawCounter(x: number, y: number, n: number) {
+        const relXY = this.gameCam.getRelCoords(x, y);
+        this.imagesStore.counterImages[n].draw(
+            relXY.x,
+            relXY.y,
+            CONST.CELLSIZES.MAXX * CONST.SCALE.X,
+            CONST.CELLSIZES.MAXY * CONST.SCALE.Y
+        );
+    }
+
+    DrawCrash(x: number, y: number, frameNumber: number) {
+        const relXY = this.gameCam.getRelCoords(x, y);
+        this.imagesStore.crashImages[frameNumber].draw(
+            relXY.x,
+            relXY.y,
+            20 * CONST.SCALE.X * 2,
+            20 * CONST.SCALE.Y * 2
+        );
+        // this.crashImage.draw(x, y, 0, onDelayEnd);
+    }
+
+    drawBackground() {
+        const relXY = this.gameCam.getRelCoords(0, 0);
+        const blackHeight = CONST.SCREENMAXY * CONST.CELLSIZES.MAXY * CONST.SCALE.Y;
+        const blackWidth = CONST.SCREENMAXX * CONST.CELLSIZES.MAXX * CONST.SCALE.X;
+        this.imagesStore.blackbackgroundImage.draw(0, 0, blackWidth, blackHeight);
+
+        const bWidth = 1920, bHeight = 1080;
+        // const bWidth = 1024, bHeight = 1024;
+        const backgroundCountX = (CONST.MAXX * CONST.CELLSIZES.MAXX) / bWidth;
+        const backgroundCountY = (CONST.MAXY * CONST.CELLSIZES.MAXY) / bHeight;
+        const truncX = Math.trunc(backgroundCountX);
+        const truncY = Math.trunc(backgroundCountY);
+        const frX = backgroundCountX % 1;
+        const frY = backgroundCountY % 1;
+        for (let cx = 0; cx <= truncX; cx++) {
+            for (let cy = 0; cy <= truncY; cy++) {
+                if (cx === truncX || cy === truncY) {
+                    this.imagesStore.backgroundImage.draw(
+                        0, 0,
+                        cx === truncX ? Math.round(bWidth * frX) : bWidth,
+                        cy === truncY ? Math.round(bHeight * frY) : bHeight,
+                        relXY.x + (bWidth * cx),
+                        relXY.y + (bHeight * cy),
+                        cx === truncX ? Math.round(bWidth * frX) : bWidth,
+                        cy === truncY ? Math.round(bHeight * frY) : bHeight,
+                    );
+                } else {
+                    this.imagesStore.backgroundImage.draw(
+                        // Math.round(relXY.x) + (bWidth * cx),
+                        // Math.round(relXY.y) + (bHeight * cy),
+                        relXY.x + (bWidth * cx),
+                        relXY.y + (bHeight * cy),
+                        bWidth,
+                        bHeight
+                    );
+                }
+            }
+        }
+        // this.backgroundImage.draw(relXY.x, relXY.y, 1920, 1080);
+    }
+
+}

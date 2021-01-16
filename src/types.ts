@@ -25,7 +25,8 @@ enum ObjectType {
     BORDER = 4,
     WAYPOINT = 5,
     WAYPOINTERASER = 6,
-    PLAYER = 7
+    PLAYER = 7,
+    STATICSHIP = 8
 }
 
 type PathUnit = {

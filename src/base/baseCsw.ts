@@ -2,7 +2,7 @@ import { BaseCoordinates } from './baseCoord';
 import { CONST } from '../const';
 import { Bullet } from '../bullet';
 import { Dimensions, Direction, ObjectType, Who } from '../types';
-import { BTankManager } from '../btank';
+import { BTankManager, DrawingManager } from '../btank';
 
 type InertiaDirections = { [key in Direction]: number; };
 
@@ -19,6 +19,7 @@ export class BaseCSW extends BaseCoordinates {
     MAXIMUM_ACCELERATION: number;
     dimensions: Dimensions;
     BTankInst: BTankManager;
+    drawingManagerInst: DrawingManager;
     iam: Who;
     maxlife: number;
     life: number;
@@ -54,25 +55,33 @@ export class BaseCSW extends BaseCoordinates {
     }
 
     // TODO: place code from init above!
-    init(mx: number, my: number, who: Who, BTankInst: BTankManager) {
+    init(
+        mx: number,
+        my: number,
+        who: Who,
+        drawingManagerInst: DrawingManager,
+        BTankInst: BTankManager
+    ) {
         super.initCoords(mx, my, 0);
         this.iam = who;
         this.maxlife = 5;
         this.life = this.maxlife;
         this.bulletsAmountOnFire = CONST.MAXBULLETS;
         this.BTankInst = BTankInst;
-        this.dimensions = {
-            0: BTankInst.getShipDimensions(0, who),
-            1: BTankInst.getShipDimensions(1, who),
-            2: BTankInst.getShipDimensions(2, who),
-            3: BTankInst.getShipDimensions(3, who),
-            '-1': { width: 0, height: 0 },
-        };
+        this.drawingManagerInst = drawingManagerInst;
+        this.drawingManagerInst.initDimensions(who);
         //this.ghost = !!ghost; // only display this object
+        this.childInit();
+    }
+
+    childInit() {}
+
+    setGhost(ghost: boolean) {
+        this.ghost = ghost;
     }
 
     draw() {
-        this.BTankInst.drawcswmt5(this.x, this.y, this.d);
+        this.drawingManagerInst.drawcswmt5(this.x, this.y, this.d);
     }
 
     createNewBullet(startX: number, startY: number, startD: Direction, whoFires?: Who) {

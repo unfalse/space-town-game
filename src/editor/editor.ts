@@ -1,11 +1,12 @@
-import { BaseCSW } from './base/baseCsw';
-import { BTankManager } from './btank';
-import { CONST } from './const';
-import { Obstacle, StaticShip, SpaceBrick, Border } from './cswai';
-import { Player } from './player';
-import { port as PORT } from './server/server.json';
-import { Ghosts, ObjectType, Point, WayPoints } from './types';
-import { CSWAI_customPaths } from './cswai';
+import { BaseCSW } from '../base/baseCsw';
+import { BTankManager } from '../btank';
+import { CONST } from '../const';
+import { port as PORT } from '../server/server.json';
+import { Ghosts, ObjectType, Point, WayPoints } from '../types';
+import { CSWAI_customPaths } from '../cswai';
+import { ObjectsFactory } from '../objFactory';
+import { placeBorders } from '../drawUtils';
+import { EditorUI } from './editorUI';
 
 type LevelObject = {
     id: number;
@@ -23,40 +24,28 @@ export class Editor {
     BTankInst: BTankManager;
     editorBlock: HTMLDivElement;
     editorCurrentObject: HTMLDivElement;
-    editorNewBtn: HTMLButtonElement;
-    editorPlayBtn: HTMLButtonElement;
-    editorSaveBtn: HTMLButtonElement;
-    editorSaveAsBtn: HTMLButtonElement;
-    editorLoadBtn: HTMLButtonElement;
-    editorFileListContainer: HTMLDivElement;
     editorCurrentObjectBrush: ObjectBrush;
     editorMode: boolean;
     editorUnits: BaseCSW[];
     editorGhosts: Ghosts;
     currentShipWithWaypoints: CSWAI_customPaths;
     playerCell: Point;
+    objFactoryInst: ObjectsFactory;
+    editorUI: EditorUI;
 
-    constructor() {
+    constructor(objFactoryInst: ObjectsFactory) {
         this.currentLevelObj = {
             id: null,
             name: '',
             data: ''
         };
+        this.objFactoryInst = objFactoryInst;
     }
 
     init(BTankInst: BTankManager) {
         this.BTankInst = BTankInst;
 
-        this.editorBlock = document.querySelector("#editorBlock");
-        this.editorCurrentObject = document.querySelector(
-            "#editorCurrentObject"
-        );
-        this.editorNewBtn = document.querySelector("#editorNewBtn");
-        this.editorPlayBtn = document.querySelector("#editorPlayBtn");
-        this.editorSaveBtn = document.querySelector("#editorSaveBtn");
-        this.editorSaveAsBtn = document.querySelector("#editorSaveAsBtn");
-        this.editorLoadBtn = document.querySelector("#editorLoadBtn");
-        this.editorFileListContainer = document.querySelector("#editorFileList");
+        this.editorUI = new EditorUI(this);
 
         this.editorCurrentObjectBrush = {
             type: CONST.TYPES.OBSTACLE,
@@ -67,31 +56,6 @@ export class Editor {
         this.editorGhosts = [];
         this.currentShipWithWaypoints = null;
         this.playerCell = { x: 0, y: 0 };
-
-        this.editorNewBtn.addEventListener(
-            "click",
-            this.newEditorLevel.bind(this)
-        );
-
-        this.editorPlayBtn.addEventListener(
-            "click",
-            this.playEditorLevel.bind(this)
-        );
-
-        this.editorSaveBtn.addEventListener(
-            "click",
-            this.saveEditorLevel.bind(this)
-        );
-
-        this.editorSaveAsBtn.addEventListener(
-            "click",
-            this.saveAsEditorLevel.bind(this)
-        );
-
-        this.editorLoadBtn.addEventListener(
-            "click",
-            this.showLevelChooseDialog.bind(this)
-        );
     }
 
     newEditorLevel() {
@@ -105,14 +69,11 @@ export class Editor {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
             },
-
-            //make sure to serialize your JSON body
             body: JSON.stringify({
                 ...this.currentLevelObj
             })
         })
             .then((response) => {
-                //do something awesome that makes the world a better place
                 alert('Level has been added!');
             });
     }
@@ -122,47 +83,36 @@ export class Editor {
         this.BTankInst.destroyAll();
 
         // TODO: add player1 to the empty array
-        player.init(this.playerCell.x, this.playerCell.y, CONST.USER, this.BTankInst);
+        // player.init(this.playerCell.x, this.playerCell.y, CONST.USER, this.BTankInst);
+        player.initCoords(this.playerCell.x, this.playerCell.y);
         this.BTankInst.addShip(player);
 
-        this.BTankInst.placeBorders();
+        placeBorders(this.objFactoryInst, this.BTankInst);
 
         this.editorUnits.forEach(function (unit) {
             if (
                 unit.type ===
                 CONST.TYPES.SHIP /*&& unit.iam !== CONST.USER*/
             ) {
-                this.BTankInst.createCSW(
+                this.objFactoryInst.createCSW(
                     unit.x,
                     unit.y,
                     CONST.COMPUTER,
-                    0,
                     CONST.TYPES.SHIP,
                     false,
                     (unit as CSWAI_customPaths).wayPoints
                 );
-            }
-            if (unit.type === CONST.TYPES.OBSTACLE) {
+            } else {
                 this.BTankInst.createCSW(
                     unit.x,
                     unit.y,
                     CONST.COMPUTER,
-                    0,
-                    CONST.TYPES.OBSTACLE
-                );
-            }
-            if (unit.type === CONST.TYPES.SPACEBRICK) {
-                this.BTankInst.createCSW(
-                    unit.x,
-                    unit.y,
-                    CONST.COMPUTER,
-                    0,
-                    CONST.TYPES.SPACEBRICK
+                    unit.type
                 );
             }
         }, this);
 
-        this.toggleEditorControls();
+        this.editorUI.toggleEditorControls();
     }
 
     prepareLevelForSaving() {
@@ -221,15 +171,15 @@ export class Editor {
         this.currentShipWithWaypoints = ship;
     }
 
-    showLevelChooseDialog() {
+    showLevelChooseDialog(editorFileListContainer: HTMLDivElement) {
         fetch(`http://localhost:${PORT}/list`)
             .then(r => r.json())
             .then(r => {
-                this.editorFileListContainer.style.display = "block";
+                editorFileListContainer.style.display = "block";
                 const ul = document.createElement('ul');
                 const title = document.createElement('span');
                 title.innerText = 'Which level to open?';
-                this.editorFileListContainer.append(title);
+                editorFileListContainer.append(title);
                 r.forEach((level: LevelObject) => {
                     const li = document.createElement('li');
                     li.innerText = level.name;
@@ -240,14 +190,14 @@ export class Editor {
                                 ...level
                             };
                             this.loadTheEditorLevel(level.id);
-                            this.editorFileListContainer.style.display = "none";
+                            editorFileListContainer.style.display = "none";
                             title.innerText = '';
-                            this.editorFileListContainer.removeChild(ul);
+                            editorFileListContainer.removeChild(ul);
                         }).bind(this)
                     );
                     ul.append(li);
                 });
-                this.editorFileListContainer.append(ul);
+                editorFileListContainer.append(ul);
             });
     }
 
@@ -293,11 +243,11 @@ export class Editor {
             });
     }
 
-    pushNewObject(obj: BaseCSW, ghost: boolean) {
+    pushNewObjects(objects: Array<BaseCSW>, ghost: boolean) {
         if (ghost) {
-            this.editorGhosts.push(obj);
+            this.editorGhosts = this.editorGhosts.concat(objects);
         } else {
-            this.editorUnits.push(obj);
+            this.editorUnits = this.editorUnits.concat(objects);
         }
     }
 
@@ -315,7 +265,6 @@ export class Editor {
     }
 
     createEditorUnit(x: number, y: number, type: ObjectType, ghost?: boolean, wayPoints?: WayPoints) {
-        let newUnit = null;
         const who = CONST.COMPUTER;
         if (
             this.editorUnits.some(function (unit: BaseCSW) {
@@ -331,32 +280,16 @@ export class Editor {
         ) {
             return;
         }
-        if (type === CONST.TYPES.OBSTACLE) {
-            newUnit = new Obstacle();
-            newUnit.init(x, y, who, this.BTankInst);
-            this.pushNewObject(newUnit, ghost);
-        }
-        if (type === CONST.TYPES.SHIP) {
-            newUnit = new StaticShip();
-            newUnit.init(x, y, who, this.BTankInst);
-            this.pushNewObject(newUnit, ghost);
-        }
-        if (type === CONST.TYPES.SPACEBRICK) {
-            newUnit = new SpaceBrick();
-            newUnit.init(x, y, who, this.BTankInst);
-            this.pushNewObject(newUnit, ghost);
-        }
-        if (type === CONST.TYPES.BORDER) {
-            newUnit = new Border();
-            newUnit.init(x, y, who, this.BTankInst);
-            this.pushNewObject(newUnit, ghost);
-        }
+
         if (type === CONST.TYPES.PLAYER) {
             this.playerCell = { x: +x, y: +y };
-            newUnit = new Player();
-            newUnit.init(x, y, CONST.USER, this.BTankInst);
-            this.pushNewObject(newUnit, true);
         }
+        this.pushNewObjects(
+            [
+                this.objFactoryInst.createCSW(x, y, who, type)
+            ],
+            ghost
+        );
     }
 
     addEditorWaypoint(x: number, y: number) {
@@ -369,10 +302,6 @@ export class Editor {
         this.editorUnits = this.editorUnits.filter(function (unit: BaseCSW) {
             return !(unit.x === x && unit.y === y);
         });
-    }
-
-    getFirstEditorObjectByType(type: ObjectType) {
-
     }
 
     removeEditorWaypointAt(x: number, y: number) {
@@ -439,7 +368,6 @@ export class Editor {
             default:
                 break;
         }
-        this.editorCurrentObject.style.backgroundImage = this.editorCurrentObjectBrush.imageUrl;
     }
 
     placeBorders() {
@@ -471,26 +399,6 @@ export class Editor {
                 CONST.TYPES.BORDER,
                 true
             );
-        }
-    }
-
-    toggleEditorControls() {
-        this.editorMode = !this.editorMode;
-        //const gameInfo = this.BTankInst.gameInfo;
-        if (this.editorMode) {
-            //gameInfo.style.display = "none";
-
-            this.editorBlock.style.display = "flex";
-            this.editorBlock.style.justifyContent = "center";
-
-            this.editorCurrentObject.style.backgroundImage = this.editorCurrentObjectBrush.imageUrl;
-            this.editorCurrentObject.style.width = "40px";
-            this.editorCurrentObject.style.height = "40px";
-            this.placeBorders();
-        } else {
-            //gameInfo.style.display = "";
-            //gameInfo.style.textAlign = "center";
-            this.editorBlock.style.display = "none";
         }
     }
 };

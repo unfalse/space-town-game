@@ -1,13 +1,16 @@
 // TODO: make a new project so everything is clean: git init from the start
 
 import { CONST } from './const';
-import { BTankManager } from './btank';
-import { Editor } from './editor';
+import { BTankManager, DrawingManager, ImagesStore } from './btank';
+import { Editor } from './editor/editor';
 import { Utils } from './utils';
 import { CSWAI_customPaths } from './cswai';
 import { Player } from './player';
 import { Camera } from './cam';
 import { Direction } from './types';
+import { ObjectsFactory } from './objFactory';
+import { placeBorders } from './drawUtils';
+import { addDemoCounters } from './demoUtils';
 
 type Keys = {
     ArrowRight: boolean,
@@ -47,164 +50,31 @@ const game = function () {
 
     // TODO: move player1 into BTankManager
     let player1: Player = null;
-    let gameCam: Camera = null;
 
     const gameField = document.getElementById("gameField");
+    
+    const cameraInst = new Camera();
+    const imagesStoreInst = new ImagesStore();
+    const drawingManagerInst = new DrawingManager(imagesStoreInst, cameraInst);
     const BTankInst = new BTankManager();
-    const EditorInst = new Editor();
+    const objFactoryGameInst = new ObjectsFactory(drawingManagerInst, BTankInst);
+    const EditorInst = new Editor(objFactoryGameInst);
+    const objFactoryEditorInst = new ObjectsFactory(drawingManagerInst, BTankInst);
 
     //     fetch('http://localhost:8080').then(r => { console.log(r); });
     //     fetch('http://localhost:8080/list').then(r => { console.log(r); return r.json(); }).then(r => { console.log(r); });
 
     this.start = function () {
-        BTankInst.init().then(
+        drawingManagerInst.init().then(
             function () {
-                EditorInst.init(BTankInst);
-                BTankInst.showLogo();
-                BTankInst.showNames();
+                // EditorInst.init(BTankInst);
 
-                player1 = BTankInst.createCSW(0, 600, CONST.USER) as Player;
-                gameCam = BTankInst.getGameCam();
+                player1 = objFactoryGameInst.createCSW(0, 600, CONST.USER) as Player;
+                BTankInst.pushNewObjects([player1])
 
-                BTankInst.createCSW(10, 10, CONST.COMPUTER, 0, CONST.TYPES.COUNTER);
-                BTankInst.createCSW(50, 10, CONST.COMPUTER, 0, CONST.TYPES.COUNTER);
-                BTankInst.createCSW(90, 10, CONST.COMPUTER, 0, CONST.TYPES.COUNTER);
-                BTankInst.createCSW(
-                    130,
-                    10,
-                    CONST.COMPUTER,
-                    0,
-                    CONST.TYPES.COUNTER
-                );
-                BTankInst.createCSW(
-                    170,
-                    10,
-                    CONST.COMPUTER,
-                    0,
-                    CONST.TYPES.COUNTER
-                );
-                BTankInst.createCSW(
-                    210,
-                    10,
-                    CONST.COMPUTER,
-                    0,
-                    CONST.TYPES.COUNTER
-                );
-                BTankInst.createCSW(
-                    250,
-                    10,
-                    CONST.COMPUTER,
-                    0,
-                    CONST.TYPES.COUNTER
-                );
-                BTankInst.createCSW(
-                    290,
-                    10,
-                    CONST.COMPUTER,
-                    0,
-                    CONST.TYPES.COUNTER
-                );
-                BTankInst.createCSW(
-                    330,
-                    10,
-                    CONST.COMPUTER,
-                    0,
-                    CONST.TYPES.COUNTER
-                );
+                addDemoCounters(objFactoryGameInst, BTankInst);
 
-                BTankInst.createCSW(10, 50, CONST.COMPUTER, 0, CONST.TYPES.COUNTER);
-                BTankInst.createCSW(50, 50, CONST.COMPUTER, 0, CONST.TYPES.COUNTER);
-                BTankInst.createCSW(90, 50, CONST.COMPUTER, 0, CONST.TYPES.COUNTER);
-                BTankInst.createCSW(
-                    130,
-                    50,
-                    CONST.COMPUTER,
-                    0,
-                    CONST.TYPES.COUNTER
-                );
-                BTankInst.createCSW(
-                    170,
-                    50,
-                    CONST.COMPUTER,
-                    0,
-                    CONST.TYPES.COUNTER
-                );
-                BTankInst.createCSW(
-                    210,
-                    50,
-                    CONST.COMPUTER,
-                    0,
-                    CONST.TYPES.COUNTER
-                );
-                BTankInst.createCSW(
-                    250,
-                    50,
-                    CONST.COMPUTER,
-                    0,
-                    CONST.TYPES.COUNTER
-                );
-                BTankInst.createCSW(
-                    290,
-                    50,
-                    CONST.COMPUTER,
-                    0,
-                    CONST.TYPES.COUNTER
-                );
-                BTankInst.createCSW(
-                    330,
-                    50,
-                    CONST.COMPUTER,
-                    0,
-                    CONST.TYPES.COUNTER
-                );
-
-                BTankInst.createCSW(10, 90, CONST.COMPUTER, 0, CONST.TYPES.COUNTER);
-                BTankInst.createCSW(50, 90, CONST.COMPUTER, 0, CONST.TYPES.COUNTER);
-                BTankInst.createCSW(90, 90, CONST.COMPUTER, 0, CONST.TYPES.COUNTER);
-                BTankInst.createCSW(
-                    130,
-                    90,
-                    CONST.COMPUTER,
-                    0,
-                    CONST.TYPES.COUNTER
-                );
-                BTankInst.createCSW(
-                    170,
-                    90,
-                    CONST.COMPUTER,
-                    0,
-                    CONST.TYPES.COUNTER
-                );
-                BTankInst.createCSW(
-                    210,
-                    90,
-                    CONST.COMPUTER,
-                    0,
-                    CONST.TYPES.COUNTER
-                );
-                BTankInst.createCSW(
-                    250,
-                    90,
-                    CONST.COMPUTER,
-                    0,
-                    CONST.TYPES.COUNTER
-                );
-                BTankInst.createCSW(
-                    290,
-                    90,
-                    CONST.COMPUTER,
-                    0,
-                    CONST.TYPES.COUNTER
-                );
-                BTankInst.createCSW(
-                    330,
-                    90,
-                    CONST.COMPUTER,
-                    0,
-                    CONST.TYPES.COUNTER
-                );
-
-                BTankInst.placeBorders();
+                placeBorders(objFactoryGameInst, BTankInst);
 
                 // for (let i = 0; i < 100; i++) {
                 //     BTank.createCSW(940, 480, CONST.COMPUTER, 0);
@@ -345,7 +215,6 @@ const game = function () {
                 );
             }
             if (EditorInst.editorCurrentObjectBrush.type === CONST.TYPES.PLAYER) {
-
                 EditorInst.createEditorUnit(
                     cellx,
                     celly,
@@ -379,8 +248,7 @@ const game = function () {
         player1.stopAccel = true;
 
         if (kc === Utils.KEY_CODE.F1_KEY) {
-            //BTank.toggleEditorControls();
-            EditorInst.toggleEditorControls();
+            EditorInst.editorUI.toggleEditorControls();
         }
     };
 

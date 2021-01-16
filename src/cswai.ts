@@ -1,14 +1,13 @@
 import { BaseCPU } from './base/baseCpu';
 import { BaseCSW } from './base/baseCsw';
-import { BTankManager } from './btank';
 import { Bullet } from './bullet';
 import { CONST } from './const';
 import { Direction, PathUnit, WayPoints, Who } from './types';
 import { Utils } from './utils';
 
-const CSWAI_0 = class extends BaseCPU {
+class CSWAI_0 extends BaseCPU {
     pathPresetCount: number;
-    
+
     constructor() {
         super();
         this.pathUnit = null; // { d: 0, accel: 0, ms: 0 };
@@ -114,7 +113,7 @@ const CSWAI_0 = class extends BaseCPU {
 };
 
 // TODO: make class BaseAI with fields path, pathStartTime etc.
-const CSWAI_1 = class extends BaseCPU {
+class CSWAI_1 extends BaseCPU {
     fireLastTime: number;
     newFireTime: number;
     disableAI: boolean;
@@ -135,8 +134,7 @@ const CSWAI_1 = class extends BaseCPU {
         // d: 0...3, a: 0...1, ms: (0...1) *1000
     }
 
-    init(mx: number, my: number, who: Who, BTankInst: BTankManager) {
-        super.init(mx, my, who, BTankInst);
+    childInit() {
         this.msCount = 0;
         this.msArray = [1000, 1200, 2000, 5000];
         this.accels = [6, 6, 4, 4, 4, 5, 5, 4, 4, 5, 5, 5, 6, 4, 4, 5, 5];
@@ -216,6 +214,7 @@ class CSWAI_customPaths extends BaseCPU {
     wpStartTime: number;
     currentWp: WayPoints;
     wayPoints: WayPoints[];
+
     constructor() {
         super();
         this.type = CONST.TYPES.SHIP;
@@ -226,14 +225,16 @@ class CSWAI_customPaths extends BaseCPU {
         // this.d = 0;
     }
 
-    init(mx: number, my: number, who: Who, BTankInst: BTankManager, wayPoints?: WayPoints[]) {
-        super.init(mx, my, who, BTankInst);
+    childInit() {
         const FIRST_PATH = [
             [80, 0],
             [80, 80],
             [0, 80],
             [0, 0],
         ];
+    }
+
+    setWaypoints(wayPoints?: WayPoints[]) {
         this.wayPoints = wayPoints || [];
     }
 
@@ -298,60 +299,55 @@ class CSWAI_customPaths extends BaseCPU {
     }
 };
 
-const Obstacle = class extends BaseCSW {
+class Obstacle extends BaseCSW {
     constructor() {
         super();
         this.type = CONST.TYPES.OBSTACLE;
     }
 
     draw() {
-        this.BTankInst.drawObstacle(this.x, this.y);
+        this.drawingManagerInst.drawObstacle(this.x, this.y);
     }
 
-    hitByBullet() {}
+    hitByBullet() { }
 };
 
-const Border = class extends BaseCSW {
+class Border extends BaseCSW {
     constructor() {
         super();
         this.type = CONST.TYPES.BORDER;
     }
 
     draw() {
-        this.BTankInst.drawBorder(this.x, this.y);
+        this.drawingManagerInst.drawBorder(this.x, this.y);
     }
 
-    hitByBullet() {}
+    hitByBullet() { }
 };
 
-const StaticShip = class extends BaseCSW {
+class StaticShip extends BaseCSW {
     constructor() {
         super();
         this.type = CONST.TYPES.SHIP;
     }
 
-    init(mx: number, my: number, who: Who, BTankInst: BTankManager) {
-        super.init(mx, my, who, BTankInst);
-    }
-
     draw() {
-        this.BTankInst.drawStaticShip(this.x, this.y);
+        this.drawingManagerInst.drawStaticShip(this.x, this.y);
     }
 };
 
-const SpaceBrick = class extends BaseCSW {
+class SpaceBrick extends BaseCSW {
     constructor() {
         super();
         this.type = CONST.TYPES.SPACEBRICK;
     }
 
-    init(mx: number, my: number, who: Who, BTankInst: BTankManager) {
-        super.init(mx, my, who, BTankInst);
+    childInit() {
         this.life = 9;
     }
 
     draw() {
-        this.BTankInst.drawSpaceBrick(
+        this.drawingManagerInst.drawSpaceBrick(
             this.x,
             this.y,
             Math.floor((this.life > 0 ? this.life : 0) / 2)

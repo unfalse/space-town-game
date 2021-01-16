@@ -7,15 +7,14 @@ export class Player extends BaseCSW {
     PLAYER_BULLETS_INTERVAL: number;
     accel: number;
     stopAccel: boolean;
+
     constructor() {
         super();
         this.type = CONST.USER;
         this.PLAYER_BULLETS_INTERVAL = 700;
     }
 
-    // TODO: move BTankInst to a constructor
-    init(mx: number, my: number, who: Who, BTankInst: any) {
-        super.init(mx, my, who, BTankInst);
+    childInit() {
         this.maxlife = 10000;
         this.life = this.maxlife;
     }
@@ -26,13 +25,13 @@ export class Player extends BaseCSW {
 
     draw(ghost?: boolean) {
         if (ghost) {
-            this.BTankInst.drawcswmt9ghost(
+            this.drawingManagerInst.drawcswmt9ghost(
                 this.x,
                 this.y,
                 this.d
             );
         } else {
-            this.BTankInst.drawcswmt9(
+            this.drawingManagerInst.drawcswmt9(
                 CONST.CAM.CENTERX,
                 CONST.CAM.CENTERY,
                 this.d
