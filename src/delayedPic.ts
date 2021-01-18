@@ -1,24 +1,31 @@
-import { BaseCoordinates } from './base/baseCoord';
+// import { BaseCoordinates } from './base/baseCoord';
+import { BaseCSW } from './base/baseCsw';
 import { BTankManager } from './btank';
 
-export class DelayedPic extends BaseCoordinates {
+// export class DelayedPic extends BaseCoordinates {
+export class DelayedPic extends BaseCSW {    
     show: boolean;
     timerStarted: boolean;
     BTankInst: BTankManager;
     frameCounter: number;
     framesLength: number;
 
-    constructor() {
+    constructor(framesLength = 4) {
         super();
-    }
-
-    init(nx: number, ny: number, BTankInst: BTankManager, framesLength: number) {
-        this.initCoords(nx, ny, 0);
-        this.show = true;
-        this.timerStarted = false;
-        this.BTankInst = BTankInst;
         this.frameCounter = 0;
         this.framesLength = framesLength;
+    }
+
+    // init(nx: number, ny: number, BTankInst: BTankManager) {
+    // init() {
+        // this.initCoords(nx, ny, 0);
+        // this.BTankInst = BTankInst;
+    // }
+
+    delayedPicInit() {
+        this.initCoords(this.x, this.y, 0);
+        this.show = true;
+        this.timerStarted = false;
     }
 
     setCoords(x: number, y: number) {
@@ -28,7 +35,7 @@ export class DelayedPic extends BaseCoordinates {
     }
 
     draw() {
-        this.BTankInst.DrawCrash(this.x, this.y, this.frameCounter);
+        this.drawingManagerInst.DrawCrash(this.x, this.y, this.frameCounter);
 
         function setDelay() {
             setTimeout(

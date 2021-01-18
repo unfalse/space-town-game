@@ -2,7 +2,8 @@ import { BaseCoordinates } from './baseCoord';
 import { CONST } from '../const';
 import { Bullet } from '../bullet';
 import { Dimensions, Direction, ObjectType, Who } from '../types';
-import { BTankManager, DrawingManager } from '../btank';
+import { DrawingManager } from '../drawingMan';
+import { BTankManager } from '../btank';
 
 type InertiaDirections = { [key in Direction]: number; };
 
@@ -69,7 +70,7 @@ export class BaseCSW extends BaseCoordinates {
         this.bulletsAmountOnFire = CONST.MAXBULLETS;
         this.BTankInst = BTankInst;
         this.drawingManagerInst = drawingManagerInst;
-        this.drawingManagerInst.initDimensions(who);
+        this.dimensions = this.drawingManagerInst.initDimensions(who);
         //this.ghost = !!ghost; // only display this object
         this.childInit();
     }
@@ -93,7 +94,7 @@ export class BaseCSW extends BaseCoordinates {
             ).length === this.bulletsAmountOnFire
         )
             return;
-        const newBullet = new Bullet(this.BTankInst, whoFires);
+        const newBullet = new Bullet(this.BTankInst, this.drawingManagerInst, whoFires);
         newBullet.init(startX, startY, startD, this);
         this.BTankInst.bulletsArr.push(newBullet);
     }

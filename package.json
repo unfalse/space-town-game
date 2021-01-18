@@ -9,7 +9,7 @@
     "build:all": "webpack",
     "build:types": "tsc --emitDeclarationOnly",
     "compile": "tsc",
-    "server": "node build/server/index.js",
+    "server": "yarn build && node build/server/index.js",
     "start": "webpack-dev-server --mode=development",
     "type-check": "tsc --noEmit",
     "watch": "webpack --watch"

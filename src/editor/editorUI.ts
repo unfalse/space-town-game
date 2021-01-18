@@ -58,7 +58,7 @@ class EditorUI {
             this.editorBlock.style.display = "flex";
             this.editorBlock.style.justifyContent = "center";
 
-            this.editorCurrentObject.style.backgroundImage = this.editorCurrentObjectBrush.imageUrl;
+            this.editorCurrentObject.style.backgroundImage = this.editorInst.editorCurrentObjectBrush.imageUrl;
             this.editorCurrentObject.style.width = "40px";
             this.editorCurrentObject.style.height = "40px";
             this.editorInst.placeBorders();

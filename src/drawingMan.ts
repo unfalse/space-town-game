@@ -1,4 +1,4 @@
-import { Camera } from "./cam";
+import { Camera } from "./camera";
 import { CONST } from "./const";
 import { Images } from "./images";
 import { Dimensions, Who, Direction, RectSize } from "./types";
@@ -12,10 +12,21 @@ export class ImagesStore {
     blackbackgroundImage: Images;
     obstacleImage: Images;
     borderImage: Images;
+    bulletImage: Images;
     spaceBrickImages: Images[];
     playerImages: Images[];
 
     constructor() {
+        this.crashImages = [];
+        this.backgroundImage = null;
+        this.counterImages = [];
+        this.cpuImages = [];
+        this.blackbackgroundImage = null;
+        this.obstacleImage = null;
+        this.borderImage = null;
+        this.spaceBrickImages = [];
+        this.playerImages = [];
+        this.bulletImage = null;
     }
 
     init(): Promise<unknown[]> {
@@ -86,6 +97,11 @@ export class ImagesStore {
                 this.borderImage = image;
             }),
 
+            loadImage("images/border.png", (image: Images) => {
+                // TODO: create a picture of bullet in Aseprite later
+                this.bulletImage = image;
+            }),
+
             // loadImage.call(this, "images/border.png", this.borderImage),
 
             loadManyImages(
@@ -124,7 +140,7 @@ export class DrawingManager {
     }
 
     initDimensions(who: Who) {
-        this.dimensions = {
+        return {
             0: this.getShipDimensions(0, who),
             1: this.getShipDimensions(1, who),
             2: this.getShipDimensions(2, who),
@@ -257,6 +273,24 @@ export class DrawingManager {
             20 * CONST.SCALE.Y * 2
         );
         // this.crashImage.draw(x, y, 0, onDelayEnd);
+    }
+
+    drawPlayerBullet(x: number, y: number) {
+        Images.drawContext.fillStyle = "#F00";
+        const relXY = this.gameCam.getRelCoords(x, y);
+        Images.drawContext.fillRect(
+            relXY.x,
+            relXY.y,
+        4, 4);
+    }
+
+    drawCPUBullet(x: number, y: number) {
+        Images.drawContext.fillStyle = "#FF0";
+        const relXY = this.gameCam.getRelCoords(x, y);
+        Images.drawContext.fillRect(
+            relXY.x,
+            relXY.y,
+        4, 4);
     }
 
     drawBackground() {

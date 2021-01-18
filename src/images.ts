@@ -1,5 +1,3 @@
-import { BTankManager } from "./btank";
-
 type OnLoadHandler = (image: Images) => void;
 
 type InternalOnLoadHandler = () => void;
@@ -7,7 +5,6 @@ type InternalOnLoadHandler = () => void;
 export class Images {
     image: HTMLImageElement;
     loaded: boolean;
-    BTankInst: BTankManager; // TODO: get rid of this
     static loadImage: (imagePath: string, onLoad: OnLoadHandler) => Promise<unknown>;
     static loadManyImages: (imagePaths: Array<string>, targetImages: Array<Images>) => Promise<unknown>;
     static drawContext: CanvasRenderingContext2D;

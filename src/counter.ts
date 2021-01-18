@@ -1,7 +1,6 @@
 import { BaseCSW } from './base/baseCsw';
-import { BTankManager, DrawingManager } from './btank';
+import { DrawingManager } from './drawingMan';
 import { CONST } from './const';
-import { Who } from './types';
 
 export const Counter = class extends BaseCSW {
     type: number; // TODO: it exists in BaseCSW too!

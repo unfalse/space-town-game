@@ -31,7 +31,7 @@ export class BaseCPU extends BaseCSW {
     }
 
     draw() {
-        this.BTankInst.drawcswmt5(this.x, this.y, this.d);
+        this.drawingManagerInst.drawcswmt5(this.x, this.y, this.d);
     }
 
     hitByBullet(bulletInstance: Bullet) {

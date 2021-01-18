@@ -1,12 +1,13 @@
 // TODO: make a new project so everything is clean: git init from the start
 
 import { CONST } from './const';
-import { BTankManager, DrawingManager, ImagesStore } from './btank';
+import { BTankManager } from './btank';
+import { ImagesStore, DrawingManager } from './drawingMan';
 import { Editor } from './editor/editor';
 import { Utils } from './utils';
 import { CSWAI_customPaths } from './cswai';
 import { Player } from './player';
-import { Camera } from './cam';
+import { Camera } from './camera';
 import { Direction } from './types';
 import { ObjectsFactory } from './objFactory';
 import { placeBorders } from './drawUtils';
@@ -56,10 +57,12 @@ const game = function () {
     const cameraInst = new Camera();
     const imagesStoreInst = new ImagesStore();
     const drawingManagerInst = new DrawingManager(imagesStoreInst, cameraInst);
-    const BTankInst = new BTankManager();
+    const BTankInst = new BTankManager(player1);
+    BTankInst.init();
+
     const objFactoryGameInst = new ObjectsFactory(drawingManagerInst, BTankInst);
     const EditorInst = new Editor(objFactoryGameInst);
-    const objFactoryEditorInst = new ObjectsFactory(drawingManagerInst, BTankInst);
+    // const objFactoryEditorInst = new ObjectsFactory(drawingManagerInst, BTankInst);
 
     //     fetch('http://localhost:8080').then(r => { console.log(r); });
     //     fetch('http://localhost:8080/list').then(r => { console.log(r); return r.json(); }).then(r => { console.log(r); });
@@ -67,7 +70,7 @@ const game = function () {
     this.start = function () {
         drawingManagerInst.init().then(
             function () {
-                // EditorInst.init(BTankInst);
+                EditorInst.init(BTankInst);
 
                 player1 = objFactoryGameInst.createCSW(0, 600, CONST.USER) as Player;
                 BTankInst.pushNewObjects([player1])
@@ -107,7 +110,7 @@ const game = function () {
 
     this.mainCycle = function (timestamp: number) {
         // console.log(timestamp);
-        BTankInst.drawBackground();
+        drawingManagerInst.drawBackground();
 
         if (EditorInst.editorMode) {
             this.editorCycle(timestamp);
@@ -125,21 +128,21 @@ const game = function () {
         // player1.update();
         // gameCam.setCoords(player1.x, player1.y);
 
-        EditorInst.editorUnits.forEach(function (unit) {
+        EditorInst.editorUnits.forEach((unit) => {
             unit.update(timestamp);
             // unit.draw();
-        }, this);
+        });
 
-        EditorInst.editorGhosts.forEach(function (ghost) {
+        EditorInst.editorGhosts.forEach((ghost) => {
             ghost.draw();
-        }, this);
+        });
 
         if (EditorInst.currentShipWithWaypoints) {
-            EditorInst.currentShipWithWaypoints.wayPoints.forEach(function (
+            EditorInst.currentShipWithWaypoints.wayPoints.forEach((
                 wp,
                 wpIndex
-            ) {
-                BTankInst.drawWayPoint(wp[0], wp[1], wpIndex + 1);
+            ) => {
+                drawingManagerInst.drawWayPoint(wp[0], wp[1], wpIndex + 1);
             });
         }
     };
@@ -149,26 +152,26 @@ const game = function () {
         if (player1.life > 0) {
             this.detectMovement(timestamp);
             player1.update(timestamp);
-            gameCam.setCoords(player1.x, player1.y);
+            cameraInst.setCoords(player1.x, player1.y);
         }
 
-        BTankInst.getAllBullets().forEach(function (bullet) {
+        BTankInst.getAllBullets().forEach((bullet) => {
             bullet.fly();
         });
 
-        BTankInst.getAllShips().forEach(function (ship) {
+        BTankInst.getAllShips().forEach((ship) => {
             ship.update(timestamp);
         });
 
-        BTankInst.getAllDelayedPics().forEach(function (pic) {
+        BTankInst.getAllDelayedPics().forEach((pic) => {
             pic.draw();
         });
 
-        BTankInst.getAllGhosts().forEach(function (ghost) {
+        BTankInst.getAllGhosts().forEach((ghost) => {
             ghost.draw();
         });
 
-        BTankInst.displayLifeBar(player1);
+        // BTankInst.displayLifeBar(player1);
 
         if (!gameOver && (win || player1.life <= 0)) {
             if (win) {
@@ -187,8 +190,8 @@ const game = function () {
     this.editorMouseDownHandler = function (event: MouseEvent) {
         if (EditorInst.editorMode && event.buttons === 1) {
             const leftTop = {
-                x: BTankInst.gameCam.x - CONST.CAM.CENTERX,
-                y: BTankInst.gameCam.y - CONST.CAM.CENTERY,
+                x: cameraInst.x - CONST.CAM.CENTERX,
+                y: cameraInst.y - CONST.CAM.CENTERY,
             };
             const x = event.offsetX + leftTop.x,
                 y = event.offsetY + leftTop.y;
@@ -299,16 +302,16 @@ const game = function () {
         const DX = 26;
         // TODO: move the screen
         if (keys[Utils.KEY_CODE.UP as keyof Keys]) {
-            gameCam.setCoords(BTankInst.gameCam.x, BTankInst.gameCam.y - DX);
+            cameraInst.setCoords(cameraInst.x, cameraInst.y - DX);
         }
         if (keys[Utils.KEY_CODE.LEFT as keyof Keys]) {
-            gameCam.setCoords(BTankInst.gameCam.x - DX, BTankInst.gameCam.y);
+            cameraInst.setCoords(cameraInst.x - DX, cameraInst.y);
         }
         if (keys[Utils.KEY_CODE.RIGHT as keyof Keys]) {
-            gameCam.setCoords(BTankInst.gameCam.x + DX, BTankInst.gameCam.y);
+            cameraInst.setCoords(cameraInst.x + DX, cameraInst.y);
         }
         if (keys[Utils.KEY_CODE.DOWN as keyof Keys]) {
-            gameCam.setCoords(BTankInst.gameCam.x, BTankInst.gameCam.y + DX);
+            cameraInst.setCoords(cameraInst.x, cameraInst.y + DX);
         }
     };
 
@@ -348,6 +351,10 @@ const game = function () {
         }
     };
 };
+
+// const dpTest = new DelayedPic(1);
+// debugger;
+// dpTest.init();
 
 // @ts-ignore
 const gameInstance = new game();

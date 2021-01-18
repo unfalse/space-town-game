@@ -3,6 +3,7 @@ import { BaseCoordinates } from './base/baseCoord';
 import { BaseCSW } from './base/baseCsw';
 import { BTankManager } from './btank';
 import { CONST } from './const';
+import { DrawingManager } from './drawingMan';
 import { Direction, Who } from './types';
 
 type NewXY = {
@@ -21,15 +22,17 @@ export class Bullet extends BaseCoordinates {
     BULLETSPEED: number;
     BTankInst: BTankManager;
     parentShip: BaseCSW;
+    drawingManagerInst: DrawingManager;
 
     // BattleTankGame.deps.baseCoordinates.call(this);
-    constructor(BTankInst: BTankManager, _whoFire: Who) {
+    constructor(BTankInst: BTankManager, drawingManager: DrawingManager, _whoFire: Who) {
         super();
         //this.BULLETSPEED = whoFire ? (whoFire.type === CONST.USER ? 2.5 : 2.5) : 2.5;
         // this.BULLETSPEED = whoFire ? (whoFire.type === CONST.USER ? 10 : 5) : 5;
         this.BULLETSPEED = 30; //100; // 30;
 
         this.BTankInst = BTankInst;
+        this.drawingManagerInst = drawingManager;
     }
 
     init(nx: number, ny: number, nd: Direction, parentShip: any) {
@@ -76,14 +79,13 @@ export class Bullet extends BaseCoordinates {
         return this;
     }
 
+    // TODO: create an image of bullet with transparent background
     draw() {
-        this.BTankInst.drawContext.fillStyle =
-            this.parentShip.iam === CONST.USER ? "#F00" : "#FF0";
-        const relXY = this.BTankInst.gameCam.getRelCoords(this.x, this.y);
-        this.BTankInst.drawContext.fillRect(
-            relXY.x,
-            relXY.y,
-        4, 4);
+        if(this.parentShip.iam === CONST.USER) {
+            this.drawingManagerInst.drawPlayerBullet(this.x, this.y);
+        } else {
+            this.drawingManagerInst.drawCPUBullet(this.x, this.y);
+        }
     }
 
     fly() {
@@ -111,7 +113,8 @@ export class Bullet extends BaseCoordinates {
             this.BTankInst.removeBullet(this);
             this.BTankInst.removeBullet(collidedBullets);
         }
-        // a bullet can't hurt it's master! :)
+
+        // a bullet can't hurt its master!
         if (collidedShips) {
             if (collidedShips.hitByBullet) {
                 collidedShips.hitByBullet(this);

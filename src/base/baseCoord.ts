@@ -1,10 +1,11 @@
 import { CONST } from "../const";
 import { Direction } from "../types";
 
-export const BaseCoordinates = class {
+export class BaseCoordinates {
   x: number;
   y: number;
   d: Direction;
+  
   constructor() {
     this.x = 0;
     this.y = 0;
@@ -29,6 +30,7 @@ export const BaseCoordinates = class {
       1: { vx: 0, vy: 1, angle: 180 },
       2: { vx: -1, vy: 0, angle: 270 },
       3: { vx: 0, vy: -1, angle: 0 },
+      '-1': { vx: 0, vy: 0, angle: 0 },
     };
     return mapDirections[d];
   }

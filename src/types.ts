@@ -1,4 +1,3 @@
-import { BaseCSW } from "./base/baseCsw";
 import { CONST } from "./const";
 
 enum Who {
@@ -35,7 +34,7 @@ type PathUnit = {
     ms: number;
 }
 
-type Ghosts = BaseCSW[];
+
 
 type Point = {
     x: number;
@@ -45,4 +44,4 @@ type Point = {
 type WayPoints = number[];
 
 export { Who, ObjectType };
-export type { Direction, Dimensions, RectSize, PathUnit, Ghosts, Point, WayPoints };
+export type { Direction, Dimensions, RectSize, PathUnit, Point, WayPoints };

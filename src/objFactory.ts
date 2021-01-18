@@ -1,3 +1,4 @@
+import { BaseCSW } from "./base/baseCsw";
 import { BTankManager } from "./btank";
 import { CONST } from "./const";
 import { Counter } from "./counter";
@@ -47,7 +48,7 @@ export class ObjectsFactory {
         if (who === CONST.USER) {
             c1 = new Player();
             // this.playerInstance = c1;
-            c1.init(x, y, who, this.drawingManagerInst, this.bTankManagerInst);
+            this.initNewObject(c1, x, y, who);
             c1.setGhost(ghost);
             return c1;
         } else if (who === CONST.COMPUTER) {
@@ -56,7 +57,7 @@ export class ObjectsFactory {
             // TODO: implement some pattern to not write thousands if-s
             if (type === ObjectType.SHIP) {
                 c1 = new CSWAI_customPaths();
-                c1.init(x, y, who, this.drawingManagerInst, this.bTankManagerInst);
+                this.initNewObject(c1, x, y, who);
                 c1.setWaypoints(wayPoints);
                 c1.setGhost(ghost);
                 return c1;
@@ -64,38 +65,42 @@ export class ObjectsFactory {
 
             if (type === ObjectType.STATICSHIP) {
                 c1 = new StaticShip();
-                c1.init(x, y, who, this.drawingManagerInst, this.bTankManagerInst);
+                this.initNewObject(c1, x, y, who);
                 c1.setGhost(ghost);
                 return c1;
             }
 
             if (type === ObjectType.OBSTACLE) {
                 c1 = new Obstacle();
-                c1.init(x, y, who, this.drawingManagerInst, this.bTankManagerInst);
+                this.initNewObject(c1, x, y, who);
                 c1.setGhost(ghost);
                 return c1;
             }
 
             if (type === ObjectType.SPACEBRICK) {
                 c1 = new SpaceBrick();
-                c1.init(x, y, who, this.drawingManagerInst, this.bTankManagerInst);
+                this.initNewObject(c1, x, y, who);
                 c1.setGhost(ghost);
                 return c1;
             }
 
             if (type === ObjectType.COUNTER) {
                 c1 = new Counter();
-                c1.init(x, y, who, this.drawingManagerInst, this.bTankManagerInst);
+                this.initNewObject(c1, x, y, who);
                 c1.setGhost(ghost);
                 return c1;
             }
 
             if (type == ObjectType.BORDER) {
                 c1 = new Border();
-                c1.init(x, y, who, this.drawingManagerInst, this.bTankManagerInst);
+                this.initNewObject(c1, x, y, who);
                 c1.setGhost(ghost);
                 return c1;
             }
         }
+    }
+
+    initNewObject(obj: BaseCSW, x: number, y: number, who: Who) {
+        obj.init(x, y, who, this.drawingManagerInst, this.bTankManagerInst);
     }
 }

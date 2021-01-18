@@ -1,13 +1,11 @@
 import { CONST } from './const';
-import { Obstacle, SpaceBrick, CSWAI_customPaths } from './cswai';
 import { Bullet } from './bullet';
-import { Counter } from './counter';
-import { Camera } from './cam';
 import { Images } from './images';
 import { DelayedPic } from './delayedPic';
-import { Dimensions, Direction, Ghosts, ObjectType, RectSize, WayPoints, Who } from './types';
-import { Player } from './player';
+import { ObjectType } from './types';
 import { BaseCSW } from './base/baseCsw';
+import { Player } from './player';
+import { Ghosts } from './ghosts';
 
 // -------------------------------------
 //    TOFIX! bullet dep propagation
@@ -29,9 +27,10 @@ export class BTankManager {
     gameInfo: HTMLCanvasElement;
     titleBlock: HTMLDivElement;
     gameFieldBlock: HTMLCanvasElement;
-    gameCam: Camera;
+    // gameCam: Camera;
+    playerInstance: Player;
 
-    constructor() {
+    constructor(player: Player) {
         // TODO: write the full paths to classes
         this.cswArr = [];
         this.ghosts = [];
@@ -40,6 +39,7 @@ export class BTankManager {
         this.drawContext = null;
         this.againBtn = null;
         this.gameOverBlock = null;
+        this.playerInstance = player;
     }
 
     init() {
@@ -106,7 +106,7 @@ export class BTankManager {
         // }).bind(this);
         // const typeToCheck = typeToCheckParam || CONST.TYPES.SHIP;
 
-        const checkSquare = function (csw: BaseCSW, x: number, y: number) {
+        const checkSquare = (csw: BaseCSW, x: number, y: number) => {
             let { width, height } = csw.dimensions[csw.d];
             width--;
             height--;
@@ -159,7 +159,7 @@ export class BTankManager {
 
     // Returns CSW on coords in params (by pixel)
     getCSWWithPixelPrecision(x: number, y: number, whoAsks: BaseCSW): BaseCSW {
-        const tArr = this.cswArr.filter(function (csw: BaseCSW) {
+        const tArr = this.cswArr.filter((csw: BaseCSW) => {
             if (whoAsks === csw) {
                 return false;
             }
@@ -191,11 +191,13 @@ export class BTankManager {
         this.cswArr.push(ship);
     }
 
+    // TODO: move into the ParticleManager (define it firstly)
     createDelayedPic(x: number, y: number) {
         const dp = new DelayedPic();
         // const relXY = this.gameCam.getRelCoords(x, y);
         // dp.init(relXY.x, relXY.y, this);
-        dp.init(x, y, this, this.crashImages.length);
+        // dp.init(x, y, this, );
+        dp.delayedPicInit();
         this.delayedPics.push(dp);
     }
 
