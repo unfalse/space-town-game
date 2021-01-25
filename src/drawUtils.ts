@@ -1,12 +1,12 @@
 import { BTankManager } from "./btank";
 import { CONST } from "./const";
-import { IObjectsFactory } from "./interfaces";
-// import { ObjectsFactory } from "./objFactory";
+// import { IObjectsFactory } from "./interfaces";
+import { ObjectsFactory } from "./objFactory";
 import { ObjectType } from "./types";
 
-export const placeBorders = (objFactoryInst: IObjectsFactory, BTankInst: BTankManager): void => {
-    let borders = [];
-    for (var x = 0; x < CONST.MAXX + 2; x++) {
+export const placeBorders = (objFactoryInst: ObjectsFactory, BTankInst: BTankManager): void => {
+    const borders = [];
+    for (let x = 0; x < CONST.MAXX + 2; x++) {
         borders.push(
             objFactoryInst.createCSW(
                 (x - 1) * CONST.CELLSIZES.MAXX,
@@ -25,7 +25,7 @@ export const placeBorders = (objFactoryInst: IObjectsFactory, BTankInst: BTankMa
         );
     }
 
-    for (var y = 0; y < CONST.MAXY + 1; y++) {
+    for (let y = 0; y < CONST.MAXY + 1; y++) {
         borders.push(
             objFactoryInst.createCSW(
                 -1 * CONST.CELLSIZES.MAXX,

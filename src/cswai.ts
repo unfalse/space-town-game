@@ -297,6 +297,7 @@ class CSWAI_customPaths extends BaseCPU {
 }
 
 class Obstacle extends BaseCSW {
+
     constructor() {
         super();
         this.type = CONST.TYPES.OBSTACLE;

@@ -6,13 +6,13 @@ import { ImagesStore, DrawingManager } from './drawingMan';
 import { Editor } from './editor/editor';
 import { Utils } from './utils';
 import { CSWAI_customPaths } from './cswai';
-// import { Player } from './player';
+import { Player } from "./player";
 import { Camera } from './camera';
 import { Direction } from './types';
 import { ObjectsFactory } from './objFactory';
 import { placeBorders } from './drawUtils';
 import { EditorUI } from './editor/editorUI';
-import { IPlayer } from './interfaces';
+// import { IPlayer } from './interfaces';
 // import { addDemoCounters } from './demoUtils';
 
 type Keys = {
@@ -51,7 +51,7 @@ class Game {
     };
 
     // TODO: move player1 into BTankManager
-    player1: IPlayer = null;
+    player1: Player = null;
     cameraInst: Camera;
     imagesStoreInst: ImagesStore;
     drawingManagerInst: DrawingManager;

@@ -1,10 +1,9 @@
 import { BaseCSW } from './base/baseCsw';
 import { Bullet } from './bullet';
 import { CONST } from './const';
-import { IPlayer } from './interfaces';
 import { Direction, Who } from './types';
 
-export class Player extends BaseCSW implements IPlayer {
+class Player extends BaseCSW {
     PLAYER_BULLETS_INTERVAL: number;
     accel: number;
     stopAccel: boolean;
@@ -85,3 +84,5 @@ export class Player extends BaseCSW implements IPlayer {
         }
     }
 }
+
+export { Player };

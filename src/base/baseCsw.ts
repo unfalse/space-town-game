@@ -5,7 +5,7 @@ import { DrawingManager } from '../drawingMan';
 import { BTankManager } from '../btank';
 import { ObjectsFactory } from '../objFactory';
 import { BaseGameObject } from './baseGameObj';
-import { IBaseCSW } from './ibasecsw';
+// import { IBaseCSW } from './ibasecsw';
 import { Bullet } from '../bullet';
 
 type InertiaDirections = { [key in Direction]: number; };
@@ -17,7 +17,7 @@ console.log('BaseCSW!');
 // TODO: csw: cosmo ship war, the old title
 // TODO: rename csw to something more understandable - tank? SpaceShip ?
 // TODO: maybe the CPU and player should have separate classes? And several base classes.
-export class BaseCSW extends BaseGameObject implements IBaseCSW {
+export class BaseCSW extends BaseGameObject {
     lastBulletTimeStamp: number;
     CSWSPEED: number;
     inertiaDirections: InertiaDirections;
@@ -319,4 +319,4 @@ export class BaseCSW extends BaseGameObject implements IBaseCSW {
     hitByBullet(bulletInstance: Bullet): void {
         return null;
     }
-};
+}

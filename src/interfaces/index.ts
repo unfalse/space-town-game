@@ -14,3 +14,33 @@ export interface IObjectsFactory {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ): any;
 }
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface ICSWAI_customPaths {
+  
+}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface IObstacle {
+  
+}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface ISpaceBrick {
+  
+}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface IBorder {
+  
+}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface IStaticShip {
+
+}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface IBaseCPU {
+
+}

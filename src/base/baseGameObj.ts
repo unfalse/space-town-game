@@ -1,6 +1,7 @@
 import { BTankManager } from "../btank";
 import { DrawingManager } from "../drawingMan";
-import { IObjectsFactory } from "../interfaces";
+import { ObjectsFactory } from "../objFactory";
+// import { IObjectsFactory } from "../interfaces";
 import { Direction } from "../types";
 import { BaseCoordinates } from "./baseCoord";
 
@@ -9,7 +10,7 @@ console.log('BaseGameObject!');
 export class BaseGameObject extends BaseCoordinates {
   BTankInst: BTankManager;
   drawingManagerInst: DrawingManager;
-  objectsFactoryInst: IObjectsFactory;
+  objectsFactoryInst: ObjectsFactory;
   
   constructor() {
     super();
@@ -21,7 +22,7 @@ export class BaseGameObject extends BaseCoordinates {
     d: Direction,
     drawingManagerInst: DrawingManager,
     BTankInst: BTankManager,
-    objectsFactoryInst: IObjectsFactory
+    objectsFactoryInst: ObjectsFactory
   ) {
     super.initCoords(mx, my, d);
     this.BTankInst = BTankInst;

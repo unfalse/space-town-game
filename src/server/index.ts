@@ -1,6 +1,6 @@
-import * as cors from 'cors';
-import * as express from "express";
-import * as fs from 'fs';
+import cors from 'cors';
+import express from "express";
+import fs from 'fs';
 
 import { port as PORT } from './server.json'
 
@@ -25,13 +25,13 @@ console.log('Server is running on port', PORT);
 
 const getFileContents = (): Contents => JSON.parse(fs.readFileSync(process.cwd() + "/src/server/" + filename).toString());
 
-app.get("/list", function (request, response) {
+app.get("/list", function (request: any, response: any) {
     const contents = getFileContents();
     const names = contents.levels.map(level => ({ id: level.id, name: level.name }));
     response.send(names);
 });
 
-app.get("/new", function (request) {
+app.get("/new", function (request: any) {
     const newLevelData = request.body;
     const contents = getFileContents();
     const lastId = contents.levels.slice(-1)[0];
@@ -46,14 +46,14 @@ app.get("/new", function (request) {
     fs.writeFileSync(process.cwd() + "/src/server/" + "levelsTest.json", JSON.stringify(newContents));
 });
 
-app.get("/level", function (request, response) {
+app.get("/level", function (request: any, response: any) {
     const contents = getFileContents();
     const id = request.query.id;
     const level = contents.levels.find(level => level.id === id);
     response.send(level);
 });
 
-app.post("/save", function (request, response) {
+app.post("/save", function (request: any, response: any) {
     const newLevel = request.body;
     const contents = getFileContents();
     const newLevels = contents.levels.map(level => {

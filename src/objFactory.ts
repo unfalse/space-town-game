@@ -1,6 +1,6 @@
 import { DrawingManager } from "./drawingMan";
 import { BTankManager } from "./btank";
-import { BaseCSW } from "./base/baseCsw";
+import { BaseCSW } from './base/baseCsw';
 import { BaseGameObject } from "./base/baseGameObj";
 import { Bullet } from "./bullet";
 import { CONST } from "./const";
@@ -9,7 +9,7 @@ import { Border, CSWAI_customPaths, Obstacle, SpaceBrick, StaticShip } from "./c
 import { Counter } from "./counter";
 
 import { ObjectType, Who, WayPoints, Direction } from "./types";
-import { IObjectsFactory } from "./interfaces";
+// import { IObjectsFactory } from "./interfaces";
 
 type FactoryTypes = Player | CSWAI_customPaths | Obstacle | SpaceBrick | CSWAI_customPaths | Border | StaticShip;
 
@@ -29,7 +29,7 @@ type FactoryTypes = Player | CSWAI_customPaths | Obstacle | SpaceBrick | CSWAI_c
 //     [ObjectType.COUNTER]: Counter
 // }
 
-export class ObjectsFactory implements IObjectsFactory {
+export class ObjectsFactory {
     drawingManagerInst: DrawingManager;
     bTankManagerInst: BTankManager;
 

@@ -4,9 +4,9 @@ import { Images } from './images';
 import { DelayedPic } from './delayedPic';
 import { ObjectType } from './types';
 import { BaseCSW } from './base/baseCsw';
-// import { Player } from './player';
+import { Player } from "./player";
 import { Ghosts } from './ghosts';
-import { IPlayer } from './interfaces';
+// import { IPlayer } from './interfaces';
 
 // -------------------------------------
 //    TOFIX! bullet dep propagation
@@ -29,9 +29,9 @@ export class BTankManager {
     titleBlock: HTMLDivElement;
     gameFieldBlock: HTMLCanvasElement;
     // gameCam: Camera;
-    playerInstance: IPlayer;
+    playerInstance: Player;
 
-    constructor(player: IPlayer) {
+    constructor(player: Player) {
         // TODO: write the full paths to classes
         this.cswArr = [];
         this.ghosts = [];

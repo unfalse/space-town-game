@@ -1,7 +1,7 @@
 // Bullet that is flying every step per pixel
-// import { BaseCSW } from './base/baseCsw';
+import { BaseCSW } from './base/baseCsw';
 import { BaseGameObject } from './base/baseGameObj';
-import { IBaseCSW } from './base/ibasecsw';
+// import { IBaseCSW } from './base/ibasecsw';
 import { BTankManager } from './btank';
 import { CONST } from './const';
 import { DrawingManager } from './drawingMan';
@@ -22,7 +22,7 @@ type DirectionObject = {
 export class Bullet extends BaseGameObject {
     BULLETSPEED: number;
     BTankInst: BTankManager;
-    parentShip: IBaseCSW;
+    parentShip: BaseCSW;
     drawingManagerInst: DrawingManager;
 
     // BattleTankGame.deps.baseCoordinates.call(this);
@@ -141,4 +141,4 @@ export class Bullet extends BaseGameObject {
             // this.BTankInst.createDelayedPic(this.x - 10, this.y - 10);
         }
     }
-};
+}
