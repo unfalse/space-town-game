@@ -1,12 +1,11 @@
 // import { BaseCoordinates } from './base/baseCoord';
 import { BaseCSW } from './base/baseCsw';
-import { BTankManager } from './btank';
 
 // export class DelayedPic extends BaseCoordinates {
+// TODO: extend from BaseGameObject !!!
 export class DelayedPic extends BaseCSW {    
     show: boolean;
     timerStarted: boolean;
-    BTankInst: BTankManager;
     frameCounter: number;
     framesLength: number;
 

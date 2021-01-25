@@ -4,8 +4,9 @@ import { Images } from './images';
 import { DelayedPic } from './delayedPic';
 import { ObjectType } from './types';
 import { BaseCSW } from './base/baseCsw';
-import { Player } from './player';
+// import { Player } from './player';
 import { Ghosts } from './ghosts';
+import { IPlayer } from './interfaces';
 
 // -------------------------------------
 //    TOFIX! bullet dep propagation
@@ -28,9 +29,9 @@ export class BTankManager {
     titleBlock: HTMLDivElement;
     gameFieldBlock: HTMLCanvasElement;
     // gameCam: Camera;
-    playerInstance: Player;
+    playerInstance: IPlayer;
 
-    constructor(player: Player) {
+    constructor(player: IPlayer) {
         // TODO: write the full paths to classes
         this.cswArr = [];
         this.ghosts = [];
@@ -75,10 +76,6 @@ export class BTankManager {
         } else {
             this.cswArr = this.cswArr.concat(objects);
         }
-    }
-
-    getPushNewObjFunc() {
-        return this.pushNewObjects.bind(this);
     }
 
     // x, y - coordinates of pixels, not cells
@@ -187,7 +184,7 @@ export class BTankManager {
         return this.bulletsArr;
     }
 
-    addShip(ship: BaseCSW) {
+    addShip(ship: BaseCSW): void {
         this.cswArr.push(ship);
     }
 
@@ -201,7 +198,7 @@ export class BTankManager {
         this.delayedPics.push(dp);
     }
 
-    removeDelayedPic(dpObj: DelayedPic) {
+    removeDelayedPic(dpObj: DelayedPic): void {
         this.delayedPics = this.delayedPics.filter(dp => dp !== dpObj);
     }
 
@@ -209,11 +206,11 @@ export class BTankManager {
         return this.delayedPics;
     }
 
-    removeBullet(bullet: Bullet) {
+    removeBullet(bullet: Bullet): void {
         this.bulletsArr = this.bulletsArr.filter(b => b !== bullet);
     }
 
-    removeShip(ship: BaseCSW) {
+    removeShip(ship: BaseCSW): void {
         this.cswArr = this.cswArr.filter(s => s !== ship);
     }
 
@@ -232,4 +229,4 @@ export class BTankManager {
         this.gameOverBlock.innerText = "YOU WIN";
         this.gameOverBlock.style.display = "block";
     }
-};
+}

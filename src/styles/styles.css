@@ -43,6 +43,7 @@ body {
     background-color: blue;
     border: 1px yellow solid;
     display: none;
+    color: white;
 }
 
 #editorFileList ul li:hover {

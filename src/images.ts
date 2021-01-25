@@ -16,7 +16,7 @@ export class Images {
         this.init(src, onLoadHandler);
     }
 
-    init(src: string, onLoadHandler: InternalOnLoadHandler) {
+    init(src: string, onLoadHandler: InternalOnLoadHandler): void {
         this.image.addEventListener(
             "load",
             function () {
@@ -30,7 +30,7 @@ export class Images {
         this.image.src = src;
     }
 
-    draw(sx: number, sy: number, sw: number, sh: number, dx?: number, dy?: number, dw?: number, dh?: number) {
+    draw(sx: number, sy: number, sw: number, sh: number, dx?: number, dy?: number, dw?: number, dh?: number): void {
         if (this.loaded) {
             if (!dx && !dy && !dw && !dh) {
                 Images.drawContext.drawImage(this.image, sx, sy, sw, sh);
@@ -39,11 +39,11 @@ export class Images {
             }
         }
     }
-};
+}
 
 Images.loadImage = function (imagePath: string, onLoad: (image: Images) => void) {
     return new Promise(
-        function (resolve: Function) {
+        function (resolve: () => void) {
             onLoad.call(
                 this,
                 new Images(imagePath, function () {

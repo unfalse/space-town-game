@@ -7,8 +7,9 @@
         "isolatedModules": true,
         "noImplicitAny": true,
         "skipLibCheck": true,
+        "sourceMap": true,
         "resolveJsonModule": true,
-        "outDir": "build"
+        "outDir": "dist"
     },
     "include": ["src/**/*"],
     "exclude": ["node_modules"]

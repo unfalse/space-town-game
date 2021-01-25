@@ -1,9 +1,10 @@
 import { BTankManager } from "./btank";
 import { CONST } from "./const";
-import { ObjectsFactory } from "./objFactory";
+import { IObjectsFactory } from "./interfaces";
+// import { ObjectsFactory } from "./objFactory";
 import { ObjectType } from "./types";
 
-export const placeBorders = (objFactoryInst: ObjectsFactory, BTankInst: BTankManager): void => {
+export const placeBorders = (objFactoryInst: IObjectsFactory, BTankInst: BTankManager): void => {
     let borders = [];
     for (var x = 0; x < CONST.MAXX + 2; x++) {
         borders.push(

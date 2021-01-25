@@ -2,7 +2,7 @@ import { BaseCPU } from './base/baseCpu';
 import { BaseCSW } from './base/baseCsw';
 import { Bullet } from './bullet';
 import { CONST } from './const';
-import { Direction, PathUnit, WayPoints, Who } from './types';
+import { Direction, PathUnit, WayPoints } from './types';
 import { Utils } from './utils';
 
 class CSWAI_0 extends BaseCPU {
@@ -33,13 +33,13 @@ class CSWAI_0 extends BaseCPU {
             go(up, 0, STOP),
             go(down, 0, STOP),
         ];
-        const goLeftAndRight: Array<PathUnit> = [
-            go(left, 1, 2000),
-            ...gpStop(),
+        // const goLeftAndRight: Array<PathUnit> = [
+        //     go(left, 1, 2000),
+        //     ...gpStop(),
 
-            go(right, 1, 2000),
-            ...gpStop(),
-        ];
+        //     go(right, 1, 2000),
+        //     ...gpStop(),
+        // ];
 
         this.pathsPresets = [
             go(left, 1, 1000),
@@ -88,12 +88,11 @@ class CSWAI_0 extends BaseCPU {
         // };
     }
 
-    AI_update(timestamp: number) {
+    AI_update(timestamp: number): void {
         if (this.pathUnit && timestamp - this.pathStartTime <= this.pathUnit.ms) {
             super.setDirectionAndAccel(
                 this.pathUnit.d,
-                this.pathUnit.accel,
-                this.pathUnit.ms
+                this.pathUnit.accel
             );
         } else {
             do {
@@ -101,8 +100,7 @@ class CSWAI_0 extends BaseCPU {
                 if (this.pathUnit.ms === 0) {
                     super.setDirectionAndAccel(
                         this.pathUnit.d,
-                        this.pathUnit.accel,
-                        this.pathUnit.ms
+                        this.pathUnit.accel
                     );
                 }
             } while (this.pathUnit.ms === 0);
@@ -110,7 +108,7 @@ class CSWAI_0 extends BaseCPU {
         }
         super.fire(timestamp);
     }
-};
+}
 
 // TODO: make class BaseAI with fields path, pathStartTime etc.
 class CSWAI_1 extends BaseCPU {
@@ -134,14 +132,14 @@ class CSWAI_1 extends BaseCPU {
         // d: 0...3, a: 0...1, ms: (0...1) *1000
     }
 
-    childInit() {
+    childInit(): void {
         this.msCount = 0;
         this.msArray = [1000, 1200, 2000, 5000];
         this.accels = [6, 6, 4, 4, 4, 5, 5, 4, 4, 5, 5, 5, 6, 4, 4, 5, 5];
         this.dirs = [3, 0, 2, 1];
     }
 
-    AI_generateNewPath() {
+    AI_generateNewPath(): { d: Direction, accel: number, ms: number } {
         // TODO: get numbers for ms from array [1000, 2500, 1200, 900, 2300, 5450, 3567, 4444]
         // this.msCount = this.msCount === this.msArray.length-1 ? 0 : (this.msCount + 1);
         return {
@@ -158,17 +156,16 @@ class CSWAI_1 extends BaseCPU {
         };
     }
 
-    AI_generateNewFireTime() {
+    AI_generateNewFireTime(): number {
         return Utils.getRandomInt(1, 30) * 100;
     }
 
-    update(timestamp: number) {
+    update(timestamp: number): void {
         if (this.life > 0 && !this.disableAI) {
             if (this.pathUnit && timestamp - this.pathStartTime <= this.pathUnit.ms) {
                 this.setDirectionAndAccel(
                     this.pathUnit.d,
-                    this.pathUnit.accel,
-                    this.pathUnit.ms
+                    this.pathUnit.accel
                 );
             } else {
                 do {
@@ -176,8 +173,7 @@ class CSWAI_1 extends BaseCPU {
                     if (this.pathUnit.ms === 0) {
                         this.setDirectionAndAccel(
                             this.pathUnit.d,
-                            this.pathUnit.accel,
-                            this.pathUnit.ms
+                            this.pathUnit.accel
                         );
                     }
                 } while (this.pathUnit.ms === 0);
@@ -225,16 +221,17 @@ class CSWAI_customPaths extends BaseCPU {
         // this.d = 0;
     }
 
-    childInit() {
-        const FIRST_PATH = [
-            [80, 0],
-            [80, 80],
-            [0, 80],
-            [0, 0],
-        ];
+    childInit(): void {
+        // const FIRST_PATH = [
+        //     [80, 0],
+        //     [80, 80],
+        //     [0, 80],
+        //     [0, 0],
+        // ];
+        return null;
     }
 
-    setWaypoints(wayPoints?: WayPoints[]) {
+    setWaypoints(wayPoints?: WayPoints[]): void {
         this.wayPoints = wayPoints || [];
     }
 
@@ -245,9 +242,9 @@ class CSWAI_customPaths extends BaseCPU {
     //     this.setDirectionAndAccel(3, 0);
     // }
 
-    update(timestamp: number) {
+    update(timestamp: number): void {
         let currentWp = this.currentWp;
-        let accel = 8;
+        const accel = 8;
         let d = -1;
 
         if (this.wayPoints.length !== 0) {
@@ -285,19 +282,19 @@ class CSWAI_customPaths extends BaseCPU {
         const scanResult: Direction = this.plusShapedScan(10);
         if (scanResult > -1) {
             this.stop();
-            this.setDirectionAndAccel(scanResult, 0, 0);
+            this.setDirectionAndAccel(scanResult, 0);
             this.fire(timestamp);
         } else {
             if (this.d != d) {
                 this.stop();
             }
             this.d = (d >= 0 ? d : this.d) as Direction;
-            this.setDirectionAndAccel(this.d, accel, 0);
+            this.setDirectionAndAccel(this.d, accel);
         }
 
         super.update(timestamp);
     }
-};
+}
 
 class Obstacle extends BaseCSW {
     constructor() {
@@ -305,12 +302,10 @@ class Obstacle extends BaseCSW {
         this.type = CONST.TYPES.OBSTACLE;
     }
 
-    draw() {
+    draw(): void {
         this.drawingManagerInst.drawObstacle(this.x, this.y);
     }
-
-    hitByBullet() { }
-};
+}
 
 class Border extends BaseCSW {
     constructor() {
@@ -318,12 +313,10 @@ class Border extends BaseCSW {
         this.type = CONST.TYPES.BORDER;
     }
 
-    draw() {
+    draw(): void {
         this.drawingManagerInst.drawBorder(this.x, this.y);
     }
-
-    hitByBullet() { }
-};
+}
 
 class StaticShip extends BaseCSW {
     constructor() {
@@ -331,10 +324,10 @@ class StaticShip extends BaseCSW {
         this.type = CONST.TYPES.SHIP;
     }
 
-    draw() {
+    draw(): void {
         this.drawingManagerInst.drawStaticShip(this.x, this.y);
     }
-};
+}
 
 class SpaceBrick extends BaseCSW {
     constructor() {
@@ -342,11 +335,11 @@ class SpaceBrick extends BaseCSW {
         this.type = CONST.TYPES.SPACEBRICK;
     }
 
-    childInit() {
+    childInit(): void {
         this.life = 9;
     }
 
-    draw() {
+    draw(): void {
         this.drawingManagerInst.drawSpaceBrick(
             this.x,
             this.y,
@@ -354,7 +347,8 @@ class SpaceBrick extends BaseCSW {
         );
     }
 
-    hitByBullet(_bulletInstance: Bullet) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    hitByBullet(bulletInstance: Bullet): void {
         this.life--;
     }
 };

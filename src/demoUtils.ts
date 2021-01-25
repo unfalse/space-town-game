@@ -1,8 +1,9 @@
 import { BTankManager } from "./btank";
 import { CONST } from "./const";
-import { ObjectsFactory } from "./objFactory";
+import { IObjectsFactory } from "./interfaces";
+// import { ObjectsFactory } from "./objFactory";
 
-const addDemoCounters = (objFactoryGameInst: ObjectsFactory, BTankInst: BTankManager) => {
+const addDemoCounters = (objFactoryGameInst: IObjectsFactory, BTankInst: BTankManager): void => {
     BTankInst.pushNewObjects([
         objFactoryGameInst.createCSW(10, 10, CONST.COMPUTER, CONST.TYPES.COUNTER),
         objFactoryGameInst.createCSW(50, 10, CONST.COMPUTER, CONST.TYPES.COUNTER),

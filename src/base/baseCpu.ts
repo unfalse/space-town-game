@@ -1,5 +1,4 @@
 import { BaseCSW } from './baseCsw';
-import { Bullet } from '../bullet';
 import { CONST } from '../const';
 import { Direction, PathUnit } from '../types';
 
@@ -20,7 +19,7 @@ export class BaseCPU extends BaseCSW {
         // this.d = 0;
     }
 
-    fire(timestamp: number) {
+    fire(timestamp: number): void {
         if (this.fireStartTime === -1 || this.fireStartTime === undefined) {
             this.fireStartTime = timestamp;
         }
@@ -30,11 +29,11 @@ export class BaseCPU extends BaseCSW {
         }
     }
 
-    draw() {
+    draw(): void {
         this.drawingManagerInst.drawcswmt5(this.x, this.y, this.d);
     }
 
-    hitByBullet(bulletInstance: Bullet) {
+    hitByBullet(): void {
         //if (bulletInstance.parentShip.iam === this.CONST.USER) {
         //    if (this.iam === this.CONST.COMPUTER) {
                 this.life--;
@@ -78,4 +77,4 @@ export class BaseCPU extends BaseCSW {
             return CONST.DOWN as Direction;
         return -1;
     }
-};
+}

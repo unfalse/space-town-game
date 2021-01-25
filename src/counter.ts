@@ -1,13 +1,10 @@
 import { BaseCSW } from './base/baseCsw';
-import { DrawingManager } from './drawingMan';
+// import { BaseGameObject } from './base/baseGameObj';
 import { CONST } from './const';
 
-export const Counter = class extends BaseCSW {
-    type: number; // TODO: it exists in BaseCSW too!
+export class Counter extends BaseCSW {
     counter: number;
     counterMax: number;
-    y: number;
-    x: number;
 
     constructor() {
       super();
@@ -16,13 +13,13 @@ export const Counter = class extends BaseCSW {
       this.counterMax = 10;
     }
 
-    draw() {
+    draw(): void {
       this.drawingManagerInst.drawCounter(this.x, this.y, this.counter);
     }
 
-    update(timestamp: number) {
+    update(): void {
       this.counter++;
       this.counter = this.counter > 9 ? 0 : this.counter;
-      super.update(timestamp);
+      super.update(0);
     }
-  };
+  }

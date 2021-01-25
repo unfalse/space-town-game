@@ -9,7 +9,7 @@ class EditorUI {
         this.editorInst = editorInst;
     }
 
-    init() {
+    init(): void {
         this.editorBlock = document.querySelector("#editorBlock");
         this.editorCurrentObject = document.querySelector(
             "#editorCurrentObject"
@@ -47,11 +47,11 @@ class EditorUI {
         );
     }
 
-    setEditorCurrentObject(imageUrl: string) {
+    setEditorCurrentObject(imageUrl: string): void {
         this.editorCurrentObject.style.backgroundImage = imageUrl;
     }
 
-    toggleEditorControls() {
+    toggleEditorControls(): void {
         this.editorInst.editorMode = !this.editorInst.editorMode;
         if (this.editorInst.editorMode) {
 

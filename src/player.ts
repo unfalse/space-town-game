@@ -1,9 +1,10 @@
 import { BaseCSW } from './base/baseCsw';
 import { Bullet } from './bullet';
 import { CONST } from './const';
+import { IPlayer } from './interfaces';
 import { Direction, Who } from './types';
 
-export class Player extends BaseCSW {
+export class Player extends BaseCSW implements IPlayer {
     PLAYER_BULLETS_INTERVAL: number;
     accel: number;
     stopAccel: boolean;
@@ -14,12 +15,12 @@ export class Player extends BaseCSW {
         this.PLAYER_BULLETS_INTERVAL = 700;
     }
 
-    childInit() {
+    childInit(): void {
         this.maxlife = 10000;
         this.life = this.maxlife;
     }
 
-    addAccel(value: number) {
+    addAccel(value: number): void {
         this.accel += value;
     }
 
@@ -83,4 +84,4 @@ export class Player extends BaseCSW {
             }
         }
     }
-};
+}

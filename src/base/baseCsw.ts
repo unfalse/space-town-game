@@ -1,16 +1,23 @@
-import { BaseCoordinates } from './baseCoord';
 import { CONST } from '../const';
-import { Bullet } from '../bullet';
+
 import { Dimensions, Direction, ObjectType, Who } from '../types';
 import { DrawingManager } from '../drawingMan';
 import { BTankManager } from '../btank';
+import { ObjectsFactory } from '../objFactory';
+import { BaseGameObject } from './baseGameObj';
+import { IBaseCSW } from './ibasecsw';
+import { Bullet } from '../bullet';
 
 type InertiaDirections = { [key in Direction]: number; };
+
+console.log('BaseCSW!');
+
+
 
 // TODO: csw: cosmo ship war, the old title
 // TODO: rename csw to something more understandable - tank? SpaceShip ?
 // TODO: maybe the CPU and player should have separate classes? And several base classes.
-export class BaseCSW extends BaseCoordinates {
+export class BaseCSW extends BaseGameObject implements IBaseCSW {
     lastBulletTimeStamp: number;
     CSWSPEED: number;
     inertiaDirections: InertiaDirections;
@@ -21,12 +28,13 @@ export class BaseCSW extends BaseCoordinates {
     dimensions: Dimensions;
     BTankInst: BTankManager;
     drawingManagerInst: DrawingManager;
+    objectsFactoryInst: ObjectsFactory;
     iam: Who;
     maxlife: number;
     life: number;
     bulletsAmountOnFire: number;
-    x: number;
-    y: number;
+    // x: number;
+    // y: number;
     type: ObjectType;
     ghost: boolean;
 
@@ -61,21 +69,26 @@ export class BaseCSW extends BaseCoordinates {
         my: number,
         who: Who,
         drawingManagerInst: DrawingManager,
-        BTankInst: BTankManager
-    ) {
-        super.initCoords(mx, my, 0);
+        BTankInst: BTankManager,
+        objectsFactoryInst: ObjectsFactory
+    ): void {
+        // super.initCoords(mx, my, 0);
+        super.init(mx, my, 0, drawingManagerInst, BTankInst, objectsFactoryInst);
         this.iam = who;
         this.maxlife = 5;
         this.life = this.maxlife;
         this.bulletsAmountOnFire = CONST.MAXBULLETS;
-        this.BTankInst = BTankInst;
-        this.drawingManagerInst = drawingManagerInst;
+        // this.BTankInst = BTankInst;
+        // this.drawingManagerInst = drawingManagerInst;
+        // this.objectsFactoryInst = objectsFactoryInst;
         this.dimensions = this.drawingManagerInst.initDimensions(who);
         //this.ghost = !!ghost; // only display this object
         this.childInit();
     }
 
-    childInit() {}
+    childInit(): void {
+        return null;
+    }
 
     setGhost(ghost: boolean) {
         this.ghost = ghost;
@@ -85,7 +98,7 @@ export class BaseCSW extends BaseCoordinates {
         this.drawingManagerInst.drawcswmt5(this.x, this.y, this.d);
     }
 
-    createNewBullet(startX: number, startY: number, startD: Direction, whoFires?: Who) {
+    createNewBullet(startX: number, startY: number, startD: Direction, whoFires?: Who): void {
         if (
             this.BTankInst.bulletsArr.filter(
                 function (b: Bullet) {
@@ -94,30 +107,31 @@ export class BaseCSW extends BaseCoordinates {
             ).length === this.bulletsAmountOnFire
         )
             return;
-        const newBullet = new Bullet(this.BTankInst, this.drawingManagerInst, whoFires);
-        newBullet.init(startX, startY, startD, this);
+        // const newBullet = new Bullet(this.BTankInst, this.drawingManagerInst, whoFires);
+        const newBullet = <Bullet>this.objectsFactoryInst.createBaseObj(startX, startY, whoFires, CONST.TYPES.BULLET);
+        newBullet.initBullet(startX, startY, startD, this);
         this.BTankInst.bulletsArr.push(newBullet);
     }
 
-    setDirectionAndAccel(d: Direction, accel: number, ms: number) {
-        const humanDir = (d: Direction) => {
-            switch (d) {
-                case 0:
-                    return "right";
-                case 1:
-                    return "down";
-                case 2:
-                    return "left";
-                case 3:
-                    return "up";
-            }
-        };
+    setDirectionAndAccel(d: Direction, accel: number): void {
+        // const humanDir = (d: Direction) => {
+        //     switch (d) {
+        //         case 0:
+        //             return "right";
+        //         case 1:
+        //             return "down";
+        //         case 2:
+        //             return "left";
+        //         case 3:
+        //             return "up";
+        //     }
+        // };
         // console.log(humanDir(d), ', ', accel, ', ', ms);
         this.d = d;
         this.inertiaDirections[d] = accel;
     }
 
-    getDirSum() {
+    getDirSum(): number {
         return (
             this.inertiaDirections[0] +
             this.inertiaDirections[1] +
@@ -128,7 +142,7 @@ export class BaseCSW extends BaseCoordinates {
 
     // TODO: move all this inertia in a separate class
     // There should be ability to make a lot of movement types
-    inertia() {
+    inertia(): void {
         if (
             this.getDirSum() > 0 &&
             this.stopAccel &&
@@ -156,7 +170,7 @@ export class BaseCSW extends BaseCoordinates {
         }
     }
 
-    waitAndCall(callback: Function, ms: number) {
+    waitAndCall(callback: () => void, ms: number): void {
         let waitStart: number = null;
         const doThings = function (timestamp: number) {
             if (waitStart == null) {
@@ -173,7 +187,7 @@ export class BaseCSW extends BaseCoordinates {
         window.requestAnimationFrame(doThings.bind(this));
     }
 
-    inertiaStartAttempt() {
+    inertiaStartAttempt(): void {
         if (
             this.getDirSum() > 0 &&
             !this.inertiaTimerIsRunning &&
@@ -188,7 +202,7 @@ export class BaseCSW extends BaseCoordinates {
         }
     }
 
-    stop() {
+    stop(): void {
         this.stopAccel = false;
         this.inertiaTimerIsRunning = false;
         for (let d = 0; d < 4; d++) {
@@ -208,7 +222,7 @@ export class BaseCSW extends BaseCoordinates {
     |
     
     */
-    move(direction: Direction) {
+    move(direction: Direction): void {
         const nvxy = super.getVXY(direction);
         const acceleration = this.CSWSPEED + this.inertiaDirections[direction];
 
@@ -285,7 +299,8 @@ export class BaseCSW extends BaseCoordinates {
         // }
     }
 
-    update(timestamp: number) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    update(timestamp: number): void {
         if (this.life <= 0) {
             this.BTankInst.removeShip(this);
         }
@@ -301,5 +316,7 @@ export class BaseCSW extends BaseCoordinates {
         this.draw();
     }
 
-    hitByBullet(bulletInstance: Bullet) { }
+    hitByBullet(bulletInstance: Bullet): void {
+        return null;
+    }
 };

@@ -15,7 +15,8 @@ const CONST = {
         WAYPOINT: 5,
         WAYPOINTERASER: 6,
         PLAYER: 7,
-        STATICSHIP: 8
+        STATICSHIP: 8,
+        BULLET: 9
     },
     CELLSIZES: {
         MAXX: 40,

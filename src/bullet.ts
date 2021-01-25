@@ -1,10 +1,11 @@
 // Bullet that is flying every step per pixel
-import { BaseCoordinates } from './base/baseCoord';
-import { BaseCSW } from './base/baseCsw';
+// import { BaseCSW } from './base/baseCsw';
+import { BaseGameObject } from './base/baseGameObj';
+import { IBaseCSW } from './base/ibasecsw';
 import { BTankManager } from './btank';
 import { CONST } from './const';
 import { DrawingManager } from './drawingMan';
-import { Direction, Who } from './types';
+import { Direction } from './types';
 
 type NewXY = {
     [key in number]: number;
@@ -18,24 +19,24 @@ type DirectionObject = {
     vy: number;
 }
 
-export class Bullet extends BaseCoordinates {
+export class Bullet extends BaseGameObject {
     BULLETSPEED: number;
     BTankInst: BTankManager;
-    parentShip: BaseCSW;
+    parentShip: IBaseCSW;
     drawingManagerInst: DrawingManager;
 
     // BattleTankGame.deps.baseCoordinates.call(this);
-    constructor(BTankInst: BTankManager, drawingManager: DrawingManager, _whoFire: Who) {
+    constructor() {
         super();
         //this.BULLETSPEED = whoFire ? (whoFire.type === CONST.USER ? 2.5 : 2.5) : 2.5;
         // this.BULLETSPEED = whoFire ? (whoFire.type === CONST.USER ? 10 : 5) : 5;
         this.BULLETSPEED = 30; //100; // 30;
 
-        this.BTankInst = BTankInst;
-        this.drawingManagerInst = drawingManager;
+        // this.BTankInst = BTankInst;
+        // this.drawingManagerInst = drawingManager;
     }
 
-    init(nx: number, ny: number, nd: Direction, parentShip: any) {
+    initBullet(nx: number, ny: number, nd: Direction, parentShip: any) {
         this.parentShip = parentShip;
         this.setCoords(nx, ny, nd);
     }
@@ -90,8 +91,8 @@ export class Bullet extends BaseCoordinates {
 
     fly() {
         const nvxy = (typeof this.d === 'number') ? this.getVXY(this.d) : this.d;
-        let vx = nvxy.vx * this.BULLETSPEED;
-        let vy = nvxy.vy * this.BULLETSPEED;
+        const vx = nvxy.vx * this.BULLETSPEED;
+        const vy = nvxy.vy * this.BULLETSPEED;
 
         // TODO: дописать
         // Проверка попадания в танк
@@ -101,7 +102,7 @@ export class Bullet extends BaseCoordinates {
             this.x,
             this.y,
             this.parentShip
-        );
+        ) as BaseCSW;
         const collidedBullets = this.BTankInst.getBulletWithPixelPrecision(
             this.x,
             this.y,
