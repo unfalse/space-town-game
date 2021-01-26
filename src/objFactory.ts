@@ -9,25 +9,16 @@ import { Border, CSWAI_customPaths, Obstacle, SpaceBrick, StaticShip } from "./c
 import { Counter } from "./counter";
 
 import { ObjectType, Who, WayPoints, Direction } from "./types";
-// import { IObjectsFactory } from "./interfaces";
+import { DelayedPic } from "./delayedPic";
 
-type FactoryTypes = Player | CSWAI_customPaths | Obstacle | SpaceBrick | CSWAI_customPaths | Border | StaticShip;
-
-// type CreateCSWParameters = {
-//     x: number,
-//     y: number,
-//     who: Who, // TODO: this field should be in ship class (csw or cswai or obstacle)
-//     typeParam?: ObjectType,
-//     ghost?: boolean,
-//     wayPoints?: WayPoints[]
-// };
-
-// const ObjectTypeToClass = {
-//     [ObjectType.SHIP]: CSWAI_customPaths,
-//     [ObjectType.OBSTACLE]: Obstacle,
-//     [ObjectType.SPACEBRICK]: SpaceBrick,
-//     [ObjectType.COUNTER]: Counter
-// }
+type FactoryTypes = Player |
+    CSWAI_customPaths | 
+    Obstacle | 
+    SpaceBrick | 
+    CSWAI_customPaths |
+    Border |
+    StaticShip |
+    DelayedPic;
 
 export class ObjectsFactory {
     drawingManagerInst: DrawingManager;
@@ -97,6 +88,13 @@ export class ObjectsFactory {
 
             if (type == ObjectType.BORDER) {
                 c1 = new Border();
+                this.initBaseCSW(c1, x, y, who);
+                c1.setGhost(ghost);
+                return c1;
+            }
+
+            if (type == ObjectType.DELAYED_PIC) {
+                c1 = new DelayedPic();
                 this.initBaseCSW(c1, x, y, who);
                 c1.setGhost(ghost);
                 return c1;

@@ -1,17 +1,14 @@
 // Bullet that is flying every step per pixel
 import { BaseCSW } from './base/baseCsw';
 import { BaseGameObject } from './base/baseGameObj';
-// import { IBaseCSW } from './base/ibasecsw';
 import { BTankManager } from './btank';
 import { CONST } from './const';
+import { DelayedPic } from './delayedPic';
 import { DrawingManager } from './drawingMan';
-import { Direction } from './types';
+import { Direction, Who } from './types';
 
 type NewXY = {
     [key in number]: number;
-    // 0: number,
-    // 1: number,
-    // '-1': number
 }
 
 type DirectionObject = {
@@ -23,25 +20,21 @@ export class Bullet extends BaseGameObject {
     BULLETSPEED: number;
     BTankInst: BTankManager;
     parentShip: BaseCSW;
-    drawingManagerInst: DrawingManager;
+    // drawingManagerInst: DrawingManager;
 
-    // BattleTankGame.deps.baseCoordinates.call(this);
     constructor() {
         super();
         //this.BULLETSPEED = whoFire ? (whoFire.type === CONST.USER ? 2.5 : 2.5) : 2.5;
         // this.BULLETSPEED = whoFire ? (whoFire.type === CONST.USER ? 10 : 5) : 5;
         this.BULLETSPEED = 30; //100; // 30;
-
-        // this.BTankInst = BTankInst;
-        // this.drawingManagerInst = drawingManager;
     }
 
-    initBullet(nx: number, ny: number, nd: Direction, parentShip: any) {
+    initBullet(nx: number, ny: number, nd: Direction, parentShip: BaseCSW): void {
         this.parentShip = parentShip;
         this.setCoords(nx, ny, nd);
     }
 
-    setCoords(nx: number, ny: number, nd: Direction|DirectionObject) {
+    setCoords(nx: number, ny: number, nd: Direction|DirectionObject): Bullet {
         const { width, height } = this.parentShip.dimensions[typeof nd === 'number' ? nd : 0];
         let x = 0,
             y = 0;
@@ -81,7 +74,7 @@ export class Bullet extends BaseGameObject {
     }
 
     // TODO: create an image of bullet with transparent background
-    draw() {
+    draw(): void {
         if(this.parentShip.iam === CONST.USER) {
             this.drawingManagerInst.drawPlayerBullet(this.x, this.y);
         } else {
@@ -89,56 +82,66 @@ export class Bullet extends BaseGameObject {
         }
     }
 
-    fly() {
+    addCrash(): void {
+        const delayedPic = <DelayedPic>this.objectsFactoryInst.createCSW(this.x - 20, this.y - 20, Who.COMPUTER, CONST.TYPES.DELAYED_PIC);
+        this.BTankInst.delayedPics.push(delayedPic);
+    }
+
+    fly(): void {
         const nvxy = (typeof this.d === 'number') ? this.getVXY(this.d) : this.d;
         const vx = nvxy.vx * this.BULLETSPEED;
         const vy = nvxy.vy * this.BULLETSPEED;
 
-        // TODO: дописать
-        // Проверка попадания в танк
+        this.draw();
 
-        // TODO: убрать сильную связанность с BTank
         const collidedShips = this.BTankInst.getCSWWithPixelPrecision(
             this.x,
             this.y,
             this.parentShip
         ) as BaseCSW;
-        const collidedBullets = this.BTankInst.getBulletWithPixelPrecision(
+        const collidedBullet = this.BTankInst.getBulletWithPixelPrecision(
             this.x,
             this.y,
             this.parentShip,
             this
         );
-        if (collidedBullets) {
+        if (collidedBullet) {
             // console.log('bullets collided!');
             this.BTankInst.removeBullet(this);
-            this.BTankInst.removeBullet(collidedBullets);
+            this.BTankInst.removeBullet(collidedBullet);
+            return;
         }
 
         // a bullet can't hurt its master!
         if (collidedShips) {
             if (collidedShips.hitByBullet) {
                 collidedShips.hitByBullet(this);
-                this.BTankInst.createDelayedPic(this.x - 20, this.y - 20);
+                // this.BTankInst.createDelayedPic(this.x - 20, this.y - 20);
+                this.addCrash();
             }
             this.BTankInst.removeBullet(this);
+            return;
         }
 
         // TODO: добавить поле MaxSpeed в класс bullet и использовать
         // вместо MAXSPEED. Переименовать в StepsToGo
         // Поле speed переименовать в steps
-        this.x = this.x + vx;
-        this.y = this.y + vy;
-        this.draw();
 
         if (this.x > CONST.MAXX * CONST.CELLSIZES.MAXX || this.x < 0) {
             this.BTankInst.removeBullet(this);
+            this.addCrash();
             // this.BTankInst.createDelayedPic(this.x - 10, this.y - 10);
+            return;
         }
 
         if (this.y > CONST.MAXY * CONST.CELLSIZES.MAXY || this.y < 0) {
             this.BTankInst.removeBullet(this);
+            this.addCrash();
             // this.BTankInst.createDelayedPic(this.x - 10, this.y - 10);
+            return;
         }
+
+        this.x = this.x + vx;
+        this.y = this.y + vy;
     }
 }

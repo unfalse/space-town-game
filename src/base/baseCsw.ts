@@ -1,18 +1,12 @@
 import { CONST } from '../const';
-
 import { Dimensions, Direction, ObjectType, Who } from '../types';
 import { DrawingManager } from '../drawingMan';
 import { BTankManager } from '../btank';
 import { ObjectsFactory } from '../objFactory';
 import { BaseGameObject } from './baseGameObj';
-// import { IBaseCSW } from './ibasecsw';
 import { Bullet } from '../bullet';
 
 type InertiaDirections = { [key in Direction]: number; };
-
-console.log('BaseCSW!');
-
-
 
 // TODO: csw: cosmo ship war, the old title
 // TODO: rename csw to something more understandable - tank? SpaceShip ?
@@ -226,7 +220,6 @@ export class BaseCSW extends BaseGameObject {
         const nvxy = super.getVXY(direction);
         const acceleration = this.CSWSPEED + this.inertiaDirections[direction];
 
-        // console.log(acceleration);
         let ux = nvxy.vx * acceleration;
         let uy = nvxy.vy * acceleration;
 
@@ -235,7 +228,6 @@ export class BaseCSW extends BaseGameObject {
         width--;
         height--;
 
-        // TODO: use this.CONST.CELLSIZES.MAXX instead of 20 !!!
         if (
             this.x + ux + width > CONST.MAXX * CONST.CELLSIZES.MAXX ||
             this.x + ux < 0
@@ -244,10 +236,12 @@ export class BaseCSW extends BaseGameObject {
             if (
                 this.x + ux + width >
                 CONST.MAXX * CONST.CELLSIZES.MAXX
-            )
+            ) {
                 this.x = CONST.MAXX * CONST.CELLSIZES.MAXX - width;
+            }
             ux = 0;
             this.inertiaDirections[direction] = 0;
+            return;
         }
 
         if (
@@ -255,27 +249,18 @@ export class BaseCSW extends BaseGameObject {
             CONST.MAXY * CONST.CELLSIZES.MAXY ||
             this.y + uy < 0
         ) {
-            if (this.y + uy < 0) this.y = 0;
+            if (this.y + uy < 0) { this.y = 0; }
             if (
                 this.y + uy + height >
                 CONST.MAXY * CONST.CELLSIZES.MAXY
-            )
+            ) {
                 this.y = CONST.MAXY * CONST.CELLSIZES.MAXY - height;
+            }
             uy = 0;
             this.inertiaDirections[direction] = 0;
+            return;
         }
 
-        // checking if the ship is on the other ship already
-        // const isOnTheOtherShip = this.BTankInst.checkIfTwoShipsCross(
-        //     this.x,
-        //     this.y,
-        //     this
-        // );
-
-        // Actual collision detection
-
-        // if (!isOnTheOtherShip) {
-        // /*
         const disableCollisionChecks = false;
         if (!disableCollisionChecks) {
             if (ux != 0 || uy != 0) {
@@ -289,14 +274,12 @@ export class BaseCSW extends BaseGameObject {
                     ux = 0;
                     uy = 0;
                     this.inertiaDirections[direction] = 0;
+                    return;
                 }
             }
         }
-        // */
         this.x = this.x + ux;
         this.y = this.y + uy;
-        // console.log(["c:", this.x, this.y, ux, uy]);
-        // }
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars

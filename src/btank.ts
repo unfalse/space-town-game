@@ -188,15 +188,19 @@ export class BTankManager {
         this.cswArr.push(ship);
     }
 
-    // TODO: move into the ParticleManager (define it firstly)
-    createDelayedPic(x: number, y: number) {
-        const dp = new DelayedPic();
-        // const relXY = this.gameCam.getRelCoords(x, y);
-        // dp.init(relXY.x, relXY.y, this);
-        // dp.init(x, y, this, );
-        dp.delayedPicInit();
-        this.delayedPics.push(dp);
+    setPlayer(player: BaseCSW): void {
+        this.playerInstance = <Player>player;
     }
+
+    // TODO: move into the ParticleManager (define it firstly)
+    // createDelayedPic(x: number, y: number) {
+    //     const dp = new DelayedPic();
+    //     // const relXY = this.gameCam.getRelCoords(x, y);
+    //     // dp.init(relXY.x, relXY.y, this);
+    //     // dp.init(x, y, this, );
+    //     dp.delayedPicInit();
+    //     this.delayedPics.push(dp);
+    // }
 
     removeDelayedPic(dpObj: DelayedPic): void {
         this.delayedPics = this.delayedPics.filter(dp => dp !== dpObj);

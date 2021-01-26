@@ -39,7 +39,7 @@ class Player extends BaseCSW {
         }
     }
 
-    fire(timestamp: number) {
+    fire(timestamp: number): void {
         if (
             timestamp - this.lastBulletTimeStamp >=
             this.PLAYER_BULLETS_INTERVAL

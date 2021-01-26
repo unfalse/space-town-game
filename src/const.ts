@@ -16,7 +16,8 @@ const CONST = {
         WAYPOINTERASER: 6,
         PLAYER: 7,
         STATICSHIP: 8,
-        BULLET: 9
+        BULLET: 9,
+        DELAYED_PIC: 10
     },
     CELLSIZES: {
         MAXX: 40,

@@ -26,7 +26,8 @@ export enum ObjectType {
     WAYPOINTERASER = 6,
     PLAYER = 7,
     STATICSHIP = 8,
-    BULLET = 9
+    BULLET = 9,
+    DELAYED_PIC = 10
 }
 
 export type PathUnit = {

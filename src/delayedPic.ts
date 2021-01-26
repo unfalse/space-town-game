@@ -13,6 +13,9 @@ export class DelayedPic extends BaseCSW {
         super();
         this.frameCounter = 0;
         this.framesLength = framesLength;
+        this.initCoords(this.x, this.y, 0);
+        this.show = true;
+        this.timerStarted = false;
     }
 
     // init(nx: number, ny: number, BTankInst: BTankManager) {
@@ -21,19 +24,19 @@ export class DelayedPic extends BaseCSW {
         // this.BTankInst = BTankInst;
     // }
 
-    delayedPicInit() {
-        this.initCoords(this.x, this.y, 0);
-        this.show = true;
-        this.timerStarted = false;
-    }
+    // delayedPicInit() {
+    //     this.initCoords(this.x, this.y, 0);
+    //     this.show = true;
+    //     this.timerStarted = false;
+    // }
 
-    setCoords(x: number, y: number) {
+    setCoords(x: number, y: number): void {
         this.x = x;
         this.y = y;
         this.show = true;
     }
 
-    draw() {
+    draw(): void {
         this.drawingManagerInst.DrawCrash(this.x, this.y, this.frameCounter);
 
         function setDelay() {
@@ -48,7 +51,7 @@ export class DelayedPic extends BaseCSW {
                         setDelay.call(this);
                     }
                 }.bind(this),
-                80
+                180
             );
         }
 
@@ -57,4 +60,4 @@ export class DelayedPic extends BaseCSW {
             setDelay.call(this);
         }
     }
-};
+}

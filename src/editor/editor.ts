@@ -90,6 +90,7 @@ export class Editor {
         // player.init(this.playerCell.x, this.playerCell.y, CONST.USER, this.BTankInst);
         player.initCoords(this.playerCell.x, this.playerCell.y);
         this.BTankInst.addShip(player);
+        this.BTankInst.setPlayer(player);
 
         placeBorders(this.objFactoryInst, this.BTankInst);
 
