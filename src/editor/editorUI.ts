@@ -47,8 +47,8 @@ class EditorUI {
         );
     }
 
-    setEditorCurrentObject(imageUrl: string): void {
-        this.editorCurrentObject.style.backgroundImage = imageUrl;
+    setEditorCurrentObjectIconImage(): void {
+        this.editorCurrentObject.style.backgroundImage = this.editorInst.editorCurrentObjectBrush.imageUrl;
     }
 
     toggleEditorControls(): void {

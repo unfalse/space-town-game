@@ -136,8 +136,8 @@ class Game {
         // gameCam.setCoords(player1.x, player1.y);
 
         this.EditorInst.editorUnits.forEach((unit) => {
-            unit.update(timestamp);
-            // unit.draw();
+            // unit.update(timestamp);
+            unit.draw();
         });
 
         this.EditorInst.editorGhosts.forEach((ghost) => {
@@ -209,6 +209,7 @@ class Game {
             const celly =
                 Math.floor(y / CONST.CELLSIZES.MAXY) * CONST.CELLSIZES.MAXY;
 
+            // place a level object (ship/obstacle/brick)
             if (
                 ![
                     CONST.TYPES.ERASER,
@@ -217,13 +218,15 @@ class Game {
                     CONST.TYPES.PLAYER
                 ].includes(this.EditorInst.editorCurrentObjectBrush.type)
             ) {
-                // place a level object (ship/obstacle/brick)
+                
                 this.EditorInst.createEditorUnit(
                     cellx,
                     celly,
                     this.EditorInst.editorCurrentObjectBrush.type
                 );
             }
+
+            // place player
             if (this.EditorInst.editorCurrentObjectBrush.type === CONST.TYPES.PLAYER) {
                 this.EditorInst.createEditorUnit(
                     cellx,
@@ -231,6 +234,8 @@ class Game {
                     this.EditorInst.editorCurrentObjectBrush.type
                 );
             }
+
+            // place waypoint
             if (this.EditorInst.editorCurrentObjectBrush.type === CONST.TYPES.WAYPOINT) {
                 if (!this.EditorInst.currentShipWithWaypoints) {
                     const unit = this.EditorInst.getEditorUnitAt(cellx, celly);
@@ -241,9 +246,13 @@ class Game {
                     }
                 }
             }
+
+            // use eraser
             if (this.EditorInst.editorCurrentObjectBrush.type === CONST.TYPES.ERASER) {
                 this.EditorInst.removeEditorObjectAt(cellx, celly);
             }
+
+            // use waypointeraser
             if (
                 this.EditorInst.editorCurrentObjectBrush.type ===
                 CONST.TYPES.WAYPOINTERASER
@@ -324,7 +333,7 @@ class Game {
 
     detectMovement(timestamp: number) {
         // code here must change ONLY DIRECTION
-        const ACCEL = 0.3; // 0.7; // 0.3;
+        const ACCEL = 0.7; // 0.7; // 0.3;
 
         if (this.keys[Utils.KEY_CODE.UP as keyof Keys]) {
             this.player1.setDirectionAndAddAccel(

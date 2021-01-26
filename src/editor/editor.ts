@@ -389,6 +389,7 @@ export class Editor {
             default:
                 break;
         }
+        this.editorUI.setEditorCurrentObjectIconImage();
     }
 
     placeBorders(): void {

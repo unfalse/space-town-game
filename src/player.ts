@@ -76,7 +76,7 @@ class Player extends BaseCSW {
         }
     }
 
-    hitByBullet(bulletInstance: Bullet) {
+    hitByBullet(bulletInstance: Bullet): void {
         if (bulletInstance.parentShip.iam === CONST.COMPUTER) {
             if (this.iam === CONST.USER) {
                 this.life--;
