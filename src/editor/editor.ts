@@ -11,6 +11,8 @@ import { Ghosts } from '../ghosts';
 
 const PORT = port;
 
+const EDITOR_SERVER_ADDRESS = `${window.location.protocol}//${window.location.hostname}:${PORT}`;
+
 type LevelObject = {
     id: number;
     name: string;
@@ -67,7 +69,7 @@ export class Editor {
     }
 
     uploadNewLevel(): void {
-        fetch(`http://localhost:${PORT}/new`, {
+        fetch(`${EDITOR_SERVER_ADDRESS}/new`, {
             method: "post",
             headers: {
                 'Accept': 'application/json',
@@ -152,7 +154,7 @@ export class Editor {
     }
 
     uploadLevel(): void {
-        fetch(`http://localhost:${PORT}/save`, {
+        fetch(`${EDITOR_SERVER_ADDRESS}/save`, {
             method: "post",
             headers: {
                 'Accept': 'application/json',
@@ -183,7 +185,7 @@ export class Editor {
 
     showLevelChooseDialog(editorFileListContainer: HTMLDivElement): void {
         // this.editorGhosts = [];
-        fetch(`http://localhost:${PORT}/list`)
+        fetch(`${EDITOR_SERVER_ADDRESS}/list`)
             .then(r => r.json())
             .then(r => {
                 editorFileListContainer.style.display = "block";
@@ -217,7 +219,7 @@ export class Editor {
 
     loadTheEditorLevel(id: string): void {
         const DATA_SEPARATOR = '|';
-        fetch(`http://localhost:${PORT}/level?id=${id}`)
+        fetch(`${EDITOR_SERVER_ADDRESS}/level?id=${id}`)
             .then(r => r.json())
             .then(r => {
                 r.data.split(DATA_SEPARATOR)
