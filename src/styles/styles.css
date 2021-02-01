@@ -46,6 +46,15 @@ body {
     color: white;
 }
 
+#todoList {
+    position: absolute;
+    top: 260px;
+    background-color: blue;
+    border: 1px yellow solid;
+    display: block;
+    color: white;
+}
+
 #editorFileList ul li:hover {
     border: 1px white solid;
 }

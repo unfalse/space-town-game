@@ -6,7 +6,7 @@
   "license": "MIT",
   "scripts": {
     "build": "yarn clear && yarn build:all",
-    "build:all": "webpack",
+    "build:all": "webpack --mode=production",
     "build:types": "tsc --emitDeclarationOnly",
     "clear": "rimraf ./dist",
     "compile": "tsc",

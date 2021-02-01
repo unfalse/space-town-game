@@ -11,6 +11,8 @@ import { Ghosts } from '../ghosts';
 
 const PORT = port;
 
+console.log(process.env.NODE_ENV);
+
 const EDITOR_SERVER_ADDRESS = `${window.location.protocol}//${window.location.hostname}:${PORT}`;
 
 type LevelObject = {
