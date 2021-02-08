@@ -1,6 +1,7 @@
 import cors from 'cors';
 import express from "express";
 import fs from 'fs';
+import path from 'path';
 
 import { port as PORT } from './server.json'
 
@@ -16,14 +17,22 @@ type Contents = {
 
 const filename = 'levels.json';
 
+const gameApp = (file?: string) => path.join(__dirname, '../', file || '');
+
 const app = express();
 app.use(express.json());
 app.use(cors());
 app.options('*', cors());
 
+app.use(express.static(gameApp()));
+
 console.log('Server is running on port', PORT);
 
 const getFileContents = (): Contents => JSON.parse(fs.readFileSync(process.cwd() + "/src/server/" + filename).toString());
+
+app.get('/', (req, res) => {
+    res.sendFile(gameApp('index.html'));
+})
 
 app.get("/list", function (request: any, response: any) {
     const contents = getFileContents();

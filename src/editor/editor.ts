@@ -9,7 +9,7 @@ import { placeBorders } from '../drawUtils';
 import { EditorUI } from './editorUI';
 import { Ghosts } from '../ghosts';
 
-const PORT = port;
+const PORT = process.env.NODE_ENV === 'production' ? 80 : port;
 
 console.log(process.env.NODE_ENV);
 
