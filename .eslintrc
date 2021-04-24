@@ -2,10 +2,12 @@
   "parser": "@typescript-eslint/parser",
   "plugins": [
     "@typescript-eslint",
+    "prettier",
     "import"
   ],
   "extends": [
-    "plugin:@typescript-eslint/recommended"
+    "plugin:@typescript-eslint/recommended",
+    "prettier"
   ],
   "parserOptions": {
     "ecmaVersion": 2020,
@@ -19,6 +21,18 @@
   "rules": {
     "no-debugger": "off",
     "no-console": 0,
-    "import/no-cycle": 2
+    "import/no-cycle": 2,
+    "prettier/prettier": [
+      "error",
+      {
+        "endOfLine": "auto",
+        "semi": true,
+        "trailingComma": "all",
+        "singleQuote": true,
+        "printWidth": 80,
+        "tabWidth": 4,
+        "arrowParens": "avoid"
+      }
+    ]
   }
 }

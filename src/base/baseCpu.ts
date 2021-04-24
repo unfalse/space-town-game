@@ -36,7 +36,7 @@ export class BaseCPU extends BaseCSW {
     hitByBullet(): void {
         //if (bulletInstance.parentShip.iam === this.CONST.USER) {
         //    if (this.iam === this.CONST.COMPUTER) {
-                this.life--;
+        this.life--;
         //    }
         // }
     }

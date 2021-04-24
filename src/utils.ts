@@ -1,7 +1,7 @@
-console.log("utils!");
+console.log('utils!');
 
 export const Utils = {
-  KEY_CODE: {
+    KEY_CODE: {
         LEFT: 'ArrowLeft',
         UP: 'ArrowUp',
         RIGHT: 'ArrowRight',
@@ -42,5 +42,5 @@ export const Utils = {
 
     text(str: string): void {
         console.log(str);
-    }
+    },
 };

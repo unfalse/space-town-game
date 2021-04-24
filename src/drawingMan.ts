@@ -1,10 +1,9 @@
-import { Camera } from "./camera";
-import { CONST } from "./const";
-import { Images } from "./images";
-import { Dimensions, Who, Direction, RectSize } from "./types";
+import { Camera } from './camera';
+import { CONST } from './const';
+import { Images } from './images';
+import { Dimensions, Who, Direction, RectSize } from './types';
 
 export class ImagesStore {
-
     crashImages: Images[];
     backgroundImage: Images;
     counterImages: Images[];
@@ -36,68 +35,68 @@ export class ImagesStore {
         const promises = [
             loadManyImages(
                 [
-                    "images/csw-mt9bigger2x_90.png",
-                    "images/csw-mt9bigger2x_180.png",
-                    "images/csw-mt9bigger2x_270.png",
-                    "images/csw-mt9bigger2x_0.png",
+                    'images/csw-mt9bigger2x_90.png',
+                    'images/csw-mt9bigger2x_180.png',
+                    'images/csw-mt9bigger2x_270.png',
+                    'images/csw-mt9bigger2x_0.png',
                 ],
-                this.playerImages
+                this.playerImages,
             ),
 
             loadManyImages(
                 [
-                    "images/csw-mt5bigger2x_90.png",
-                    "images/csw-mt5bigger2x_180.png",
-                    "images/csw-mt5bigger2x_270.png",
-                    "images/csw-mt5bigger2x_0.png",
+                    'images/csw-mt5bigger2x_90.png',
+                    'images/csw-mt5bigger2x_180.png',
+                    'images/csw-mt5bigger2x_270.png',
+                    'images/csw-mt5bigger2x_0.png',
                 ],
-                this.cpuImages
+                this.cpuImages,
             ),
 
             loadManyImages(
                 [
-                    "images/crash.png",
-                    "images/crash1.png",
-                    "images/crash2.png",
-                    "images/crash3.png",
-                    "images/crash4.png",
-                    "images/crash5.png",
+                    'images/crash.png',
+                    'images/crash1.png',
+                    'images/crash2.png',
+                    'images/crash3.png',
+                    'images/crash4.png',
+                    'images/crash5.png',
                 ],
-                this.crashImages
+                this.crashImages,
             ),
 
             // loadImage.call(this, "images/background-cats.jpg", function (image) {
             //     this.backgroundImage = image;
             // }),
 
-            loadImage("images/background.png", (image: Images) => {
+            loadImage('images/skybox_right.png', (image: Images) => {
                 this.backgroundImage = image;
             }),
 
-            loadImage("images/blackbackground.png", (image: Images) => {
+            loadImage('images/blackbackground.png', (image: Images) => {
                 this.blackbackgroundImage = image;
             }),
 
-            loadImage("images/obstacle3.png", (image: Images) => {
+            loadImage('images/obstacle3.png', (image: Images) => {
                 this.obstacleImage = image;
             }),
 
             loadManyImages(
                 [
-                    "images/space_brick-4.png",
-                    "images/space_brick-3.png",
-                    "images/space_brick-2.png",
-                    "images/space_brick-1.png",
-                    "images/space_brick-0.png",
+                    'images/space_brick-4.png',
+                    'images/space_brick-3.png',
+                    'images/space_brick-2.png',
+                    'images/space_brick-1.png',
+                    'images/space_brick-0.png',
                 ],
-                this.spaceBrickImages
+                this.spaceBrickImages,
             ),
 
-            loadImage("images/border.png", (image: Images) => {
+            loadImage('images/border.png', (image: Images) => {
                 this.borderImage = image;
             }),
 
-            loadImage("images/border.png", (image: Images) => {
+            loadImage('images/border.png', (image: Images) => {
                 // TODO: create a picture of bullet in Aseprite later
                 this.bulletImage = image;
             }),
@@ -106,18 +105,18 @@ export class ImagesStore {
 
             loadManyImages(
                 [
-                    "images/counter-0.png",
-                    "images/counter-1.png",
-                    "images/counter-2.png",
-                    "images/counter-3.png",
-                    "images/counter-4.png",
-                    "images/counter-5.png",
-                    "images/counter-6.png",
-                    "images/counter-7.png",
-                    "images/counter-8.png",
-                    "images/counter-9.png",
+                    'images/counter-0.png',
+                    'images/counter-1.png',
+                    'images/counter-2.png',
+                    'images/counter-3.png',
+                    'images/counter-4.png',
+                    'images/counter-5.png',
+                    'images/counter-6.png',
+                    'images/counter-7.png',
+                    'images/counter-8.png',
+                    'images/counter-9.png',
                 ],
-                this.counterImages
+                this.counterImages,
             ),
         ];
         return Promise.all(promises);
@@ -125,8 +124,7 @@ export class ImagesStore {
 }
 
 export class DrawingManager {
-
-    imagesStore: ImagesStore
+    imagesStore: ImagesStore;
     gameCam: Camera;
     dimensions: Dimensions;
 
@@ -168,7 +166,7 @@ export class DrawingManager {
             x,
             y,
             CONST.CELLSIZES.MAXX * CONST.SCALE.X,
-            CONST.CELLSIZES.MAXY * CONST.SCALE.Y
+            CONST.CELLSIZES.MAXY * CONST.SCALE.Y,
         );
         // this.drawContext.strokeStyle="#f00";
         // this.drawContext.strokeRect(Math.floor(x), Math.floor(y), 39,39);
@@ -181,7 +179,7 @@ export class DrawingManager {
             relXY.x,
             relXY.y,
             CONST.CELLSIZES.MAXX * CONST.SCALE.X,
-            CONST.CELLSIZES.MAXY * CONST.SCALE.Y
+            CONST.CELLSIZES.MAXY * CONST.SCALE.Y,
         );
     }
 
@@ -192,7 +190,7 @@ export class DrawingManager {
             relXY.x,
             relXY.y,
             CONST.CELLSIZES.MAXX * CONST.SCALE.X,
-            CONST.CELLSIZES.MAXY * CONST.SCALE.Y
+            CONST.CELLSIZES.MAXY * CONST.SCALE.Y,
         );
         // this.drawContext.strokeStyle="#f00";
         // this.drawContext.strokeRect(x, y, 39,39);
@@ -204,7 +202,7 @@ export class DrawingManager {
             relXY.x,
             relXY.y,
             CONST.CELLSIZES.MAXX * CONST.SCALE.X,
-            CONST.CELLSIZES.MAXY * CONST.SCALE.Y
+            CONST.CELLSIZES.MAXY * CONST.SCALE.Y,
         );
         // this.drawContext.strokeStyle="#f00";
         // this.drawContext.strokeRect(x, y, 39,39);
@@ -216,7 +214,7 @@ export class DrawingManager {
             relXY.x,
             relXY.y,
             CONST.CELLSIZES.MAXX * CONST.SCALE.X,
-            CONST.CELLSIZES.MAXY * CONST.SCALE.Y
+            CONST.CELLSIZES.MAXY * CONST.SCALE.Y,
         );
         // this.drawContext.strokeStyle="#f00";
         // this.drawContext.strokeRect(x, y, 39,39);
@@ -228,7 +226,7 @@ export class DrawingManager {
             relXY.x,
             relXY.y,
             CONST.CELLSIZES.MAXX * CONST.SCALE.X,
-            CONST.CELLSIZES.MAXY * CONST.SCALE.Y
+            CONST.CELLSIZES.MAXY * CONST.SCALE.Y,
         );
         // this.drawContext.strokeStyle="#f00";
         // this.drawContext.strokeRect(x, y, 39,39);
@@ -240,7 +238,7 @@ export class DrawingManager {
             relXY.x,
             relXY.y,
             CONST.CELLSIZES.MAXX * CONST.SCALE.X,
-            CONST.CELLSIZES.MAXY * CONST.SCALE.Y
+            CONST.CELLSIZES.MAXY * CONST.SCALE.Y,
         );
     }
 
@@ -250,7 +248,7 @@ export class DrawingManager {
             relXY.x,
             relXY.y,
             CONST.CELLSIZES.MAXX * CONST.SCALE.X,
-            CONST.CELLSIZES.MAXY * CONST.SCALE.Y
+            CONST.CELLSIZES.MAXY * CONST.SCALE.Y,
         );
     }
 
@@ -260,7 +258,7 @@ export class DrawingManager {
             relXY.x,
             relXY.y,
             CONST.CELLSIZES.MAXX * CONST.SCALE.X,
-            CONST.CELLSIZES.MAXY * CONST.SCALE.Y
+            CONST.CELLSIZES.MAXY * CONST.SCALE.Y,
         );
     }
 
@@ -270,36 +268,40 @@ export class DrawingManager {
             relXY.x,
             relXY.y,
             20 * CONST.SCALE.X * 2,
-            20 * CONST.SCALE.Y * 2
+            20 * CONST.SCALE.Y * 2,
         );
         // this.crashImage.draw(x, y, 0, onDelayEnd);
     }
 
     drawPlayerBullet(x: number, y: number) {
-        Images.drawContext.fillStyle = "#F00";
+        Images.drawContext.fillStyle = '#F00';
         const relXY = this.gameCam.getRelCoords(x, y);
-        Images.drawContext.fillRect(
-            relXY.x,
-            relXY.y,
-        4, 4);
+        Images.drawContext.fillRect(relXY.x, relXY.y, 4, 4);
     }
 
     drawCPUBullet(x: number, y: number) {
-        Images.drawContext.fillStyle = "#FF0";
+        Images.drawContext.fillStyle = '#FF0';
         const relXY = this.gameCam.getRelCoords(x, y);
-        Images.drawContext.fillRect(
-            relXY.x,
-            relXY.y,
-        4, 4);
+        Images.drawContext.fillRect(relXY.x, relXY.y, 4, 4);
     }
 
     drawBackground() {
         const relXY = this.gameCam.getRelCoords(0, 0);
-        const blackHeight = CONST.SCREENMAXY * CONST.CELLSIZES.MAXY * CONST.SCALE.Y;
-        const blackWidth = CONST.SCREENMAXX * CONST.CELLSIZES.MAXX * CONST.SCALE.X;
-        this.imagesStore.blackbackgroundImage.draw(0, 0, blackWidth, blackHeight);
+        const blackHeight =
+            CONST.SCREENMAXY * CONST.CELLSIZES.MAXY * CONST.SCALE.Y;
+        const blackWidth =
+            CONST.SCREENMAXX * CONST.CELLSIZES.MAXX * CONST.SCALE.X;
+        this.imagesStore.blackbackgroundImage.draw(
+            0,
+            0,
+            blackWidth,
+            blackHeight,
+        );
 
-        const bWidth = 1920, bHeight = 1080;
+        const bWidth = 4096,
+            bHeight = 4096;
+        // const bWidth = 1920,
+        //     bHeight = 1080;
         // const bWidth = 1024, bHeight = 1024;
         const backgroundCountX = (CONST.MAXX * CONST.CELLSIZES.MAXX) / bWidth;
         const backgroundCountY = (CONST.MAXY * CONST.CELLSIZES.MAXY) / bHeight;
@@ -311,11 +313,12 @@ export class DrawingManager {
             for (let cy = 0; cy <= truncY; cy++) {
                 if (cx === truncX || cy === truncY) {
                     this.imagesStore.backgroundImage.draw(
-                        0, 0,
+                        0,
+                        0,
                         cx === truncX ? Math.round(bWidth * frX) : bWidth,
                         cy === truncY ? Math.round(bHeight * frY) : bHeight,
-                        relXY.x + (bWidth * cx),
-                        relXY.y + (bHeight * cy),
+                        relXY.x + bWidth * cx,
+                        relXY.y + bHeight * cy,
                         cx === truncX ? Math.round(bWidth * frX) : bWidth,
                         cy === truncY ? Math.round(bHeight * frY) : bHeight,
                     );
@@ -323,15 +326,14 @@ export class DrawingManager {
                     this.imagesStore.backgroundImage.draw(
                         // Math.round(relXY.x) + (bWidth * cx),
                         // Math.round(relXY.y) + (bHeight * cy),
-                        relXY.x + (bWidth * cx),
-                        relXY.y + (bHeight * cy),
+                        relXY.x + bWidth * cx,
+                        relXY.y + bHeight * cy,
                         bWidth,
-                        bHeight
+                        bHeight,
                     );
                 }
             }
         }
         // this.backgroundImage.draw(relXY.x, relXY.y, 1920, 1080);
     }
-
 }

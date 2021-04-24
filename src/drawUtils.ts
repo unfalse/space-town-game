@@ -1,10 +1,13 @@
-import { BTankManager } from "./btank";
-import { CONST } from "./const";
+import { BTankManager } from './btank';
+import { CONST } from './const';
 // import { IObjectsFactory } from "./interfaces";
-import { ObjectsFactory } from "./objFactory";
-import { ObjectType } from "./types";
+import { ObjectsFactory } from './objFactory';
+import { ObjectType } from './types';
 
-export const placeBorders = (objFactoryInst: ObjectsFactory, BTankInst: BTankManager): void => {
+export const placeBorders = (
+    objFactoryInst: ObjectsFactory,
+    BTankInst: BTankManager,
+): void => {
     const borders = [];
     for (let x = 0; x < CONST.MAXX + 2; x++) {
         borders.push(
@@ -12,16 +15,16 @@ export const placeBorders = (objFactoryInst: ObjectsFactory, BTankInst: BTankMan
                 (x - 1) * CONST.CELLSIZES.MAXX,
                 -1 * CONST.CELLSIZES.MAXY,
                 CONST.COMPUTER,
-                ObjectType.OBSTACLE
-            )
+                ObjectType.OBSTACLE,
+            ),
         );
         borders.push(
             objFactoryInst.createCSW(
                 (x - 1) * CONST.CELLSIZES.MAXX,
                 CONST.MAXY * CONST.CELLSIZES.MAXY,
                 CONST.COMPUTER,
-                ObjectType.OBSTACLE
-            )
+                ObjectType.OBSTACLE,
+            ),
         );
     }
 
@@ -31,18 +34,18 @@ export const placeBorders = (objFactoryInst: ObjectsFactory, BTankInst: BTankMan
                 -1 * CONST.CELLSIZES.MAXX,
                 (y - 1) * CONST.CELLSIZES.MAXY,
                 CONST.COMPUTER,
-                ObjectType.OBSTACLE
-            )
+                ObjectType.OBSTACLE,
+            ),
         );
         borders.push(
             objFactoryInst.createCSW(
                 CONST.MAXX * CONST.CELLSIZES.MAXX,
                 (y - 1) * CONST.CELLSIZES.MAXY,
                 CONST.COMPUTER,
-                ObjectType.OBSTACLE
-            )
+                ObjectType.OBSTACLE,
+            ),
         );
     }
 
     BTankInst.pushNewObjects(borders, true);
-}
+};

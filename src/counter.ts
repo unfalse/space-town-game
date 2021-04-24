@@ -7,19 +7,19 @@ export class Counter extends BaseCSW {
     counterMax: number;
 
     constructor() {
-      super();
-      this.type = CONST.TYPES.COUNTER;
-      this.counter = 0;
-      this.counterMax = 10;
+        super();
+        this.type = CONST.TYPES.COUNTER;
+        this.counter = 0;
+        this.counterMax = 10;
     }
 
     draw(): void {
-      this.drawingManagerInst.drawCounter(this.x, this.y, this.counter);
+        this.drawingManagerInst.drawCounter(this.x, this.y, this.counter);
     }
 
     update(): void {
-      this.counter++;
-      this.counter = this.counter > 9 ? 0 : this.counter;
-      super.update(0);
+        this.counter++;
+        this.counter = this.counter > 9 ? 0 : this.counter;
+        super.update(0);
     }
-  }
+}

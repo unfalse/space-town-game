@@ -26,7 +26,11 @@ class CSWAI_0 extends BaseCPU {
         const left = 2;
         const up = 3;
         const STOP = 0;
-        const go = (d: Direction, accel: number, ms: number): PathUnit => ({ d, accel, ms });
+        const go = (d: Direction, accel: number, ms: number): PathUnit => ({
+            d,
+            accel,
+            ms,
+        });
         const gpStop = (): Array<PathUnit> => [
             go(left, 0, STOP),
             go(right, 0, STOP),
@@ -89,18 +93,18 @@ class CSWAI_0 extends BaseCPU {
     }
 
     AI_update(timestamp: number): void {
-        if (this.pathUnit && timestamp - this.pathStartTime <= this.pathUnit.ms) {
-            super.setDirectionAndAccel(
-                this.pathUnit.d,
-                this.pathUnit.accel
-            );
+        if (
+            this.pathUnit &&
+            timestamp - this.pathStartTime <= this.pathUnit.ms
+        ) {
+            super.setDirectionAndAccel(this.pathUnit.d, this.pathUnit.accel);
         } else {
             do {
                 this.pathUnit = this.AI_generateNewPath();
                 if (this.pathUnit.ms === 0) {
                     super.setDirectionAndAccel(
                         this.pathUnit.d,
-                        this.pathUnit.accel
+                        this.pathUnit.accel,
                     );
                 }
             } while (this.pathUnit.ms === 0);
@@ -139,19 +143,17 @@ class CSWAI_1 extends BaseCPU {
         this.dirs = [3, 0, 2, 1];
     }
 
-    AI_generateNewPath(): { d: Direction, accel: number, ms: number } {
+    AI_generateNewPath(): { d: Direction; accel: number; ms: number } {
         // TODO: get numbers for ms from array [1000, 2500, 1200, 900, 2300, 5450, 3567, 4444]
         // this.msCount = this.msCount === this.msArray.length-1 ? 0 : (this.msCount + 1);
         return {
             // d: this.Utils.getRandomInt(0, 3),
             // accel: this.Utils.getRandomInt(0, 3),
-            d: this.dirs[Utils.getRandomInt(0, this.dirs.length - 1)] as Direction,
-            accel: this.accels[
-                Utils.getRandomInt(0, this.accels.length - 1)
-            ],
-            ms: this.msArray[
-                Utils.getRandomInt(0, this.msArray.length - 1)
-            ],
+            d: this.dirs[
+                Utils.getRandomInt(0, this.dirs.length - 1)
+            ] as Direction,
+            accel: this.accels[Utils.getRandomInt(0, this.accels.length - 1)],
+            ms: this.msArray[Utils.getRandomInt(0, this.msArray.length - 1)],
             // ms: this.Utils.getRandomInt(0, 6) * 1000
         };
     }
@@ -162,18 +164,18 @@ class CSWAI_1 extends BaseCPU {
 
     update(timestamp: number): void {
         if (this.life > 0 && !this.disableAI) {
-            if (this.pathUnit && timestamp - this.pathStartTime <= this.pathUnit.ms) {
-                this.setDirectionAndAccel(
-                    this.pathUnit.d,
-                    this.pathUnit.accel
-                );
+            if (
+                this.pathUnit &&
+                timestamp - this.pathStartTime <= this.pathUnit.ms
+            ) {
+                this.setDirectionAndAccel(this.pathUnit.d, this.pathUnit.accel);
             } else {
                 do {
                     this.pathUnit = this.AI_generateNewPath();
                     if (this.pathUnit.ms === 0) {
                         this.setDirectionAndAccel(
                             this.pathUnit.d,
-                            this.pathUnit.accel
+                            this.pathUnit.accel,
                         );
                     }
                 } while (this.pathUnit.ms === 0);
@@ -203,7 +205,7 @@ class CSWAI_1 extends BaseCPU {
         // this.__proto__.update.call(this, timestamp);
         // this.baseUpdate(timestamp);
     }
-};
+}
 
 class CSWAI_customPaths extends BaseCPU {
     wpCounter: number;
@@ -248,13 +250,13 @@ class CSWAI_customPaths extends BaseCPU {
         let d = -1;
 
         if (this.wayPoints.length !== 0) {
-
             if (
                 !currentWp ||
                 (this.x === currentWp[0] && this.y === currentWp[1])
             ) {
                 this.wpCounter++;
-                if (this.wpCounter === this.wayPoints.length) this.wpCounter = 0;
+                if (this.wpCounter === this.wayPoints.length)
+                    this.wpCounter = 0;
                 this.currentWp = this.wayPoints[this.wpCounter];
                 currentWp = this.currentWp;
             }
@@ -297,7 +299,6 @@ class CSWAI_customPaths extends BaseCPU {
 }
 
 class Obstacle extends BaseCSW {
-
     constructor() {
         super();
         this.type = CONST.TYPES.OBSTACLE;
@@ -344,7 +345,7 @@ class SpaceBrick extends BaseCSW {
         this.drawingManagerInst.drawSpaceBrick(
             this.x,
             this.y,
-            Math.floor((this.life > 0 ? this.life : 0) / 2)
+            Math.floor((this.life > 0 ? this.life : 0) / 2),
         );
     }
 
@@ -352,6 +353,14 @@ class SpaceBrick extends BaseCSW {
     hitByBullet(bulletInstance: Bullet): void {
         this.life--;
     }
-};
+}
 
-export { CSWAI_0, CSWAI_1, CSWAI_customPaths, Border, SpaceBrick, StaticShip, Obstacle };
+export {
+    CSWAI_0,
+    CSWAI_1,
+    CSWAI_customPaths,
+    Border,
+    SpaceBrick,
+    StaticShip,
+    Obstacle,
+};

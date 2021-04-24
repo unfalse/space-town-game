@@ -17,7 +17,7 @@ const CONST = {
         PLAYER: 7,
         STATICSHIP: 8,
         BULLET: 9,
-        DELAYED_PIC: 10
+        DELAYED_PIC: 10,
     },
     CELLSIZES: {
         MAXX: 40,
@@ -49,7 +49,7 @@ const CONST = {
         1: 3,
         2: 0,
         3: 1,
-        "-1": -1
+        '-1': -1,
     },
 };
 

@@ -9,12 +9,12 @@ import { Direction, Who } from './types';
 
 type NewXY = {
     [key in number]: number;
-}
+};
 
 type DirectionObject = {
     vx: number;
     vy: number;
-}
+};
 
 export class Bullet extends BaseGameObject {
     BULLETSPEED: number;
@@ -29,13 +29,20 @@ export class Bullet extends BaseGameObject {
         this.BULLETSPEED = 30; //100; // 30;
     }
 
-    initBullet(nx: number, ny: number, nd: Direction, parentShip: BaseCSW): void {
+    initBullet(
+        nx: number,
+        ny: number,
+        nd: Direction,
+        parentShip: BaseCSW,
+    ): void {
         this.parentShip = parentShip;
         this.setCoords(nx, ny, nd);
     }
 
-    setCoords(nx: number, ny: number, nd: Direction|DirectionObject): Bullet {
-        const { width, height } = this.parentShip.dimensions[typeof nd === 'number' ? nd : 0];
+    setCoords(nx: number, ny: number, nd: Direction | DirectionObject): Bullet {
+        const { width, height } = this.parentShip.dimensions[
+            typeof nd === 'number' ? nd : 0
+        ];
         let x = 0,
             y = 0;
         if (typeof nd === 'number') {
@@ -75,7 +82,7 @@ export class Bullet extends BaseGameObject {
 
     // TODO: create an image of bullet with transparent background
     draw(): void {
-        if(this.parentShip.iam === CONST.USER) {
+        if (this.parentShip.iam === CONST.USER) {
             this.drawingManagerInst.drawPlayerBullet(this.x, this.y);
         } else {
             this.drawingManagerInst.drawCPUBullet(this.x, this.y);
@@ -83,12 +90,19 @@ export class Bullet extends BaseGameObject {
     }
 
     addCrash(): void {
-        const delayedPic = <DelayedPic>this.objectsFactoryInst.createCSW(this.x - 20, this.y - 20, Who.COMPUTER, CONST.TYPES.DELAYED_PIC);
+        const delayedPic = <DelayedPic>(
+            this.objectsFactoryInst.createCSW(
+                this.x - 20,
+                this.y - 20,
+                Who.COMPUTER,
+                CONST.TYPES.DELAYED_PIC,
+            )
+        );
         this.BTankInst.delayedPics.push(delayedPic);
     }
 
     fly(): void {
-        const nvxy = (typeof this.d === 'number') ? this.getVXY(this.d) : this.d;
+        const nvxy = typeof this.d === 'number' ? this.getVXY(this.d) : this.d;
         const vx = nvxy.vx * this.BULLETSPEED;
         const vy = nvxy.vy * this.BULLETSPEED;
 
@@ -97,13 +111,13 @@ export class Bullet extends BaseGameObject {
         const collidedShips = this.BTankInst.getCSWWithPixelPrecision(
             this.x,
             this.y,
-            this.parentShip
+            this.parentShip,
         ) as BaseCSW;
         const collidedBullet = this.BTankInst.getBulletWithPixelPrecision(
             this.x,
             this.y,
             this.parentShip,
-            this
+            this,
         );
         if (collidedBullet) {
             // console.log('bullets collided!');

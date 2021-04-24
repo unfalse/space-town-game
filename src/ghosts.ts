@@ -1,4 +1,4 @@
-import { BaseCSW } from "./base/baseCsw";
+import { BaseCSW } from './base/baseCsw';
 
 type Ghosts = BaseCSW[];
 

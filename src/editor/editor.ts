@@ -19,12 +19,12 @@ type LevelObject = {
     id: number;
     name: string;
     data: string;
-}
+};
 
 type ObjectBrush = {
     type: ObjectType;
     imageUrl: string;
-}
+};
 
 export class Editor {
     currentLevelObj: LevelObject;
@@ -44,7 +44,7 @@ export class Editor {
         this.currentLevelObj = {
             id: null,
             name: '',
-            data: ''
+            data: '',
         };
         this.objFactoryInst = objFactoryInst;
     }
@@ -72,18 +72,17 @@ export class Editor {
 
     uploadNewLevel(): void {
         fetch(`${EDITOR_SERVER_ADDRESS}/new`, {
-            method: "post",
+            method: 'post',
             headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                ...this.currentLevelObj
-            })
-        })
-            .then(() => {
-                alert('Level has been added!');
-            });
+                ...this.currentLevelObj,
+            }),
+        }).then(() => {
+            alert('Level has been added!');
+        });
     }
 
     playEditorLevel(): void {
@@ -99,10 +98,7 @@ export class Editor {
         placeBorders(this.objFactoryInst, this.BTankInst);
 
         this.editorUnits.forEach(unit => {
-            if (
-                unit.type ===
-                CONST.TYPES.SHIP /*&& unit.iam !== CONST.USER*/
-            ) {
+            if (unit.type === CONST.TYPES.SHIP /*&& unit.iam !== CONST.USER*/) {
                 this.BTankInst.addShip(
                     this.objFactoryInst.createCSW(
                         unit.x,
@@ -110,8 +106,8 @@ export class Editor {
                         CONST.COMPUTER,
                         CONST.TYPES.SHIP,
                         false,
-                        (unit as CSWAI_customPaths).wayPoints
-                    )
+                        (unit as CSWAI_customPaths).wayPoints,
+                    ),
                 );
             } else {
                 this.BTankInst.addShip(
@@ -119,8 +115,8 @@ export class Editor {
                         unit.x,
                         unit.y,
                         CONST.COMPUTER,
-                        unit.type
-                    )
+                        unit.type,
+                    ),
                 );
             }
         });
@@ -129,46 +125,47 @@ export class Editor {
     }
 
     prepareLevelForSaving(): void {
-        let levelData = [this.playerCell.x, this.playerCell.y].join(";") + "|";
+        let levelData = [this.playerCell.x, this.playerCell.y].join(';') + '|';
         levelData += this.editorUnits.reduce(
             function (prev: string, curr: BaseCSW) {
-                let wayPoints = "";
+                let wayPoints = '';
                 if (curr.type === CONST.TYPES.SHIP) {
-                    wayPoints = JSON.stringify((curr as CSWAI_customPaths).wayPoints);
+                    wayPoints = JSON.stringify(
+                        (curr as CSWAI_customPaths).wayPoints,
+                    );
                 }
                 return (
                     prev +
                     wayPoints +
-                    ";" +
+                    ';' +
                     !!curr.ghost +
-                    ";" +
+                    ';' +
                     curr.type +
-                    ";" +
+                    ';' +
                     curr.y +
-                    ";" +
+                    ';' +
                     curr.x +
-                    "|"
+                    '|'
                 );
             }.bind(this),
-            ""
+            '',
         );
         this.currentLevelObj.data = levelData;
     }
 
     uploadLevel(): void {
         fetch(`${EDITOR_SERVER_ADDRESS}/save`, {
-            method: "post",
+            method: 'post',
             headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                ...this.currentLevelObj
-            })
-        })
-            .then(() => {
-                alert('Level has been saved!');
-            });
+                ...this.currentLevelObj,
+            }),
+        }).then(() => {
+            alert('Level has been saved!');
+        });
     }
 
     saveEditorLevel(): void {
@@ -190,7 +187,7 @@ export class Editor {
         fetch(`${EDITOR_SERVER_ADDRESS}/list`)
             .then(r => r.json())
             .then(r => {
-                editorFileListContainer.style.display = "block";
+                editorFileListContainer.style.display = 'block';
                 const ul = document.createElement('ul');
                 const title = document.createElement('span');
                 title.innerText = 'Which level to open?';
@@ -200,15 +197,15 @@ export class Editor {
                     li.innerText = level.name;
                     li.addEventListener(
                         'click',
-                        (function () {
+                        function () {
                             this.currentLevelObj = {
-                                ...level
+                                ...level,
                             };
                             this.loadTheEditorLevel(level.id);
-                            editorFileListContainer.style.display = "none";
+                            editorFileListContainer.style.display = 'none';
                             title.innerText = '';
                             editorFileListContainer.removeChild(ul);
-                        }).bind(this)
+                        }.bind(this),
                     );
                     ul.append(li);
                 });
@@ -224,26 +221,27 @@ export class Editor {
         fetch(`${EDITOR_SERVER_ADDRESS}/level?id=${id}`)
             .then(r => r.json())
             .then(r => {
-                r.data.split(DATA_SEPARATOR)
+                r.data
+                    .split(DATA_SEPARATOR)
                     .forEach((objStr: string, strIndex: number) => {
-                        const fields = objStr.split(";");
+                        const fields = objStr.split(';');
                         if (strIndex === 0) {
                             //this.playerCell = { x: fields[0], y: fields[1] };
                             this.createEditorUnit(
                                 +fields[0],
                                 +fields[1],
                                 CONST.TYPES.PLAYER,
-                                true
+                                true,
                             );
                         }
-                        if (strIndex > 0 && objStr !== "") {
-                            if (objStr !== "") {
+                        if (strIndex > 0 && objStr !== '') {
+                            if (objStr !== '') {
                                 if (fields.length === 1) {
                                     const splitted = fields[0].split(',');
                                     this.createEditorUnit(
                                         +splitted[1], // x
                                         +splitted[2], // y
-                                        +splitted[0] // type
+                                        +splitted[0], // type
                                     );
                                 } else {
                                     this.createEditorUnit(
@@ -252,7 +250,7 @@ export class Editor {
                                         +fields[2], // type
                                         //fields[1], // ghost
                                         false,
-                                        fields[0] ? JSON.parse(fields[0]) : [] // wayPoints
+                                        fields[0] ? JSON.parse(fields[0]) : [], // wayPoints
                                     );
                                 }
                             }
@@ -282,7 +280,13 @@ export class Editor {
         });
     }
 
-    createEditorUnit(x: number, y: number, type: ObjectType, ghost?: boolean, wayPoints?: WayPoints[]): void {
+    createEditorUnit(
+        x: number,
+        y: number,
+        type: ObjectType,
+        ghost?: boolean,
+        wayPoints?: WayPoints[],
+    ): void {
         let who = CONST.COMPUTER;
 
         if (
@@ -295,7 +299,10 @@ export class Editor {
 
         if (
             this.editorGhosts.some((ghost: BaseCSW, index: number) => {
-                if(!ghost) { console.log(index); debugger; }
+                if (!ghost) {
+                    console.log(index);
+                    debugger;
+                }
                 return ghost.x === x && ghost.y === y;
             })
         ) {
@@ -307,14 +314,16 @@ export class Editor {
             who = CONST.USER;
         }
 
-        const newCSW = this.objFactoryInst.createCSW(x, y, who, type, false, wayPoints);
-        if (!newCSW) debugger;
-        this.pushNewObjects(
-            [
-                newCSW
-            ],
-            ghost
+        const newCSW = this.objFactoryInst.createCSW(
+            x,
+            y,
+            who,
+            type,
+            false,
+            wayPoints,
         );
+        if (!newCSW) debugger;
+        this.pushNewObjects([newCSW], ghost);
     }
 
     addEditorWaypoint(x: number, y: number): void {
@@ -334,7 +343,7 @@ export class Editor {
         this.currentShipWithWaypoints.wayPoints = this.currentShipWithWaypoints.wayPoints.filter(
             (wp: WayPoints) => {
                 return !(wp[0] === x && wp[1] === y);
-            }
+            },
         );
     }
 
@@ -364,7 +373,7 @@ export class Editor {
             case CONST.TYPES.ERASER: {
                 this.editorCurrentObjectBrush = {
                     type: brushObjectType,
-                    imageUrl: "",
+                    imageUrl: '',
                 };
                 break;
             }
@@ -402,13 +411,13 @@ export class Editor {
                 (x - 1) * CONST.CELLSIZES.MAXX,
                 -1 * CONST.CELLSIZES.MAXY,
                 CONST.TYPES.BORDER,
-                true
+                true,
             );
             this.createEditorUnit(
                 (x - 1) * CONST.CELLSIZES.MAXX,
                 CONST.MAXY * CONST.CELLSIZES.MAXY,
                 CONST.TYPES.BORDER,
-                true
+                true,
             );
         }
 
@@ -417,13 +426,13 @@ export class Editor {
                 -1 * CONST.CELLSIZES.MAXX,
                 (y - 1) * CONST.CELLSIZES.MAXY,
                 CONST.TYPES.BORDER,
-                true
+                true,
             );
             this.createEditorUnit(
                 CONST.MAXX * CONST.CELLSIZES.MAXX,
                 (y - 1) * CONST.CELLSIZES.MAXY,
                 CONST.TYPES.BORDER,
-                true
+                true,
             );
         }
     }

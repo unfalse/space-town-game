@@ -6,7 +6,7 @@ import { ObjectsFactory } from '../objFactory';
 import { BaseGameObject } from './baseGameObj';
 import { Bullet } from '../bullet';
 
-type InertiaDirections = { [key in Direction]: number; };
+type InertiaDirections = { [key in Direction]: number };
 
 // TODO: csw: cosmo ship war, the old title
 // TODO: rename csw to something more understandable - tank? SpaceShip ?
@@ -64,10 +64,17 @@ export class BaseCSW extends BaseGameObject {
         who: Who,
         drawingManagerInst: DrawingManager,
         BTankInst: BTankManager,
-        objectsFactoryInst: ObjectsFactory
+        objectsFactoryInst: ObjectsFactory,
     ): void {
         // super.initCoords(mx, my, 0);
-        super.init(mx, my, 0, drawingManagerInst, BTankInst, objectsFactoryInst);
+        super.init(
+            mx,
+            my,
+            0,
+            drawingManagerInst,
+            BTankInst,
+            objectsFactoryInst,
+        );
         this.iam = who;
         this.maxlife = 5;
         this.life = this.maxlife;
@@ -92,17 +99,29 @@ export class BaseCSW extends BaseGameObject {
         this.drawingManagerInst.drawcswmt5(this.x, this.y, this.d);
     }
 
-    createNewBullet(startX: number, startY: number, startD: Direction, whoFires?: Who): void {
+    createNewBullet(
+        startX: number,
+        startY: number,
+        startD: Direction,
+        whoFires?: Who,
+    ): void {
         if (
             this.BTankInst.bulletsArr.filter(
                 function (b: Bullet) {
                     return b.parentShip === this;
-                }.bind(this)
+                }.bind(this),
             ).length === this.bulletsAmountOnFire
         )
             return;
         // const newBullet = new Bullet(this.BTankInst, this.drawingManagerInst, whoFires);
-        const newBullet = <Bullet>this.objectsFactoryInst.createBaseObj(startX, startY, whoFires, CONST.TYPES.BULLET);
+        const newBullet = <Bullet>(
+            this.objectsFactoryInst.createBaseObj(
+                startX,
+                startY,
+                whoFires,
+                CONST.TYPES.BULLET,
+            )
+        );
         newBullet.initBullet(startX, startY, startD, this);
         this.BTankInst.bulletsArr.push(newBullet);
     }
@@ -189,10 +208,7 @@ export class BaseCSW extends BaseGameObject {
         ) {
             this.inertiaTimerIsRunning = true;
             // setTimeout(this.inertia.bind(this), 10);
-            this.waitAndCall(
-                this.inertia.bind(this),
-                10
-            );
+            this.waitAndCall(this.inertia.bind(this), 10);
         }
     }
 
@@ -233,10 +249,7 @@ export class BaseCSW extends BaseGameObject {
             this.x + ux < 0
         ) {
             if (this.x + ux < 0) this.x = 0;
-            if (
-                this.x + ux + width >
-                CONST.MAXX * CONST.CELLSIZES.MAXX
-            ) {
+            if (this.x + ux + width > CONST.MAXX * CONST.CELLSIZES.MAXX) {
                 this.x = CONST.MAXX * CONST.CELLSIZES.MAXX - width;
             }
             ux = 0;
@@ -245,15 +258,13 @@ export class BaseCSW extends BaseGameObject {
         }
 
         if (
-            this.y + uy + height >
-            CONST.MAXY * CONST.CELLSIZES.MAXY ||
+            this.y + uy + height > CONST.MAXY * CONST.CELLSIZES.MAXY ||
             this.y + uy < 0
         ) {
-            if (this.y + uy < 0) { this.y = 0; }
-            if (
-                this.y + uy + height >
-                CONST.MAXY * CONST.CELLSIZES.MAXY
-            ) {
+            if (this.y + uy < 0) {
+                this.y = 0;
+            }
+            if (this.y + uy + height > CONST.MAXY * CONST.CELLSIZES.MAXY) {
                 this.y = CONST.MAXY * CONST.CELLSIZES.MAXY - height;
             }
             uy = 0;
@@ -268,7 +279,7 @@ export class BaseCSW extends BaseGameObject {
                     this.x + ux, //Math.floor(ux), //Math.ceil(ux),
                     this.y + uy, //Math.floor(uy),//Math.ceil(uy),
                     this,
-                    [ObjectType.SHIP]
+                    [ObjectType.SHIP],
                 );
                 if (found) {
                     ux = 0;

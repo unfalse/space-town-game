@@ -15,7 +15,7 @@ class Player extends BaseCSW {
     }
 
     childInit(): void {
-        this.maxlife = 10000;
+        this.maxlife = 100;
         this.life = this.maxlife;
     }
 
@@ -25,16 +25,12 @@ class Player extends BaseCSW {
 
     draw(ghost?: boolean) {
         if (ghost) {
-            this.drawingManagerInst.drawcswmt9ghost(
-                this.x,
-                this.y,
-                this.d
-            );
+            this.drawingManagerInst.drawcswmt9ghost(this.x, this.y, this.d);
         } else {
             this.drawingManagerInst.drawcswmt9(
                 CONST.CAM.CENTERX,
                 CONST.CAM.CENTERY,
-                this.d
+                this.d,
             );
         }
     }
@@ -64,8 +60,12 @@ class Player extends BaseCSW {
 
         // TODO: not sure if it's a right place to change inertia directions
         if (this.inertiaDirections[CONST.DIR_OPPOSITES[d] as Direction] > 0) {
-            this.inertiaDirections[CONST.DIR_OPPOSITES[d] as Direction] -= accel;
-            if (this.inertiaDirections[CONST.DIR_OPPOSITES[d] as Direction] < 0) {
+            this.inertiaDirections[
+                CONST.DIR_OPPOSITES[d] as Direction
+            ] -= accel;
+            if (
+                this.inertiaDirections[CONST.DIR_OPPOSITES[d] as Direction] < 0
+            ) {
                 this.inertiaDirections[CONST.DIR_OPPOSITES[d] as Direction] = 0;
             }
         } else {

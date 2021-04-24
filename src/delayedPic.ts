@@ -3,7 +3,7 @@ import { BaseCSW } from './base/baseCsw';
 
 // export class DelayedPic extends BaseCoordinates {
 // TODO: extend from BaseGameObject !!!
-export class DelayedPic extends BaseCSW {    
+export class DelayedPic extends BaseCSW {
     show: boolean;
     timerStarted: boolean;
     frameCounter: number;
@@ -20,8 +20,8 @@ export class DelayedPic extends BaseCSW {
 
     // init(nx: number, ny: number, BTankInst: BTankManager) {
     // init() {
-        // this.initCoords(nx, ny, 0);
-        // this.BTankInst = BTankInst;
+    // this.initCoords(nx, ny, 0);
+    // this.BTankInst = BTankInst;
     // }
 
     // delayedPicInit() {
@@ -51,7 +51,7 @@ export class DelayedPic extends BaseCSW {
                         setDelay.call(this);
                     }
                 }.bind(this),
-                180
+                180,
             );
         }
 

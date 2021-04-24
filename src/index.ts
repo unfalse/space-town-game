@@ -6,7 +6,7 @@ import { ImagesStore, DrawingManager } from './drawingMan';
 import { Editor } from './editor/editor';
 import { Utils } from './utils';
 import { CSWAI_customPaths } from './cswai';
-import { Player } from "./player";
+import { Player } from './player';
 import { Camera } from './camera';
 import { Direction } from './types';
 import { ObjectsFactory } from './objFactory';
@@ -16,31 +16,30 @@ import { EditorUI } from './editor/editorUI';
 // import { addDemoCounters } from './demoUtils';
 
 type Keys = {
-    ArrowRight: boolean,
-    ArrowLeft: boolean,
-    ArrowUp: boolean,
-    ArrowDown: boolean,
-    a: boolean,
-    s: boolean
+    ArrowRight: boolean;
+    ArrowLeft: boolean;
+    ArrowUp: boolean;
+    ArrowDown: boolean;
+    a: boolean;
+    s: boolean;
 };
 
 type ControlsMap = {
-    ArrowRight: number,
-    ArrowLeft: number,
-    ArrowUp: number,
-    ArrowDown: number,
-    a: number
-}
+    ArrowRight: number;
+    ArrowLeft: number;
+    ArrowUp: number;
+    ArrowDown: number;
+    a: number;
+};
 
 // -----------------------------
 //        Основная логика
 // -----------------------------
 class Game {
-
     mainIntervalId: number = null;
     gameOver = false;
     win = false;
-    keys: Keys = {} as Keys;    
+    keys: Keys = {} as Keys;
 
     controlsMap: ControlsMap = {
         ArrowUp: 3,
@@ -62,14 +61,20 @@ class Game {
 
     constructor() {
         // const gameField = document.getElementById("gameField");
-        
+
         this.cameraInst = new Camera();
         this.imagesStoreInst = new ImagesStore();
-        this.drawingManagerInst = new DrawingManager(this.imagesStoreInst, this.cameraInst);
+        this.drawingManagerInst = new DrawingManager(
+            this.imagesStoreInst,
+            this.cameraInst,
+        );
         this.BTankInst = new BTankManager(this.player1);
         this.BTankInst.init();
 
-        this.objFactoryGameInst = new ObjectsFactory(this.drawingManagerInst, this.BTankInst);
+        this.objFactoryGameInst = new ObjectsFactory(
+            this.drawingManagerInst,
+            this.BTankInst,
+        );
         this.EditorInst = new Editor(this.objFactoryGameInst);
         this.EditorUIInst = new EditorUI(this.EditorInst);
     }
@@ -79,8 +84,12 @@ class Game {
             function () {
                 this.EditorInst.init(this.BTankInst, this.EditorUIInst);
 
-                this.player1 = this.objFactoryGameInst.createCSW(0, 600, CONST.USER) as Player;
-                this.BTankInst.pushNewObjects([this.player1])
+                this.player1 = this.objFactoryGameInst.createCSW(
+                    0,
+                    600,
+                    CONST.USER,
+                ) as Player;
+                this.BTankInst.pushNewObjects([this.player1]);
 
                 // addDemoCounters(objFactoryGameInst, BTankInst);
 
@@ -94,24 +103,24 @@ class Game {
                 this.win = false;
 
                 document.addEventListener(
-                    "keydown",
-                    this.keysHandler.bind(this)
+                    'keydown',
+                    this.keysHandler.bind(this),
                 );
-                document.addEventListener("keyup", this.keysHandler.bind(this));
+                document.addEventListener('keyup', this.keysHandler.bind(this));
 
                 this.BTankInst.gameFieldBlock.addEventListener(
-                    "mousedown",
-                    this.editorMouseDownHandler.bind(this)
+                    'mousedown',
+                    this.editorMouseDownHandler.bind(this),
                 );
                 this.BTankInst.gameFieldBlock.addEventListener(
-                    "mousemove",
-                    this.editorMouseDownHandler.bind(this)
+                    'mousemove',
+                    this.editorMouseDownHandler.bind(this),
                 );
 
                 this.mainIntervalId = window.requestAnimationFrame(
-                    this.mainCycle.bind(this)
+                    this.mainCycle.bind(this),
                 );
-            }.bind(this)
+            }.bind(this),
         );
     }
 
@@ -126,7 +135,7 @@ class Game {
         }
 
         this.mainIntervalId = window.requestAnimationFrame(
-            this.mainCycle.bind(this)
+            this.mainCycle.bind(this),
         );
     }
 
@@ -135,46 +144,48 @@ class Game {
         // player1.update();
         // gameCam.setCoords(player1.x, player1.y);
 
-        this.EditorInst.editorUnits.forEach((unit) => {
+        this.EditorInst.editorUnits.forEach(unit => {
             // unit.update(timestamp);
             unit.draw();
         });
 
-        this.EditorInst.editorGhosts.forEach((ghost) => {
+        this.EditorInst.editorGhosts.forEach(ghost => {
             ghost.draw();
         });
 
         if (this.EditorInst.currentShipWithWaypoints) {
-            this.EditorInst.currentShipWithWaypoints.wayPoints.forEach((
-                wp,
-                wpIndex
-            ) => {
-                this.drawingManagerInst.drawWayPoint(wp[0], wp[1], wpIndex + 1);
-            });
+            this.EditorInst.currentShipWithWaypoints.wayPoints.forEach(
+                (wp, wpIndex) => {
+                    this.drawingManagerInst.drawWayPoint(
+                        wp[0],
+                        wp[1],
+                        wpIndex + 1,
+                    );
+                },
+            );
         }
     }
 
     gameCycle(timestamp: number) {
-
         if (this.player1.life > 0) {
             this.detectMovement(timestamp);
             this.player1.update(timestamp);
             this.cameraInst.setCoords(this.player1.x, this.player1.y);
         }
 
-        this.BTankInst.getAllBullets().forEach((bullet) => {
+        this.BTankInst.getAllBullets().forEach(bullet => {
             bullet.fly();
         });
 
-        this.BTankInst.getAllShips().forEach((ship) => {
+        this.BTankInst.getAllShips().forEach(ship => {
             ship.update(timestamp);
         });
 
-        this.BTankInst.getAllDelayedPics().forEach((pic) => {
+        this.BTankInst.getAllDelayedPics().forEach(pic => {
             pic.draw();
         });
 
-        this.BTankInst.getAllGhosts().forEach((ghost) => {
+        this.BTankInst.getAllGhosts().forEach(ghost => {
             ghost.draw();
         });
 
@@ -182,10 +193,10 @@ class Game {
 
         if (!this.gameOver && (this.win || this.player1.life <= 0)) {
             if (this.win) {
-                Utils.text("YOU WIN");
+                Utils.text('YOU WIN');
                 this.BTankInst.showWin();
             } else {
-                Utils.text("GAME OVER");
+                Utils.text('GAME OVER');
                 this.BTankInst.showGameOver();
             }
 
@@ -215,31 +226,38 @@ class Game {
                     CONST.TYPES.ERASER,
                     CONST.TYPES.WAYPOINTERASER,
                     CONST.TYPES.WAYPOINT,
-                    CONST.TYPES.PLAYER
+                    CONST.TYPES.PLAYER,
                 ].includes(this.EditorInst.editorCurrentObjectBrush.type)
             ) {
-                
                 this.EditorInst.createEditorUnit(
                     cellx,
                     celly,
-                    this.EditorInst.editorCurrentObjectBrush.type
+                    this.EditorInst.editorCurrentObjectBrush.type,
                 );
             }
 
             // place player
-            if (this.EditorInst.editorCurrentObjectBrush.type === CONST.TYPES.PLAYER) {
+            if (
+                this.EditorInst.editorCurrentObjectBrush.type ===
+                CONST.TYPES.PLAYER
+            ) {
                 this.EditorInst.createEditorUnit(
                     cellx,
                     celly,
-                    this.EditorInst.editorCurrentObjectBrush.type
+                    this.EditorInst.editorCurrentObjectBrush.type,
                 );
             }
 
             // place waypoint
-            if (this.EditorInst.editorCurrentObjectBrush.type === CONST.TYPES.WAYPOINT) {
+            if (
+                this.EditorInst.editorCurrentObjectBrush.type ===
+                CONST.TYPES.WAYPOINT
+            ) {
                 if (!this.EditorInst.currentShipWithWaypoints) {
                     const unit = this.EditorInst.getEditorUnitAt(cellx, celly);
-                    this.EditorInst.setCurrentShipWithWaypoints(unit as CSWAI_customPaths);
+                    this.EditorInst.setCurrentShipWithWaypoints(
+                        unit as CSWAI_customPaths,
+                    );
                 } else {
                     if (!this.EditorInst.getEditorWaypointAt(cellx, celly)) {
                         this.EditorInst.addEditorWaypoint(cellx, celly);
@@ -248,7 +266,10 @@ class Game {
             }
 
             // use eraser
-            if (this.EditorInst.editorCurrentObjectBrush.type === CONST.TYPES.ERASER) {
+            if (
+                this.EditorInst.editorCurrentObjectBrush.type ===
+                CONST.TYPES.ERASER
+            ) {
                 this.EditorInst.removeEditorObjectAt(cellx, celly);
             }
 
@@ -280,9 +301,9 @@ class Game {
             event.returnValue = false;
         }
         const kc = event.key as keyof Keys;
-        this.keys[kc] = event.type == "keydown";
+        this.keys[kc] = event.type == 'keydown';
 
-        if (event.type === "keyup") {
+        if (event.type === 'keyup') {
             this.keyUpHandler(kc);
         }
         this.editorKeys(kc);
@@ -294,19 +315,27 @@ class Game {
                 this.EditorInst.setCurrentEditorBrushObject(CONST.TYPES.ERASER);
             }
             if (kc === Utils.KEY_CODE.N2_KEY) {
-                this.EditorInst.setCurrentEditorBrushObject(CONST.TYPES.OBSTACLE);
+                this.EditorInst.setCurrentEditorBrushObject(
+                    CONST.TYPES.OBSTACLE,
+                );
             }
             if (kc === Utils.KEY_CODE.N3_KEY) {
                 this.EditorInst.setCurrentEditorBrushObject(CONST.TYPES.SHIP);
             }
             if (kc === Utils.KEY_CODE.N4_KEY) {
-                this.EditorInst.setCurrentEditorBrushObject(CONST.TYPES.SPACEBRICK);
+                this.EditorInst.setCurrentEditorBrushObject(
+                    CONST.TYPES.SPACEBRICK,
+                );
             }
             if (kc === Utils.KEY_CODE.N5_KEY) {
-                this.EditorInst.setCurrentEditorBrushObject(CONST.TYPES.WAYPOINT);
+                this.EditorInst.setCurrentEditorBrushObject(
+                    CONST.TYPES.WAYPOINT,
+                );
             }
             if (kc === Utils.KEY_CODE.N6_KEY) {
-                this.EditorInst.setCurrentEditorBrushObject(CONST.TYPES.WAYPOINTERASER);
+                this.EditorInst.setCurrentEditorBrushObject(
+                    CONST.TYPES.WAYPOINTERASER,
+                );
             }
             if (kc === Utils.KEY_CODE.N7_KEY) {
                 this.EditorInst.setCurrentEditorBrushObject(CONST.TYPES.PLAYER);
@@ -318,16 +347,28 @@ class Game {
         const DX = 26;
         // TODO: move the screen
         if (this.keys[Utils.KEY_CODE.UP as keyof Keys]) {
-            this.cameraInst.setCoords(this.cameraInst.x, this.cameraInst.y - DX);
+            this.cameraInst.setCoords(
+                this.cameraInst.x,
+                this.cameraInst.y - DX,
+            );
         }
         if (this.keys[Utils.KEY_CODE.LEFT as keyof Keys]) {
-            this.cameraInst.setCoords(this.cameraInst.x - DX, this.cameraInst.y);
+            this.cameraInst.setCoords(
+                this.cameraInst.x - DX,
+                this.cameraInst.y,
+            );
         }
         if (this.keys[Utils.KEY_CODE.RIGHT as keyof Keys]) {
-            this.cameraInst.setCoords(this.cameraInst.x + DX, this.cameraInst.y);
+            this.cameraInst.setCoords(
+                this.cameraInst.x + DX,
+                this.cameraInst.y,
+            );
         }
         if (this.keys[Utils.KEY_CODE.DOWN as keyof Keys]) {
-            this.cameraInst.setCoords(this.cameraInst.x, this.cameraInst.y + DX);
+            this.cameraInst.setCoords(
+                this.cameraInst.x,
+                this.cameraInst.y + DX,
+            );
         }
     }
 
@@ -337,26 +378,34 @@ class Game {
 
         if (this.keys[Utils.KEY_CODE.UP as keyof Keys]) {
             this.player1.setDirectionAndAddAccel(
-                this.controlsMap[Utils.KEY_CODE.UP as keyof ControlsMap] as Direction,
-                ACCEL
+                this.controlsMap[
+                    Utils.KEY_CODE.UP as keyof ControlsMap
+                ] as Direction,
+                ACCEL,
             );
         }
         if (this.keys[Utils.KEY_CODE.LEFT as keyof Keys]) {
             this.player1.setDirectionAndAddAccel(
-                this.controlsMap[Utils.KEY_CODE.LEFT as keyof ControlsMap] as Direction,
-                ACCEL
+                this.controlsMap[
+                    Utils.KEY_CODE.LEFT as keyof ControlsMap
+                ] as Direction,
+                ACCEL,
             );
         }
         if (this.keys[Utils.KEY_CODE.RIGHT as keyof Keys]) {
             this.player1.setDirectionAndAddAccel(
-                this.controlsMap[Utils.KEY_CODE.RIGHT as keyof ControlsMap] as Direction,
-                ACCEL
+                this.controlsMap[
+                    Utils.KEY_CODE.RIGHT as keyof ControlsMap
+                ] as Direction,
+                ACCEL,
             );
         }
         if (this.keys[Utils.KEY_CODE.DOWN as keyof Keys]) {
             this.player1.setDirectionAndAddAccel(
-                this.controlsMap[Utils.KEY_CODE.DOWN as keyof ControlsMap] as Direction,
-                ACCEL
+                this.controlsMap[
+                    Utils.KEY_CODE.DOWN as keyof ControlsMap
+                ] as Direction,
+                ACCEL,
             );
         }
         if (this.keys[Utils.KEY_CODE.a_KEY as keyof Keys]) {
@@ -371,7 +420,6 @@ class Game {
 // const dpTest = new DelayedPic(1);
 // debugger;
 // dpTest.init();
-
 
 const gameInstance = new Game();
 

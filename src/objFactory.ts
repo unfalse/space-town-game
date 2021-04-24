@@ -1,24 +1,31 @@
-import { DrawingManager } from "./drawingMan";
-import { BTankManager } from "./btank";
+import { DrawingManager } from './drawingMan';
+import { BTankManager } from './btank';
 import { BaseCSW } from './base/baseCsw';
-import { BaseGameObject } from "./base/baseGameObj";
-import { Bullet } from "./bullet";
-import { CONST } from "./const";
-import { Player } from "./player";
-import { Border, CSWAI_customPaths, Obstacle, SpaceBrick, StaticShip } from "./cswai";
-import { Counter } from "./counter";
+import { BaseGameObject } from './base/baseGameObj';
+import { Bullet } from './bullet';
+import { CONST } from './const';
+import { Player } from './player';
+import {
+    Border,
+    CSWAI_customPaths,
+    Obstacle,
+    SpaceBrick,
+    StaticShip,
+} from './cswai';
+import { Counter } from './counter';
 
-import { ObjectType, Who, WayPoints, Direction } from "./types";
-import { DelayedPic } from "./delayedPic";
+import { ObjectType, Who, WayPoints, Direction } from './types';
+import { DelayedPic } from './delayedPic';
 
-type FactoryTypes = Player |
-    CSWAI_customPaths | 
-    Obstacle | 
-    SpaceBrick | 
-    CSWAI_customPaths |
-    Border |
-    StaticShip |
-    DelayedPic;
+type FactoryTypes =
+    | Player
+    | CSWAI_customPaths
+    | Obstacle
+    | SpaceBrick
+    | CSWAI_customPaths
+    | Border
+    | StaticShip
+    | DelayedPic;
 
 export class ObjectsFactory {
     drawingManagerInst: DrawingManager;
@@ -36,7 +43,7 @@ export class ObjectsFactory {
         who: Who, // TODO: this field should be in ship class (csw or cswai or obstacle)
         typeParam?: ObjectType,
         ghost?: boolean,
-        wayPoints?: WayPoints[]
+        wayPoints?: WayPoints[],
     ): FactoryTypes {
         let c1 = null;
         const type = typeParam || ObjectType.SHIP;
@@ -107,7 +114,7 @@ export class ObjectsFactory {
         y: number,
         who: Who, // TODO: this field should be in ship class (csw or cswai or obstacle)
         typeParam?: ObjectType,
-        ghost?: boolean
+        ghost?: boolean,
     ): BaseGameObject {
         let c1 = null;
         const type = typeParam || ObjectType.SHIP;
@@ -119,10 +126,22 @@ export class ObjectsFactory {
     }
 
     initBaseCSW(obj: BaseCSW, x: number, y: number, who: Who) {
-        obj.init(x, y, who, this.drawingManagerInst, this.bTankManagerInst, this);
+        obj.init(
+            x,
+            y,
+            who,
+            this.drawingManagerInst,
+            this.bTankManagerInst,
+            this,
+        );
     }
 
-    initBaseGameObject(obj: BaseGameObject, x: number, y: number, d?: Direction) {
+    initBaseGameObject(
+        obj: BaseGameObject,
+        x: number,
+        y: number,
+        d?: Direction,
+    ) {
         obj.init(x, y, d, this.drawingManagerInst, this.bTankManagerInst, this);
     }
 }

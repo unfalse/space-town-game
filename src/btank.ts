@@ -4,7 +4,7 @@ import { Images } from './images';
 import { DelayedPic } from './delayedPic';
 import { ObjectType } from './types';
 import { BaseCSW } from './base/baseCsw';
-import { Player } from "./player";
+import { Player } from './player';
 import { Ghosts } from './ghosts';
 // import { IPlayer } from './interfaces';
 
@@ -44,19 +44,23 @@ export class BTankManager {
     }
 
     init() {
-        const gameField: HTMLCanvasElement = document.getElementById("gameField") as HTMLCanvasElement;
+        const gameField: HTMLCanvasElement = document.getElementById(
+            'gameField',
+        ) as HTMLCanvasElement;
 
-        gameField.height = CONST.SCREENMAXY * CONST.CELLSIZES.MAXY * CONST.SCALE.Y;
-        gameField.width = CONST.SCREENMAXX * CONST.CELLSIZES.MAXX * CONST.SCALE.X;
+        gameField.height =
+            CONST.SCREENMAXY * CONST.CELLSIZES.MAXY * CONST.SCALE.Y;
+        gameField.width =
+            CONST.SCREENMAXX * CONST.CELLSIZES.MAXX * CONST.SCALE.X;
 
         // TODO: create new ui class and move these things to it
         // this.gameInfo = document.getElementById("gameInfo");
-        this.againBtn = document.querySelector("#playAgainBtn");
-        this.gameOverBlock = document.querySelector("#gameOverBlock");
-        this.titleBlock = document.querySelector("#titleBlock");
+        this.againBtn = document.querySelector('#playAgainBtn');
+        this.gameOverBlock = document.querySelector('#gameOverBlock');
+        this.titleBlock = document.querySelector('#titleBlock');
         this.gameFieldBlock = gameField;
 
-        this.drawContext = gameField.getContext("2d");
+        this.drawContext = gameField.getContext('2d');
         Images.drawContext = this.drawContext;
         //this.infoContext = this.gameInfo.getContext("2d");
 
@@ -67,7 +71,7 @@ export class BTankManager {
         // TODO: it should be a function which will preload images.
         // First it should collect paths to images from classes (csw, cswai, obstacle, etc.)
         // Every class will have a variable with image. Now it can only call the "draw" function.
-        // Image field should be in csw class. This way player should have a separate class. 
+        // Image field should be in csw class. This way player should have a separate class.
     }
 
     pushNewObjects(objects: Array<BaseCSW>, ghost?: boolean): void {
@@ -79,7 +83,11 @@ export class BTankManager {
     }
 
     // x, y - coordinates of pixels, not cells
-    checkCSWWithPixelPrecision(x: number, y: number, whoAsks: BaseCSW): boolean {
+    checkCSWWithPixelPrecision(
+        x: number,
+        y: number,
+        whoAsks: BaseCSW,
+    ): boolean {
         const result = this.cswArr.filter((csw: BaseCSW) => {
             // console.log(whoAsks === csw);
             if (whoAsks === csw) {
@@ -96,7 +104,12 @@ export class BTankManager {
         return result.length > 0;
     }
 
-    checkIfTwoShipsCross(nx: number, ny: number, whoAsks: BaseCSW, typesToIgnore: ObjectType[]): BaseCSW {
+    checkIfTwoShipsCross(
+        nx: number,
+        ny: number,
+        whoAsks: BaseCSW,
+        typesToIgnore: ObjectType[],
+    ): BaseCSW {
         // const debugDraw = (function(x,y,w,h) {
         //     this.drawContext.strokeStyle = "#0f0";
         //     this.drawContext.strokeRect(x, y, w, h);
@@ -126,7 +139,8 @@ export class BTankManager {
                 return false;
             }
 
-            const checkResult = checkSquare(csw, nx, ny) ||
+            const checkResult =
+                checkSquare(csw, nx, ny) ||
                 checkSquare(csw, nx + width, ny) ||
                 checkSquare(csw, nx, ny + height) ||
                 checkSquare(csw, nx + width, ny + height) ||
@@ -140,7 +154,12 @@ export class BTankManager {
         return tArr.length > 0 ? tArr[0] : null;
     }
 
-    getBulletWithPixelPrecision(x: number, y: number, parentShip: BaseCSW, bulletInst: Bullet): Bullet {
+    getBulletWithPixelPrecision(
+        x: number,
+        y: number,
+        parentShip: BaseCSW,
+        bulletInst: Bullet,
+    ): Bullet {
         const tArr = this.bulletsArr.filter(function (b: Bullet) {
             return (
                 b.parentShip !== parentShip &&
@@ -223,14 +242,14 @@ export class BTankManager {
     }
 
     showGameOver() {
-        this.gameOverBlock.innerText = "GAME OVER";
-        this.againBtn.style.display = "block";
-        this.gameOverBlock.style.display = "block";
+        this.gameOverBlock.innerText = 'GAME OVER';
+        this.againBtn.style.display = 'block';
+        this.gameOverBlock.style.display = 'block';
     }
 
     showWin() {
-        this.againBtn.style.display = "block";
-        this.gameOverBlock.innerText = "YOU WIN";
-        this.gameOverBlock.style.display = "block";
+        this.againBtn.style.display = 'block';
+        this.gameOverBlock.innerText = 'YOU WIN';
+        this.gameOverBlock.style.display = 'block';
     }
 }
