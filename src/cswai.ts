@@ -281,7 +281,10 @@ class CSWAI_customPaths extends BaseCPU {
             }
         }
 
-        const scanResult: Direction = this.plusShapedScan(10);
+        const scanResult: Direction =
+            this.BTankInst.playerInstance.isHidden
+            ? -1
+            : this.plusShapedScan(10);
         if (scanResult > -1) {
             this.stop();
             this.setDirectionAndAccel(scanResult, 0);

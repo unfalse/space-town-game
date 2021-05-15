@@ -414,6 +414,9 @@ class Game {
         if (this.keys[Utils.KEY_CODE.s_KEY as keyof Keys]) {
             this.player1.stop();
         }
+        if (this.keys[Utils.KEY_CODE.h_KEY as keyof Keys]) {
+            this.BTankInst.playerInstance.isHidden = !this.BTankInst.playerInstance.isHidden;
+        }
     }
 }
 

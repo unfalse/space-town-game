@@ -86,10 +86,10 @@ Images.loadManyImages = function (
     imagePaths: Array<string>,
     targetImages: Array<Images>,
 ) {
-    return new Promise((allResolved: Function) => {
+    return new Promise((allResolved: (value?: unknown) => void) => {
         const ps: Array<Promise<unknown>> = imagePaths.map(
             (ip: string) =>
-                new Promise((resolve: Function) => {
+                new Promise((resolve: (value?: unknown) => void) => {
                     const newImage = new Images(ip, function () {
                         resolve(newImage);
                     });

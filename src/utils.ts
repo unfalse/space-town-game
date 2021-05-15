@@ -7,6 +7,7 @@ export const Utils = {
         RIGHT: 'ArrowRight',
         DOWN: 'ArrowDown',
         a_KEY: 'a',
+        h_KEY: 'h',
         s_KEY: 's',
         F1_KEY: 'F1',
         N1_KEY: '1',

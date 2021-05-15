@@ -7,11 +7,13 @@ class Player extends BaseCSW {
     PLAYER_BULLETS_INTERVAL: number;
     accel: number;
     stopAccel: boolean;
+    isHidden: boolean;
 
     constructor() {
         super();
         this.type = CONST.USER;
         this.PLAYER_BULLETS_INTERVAL = 700;
+        this.isHidden = false;
     }
 
     childInit(): void {

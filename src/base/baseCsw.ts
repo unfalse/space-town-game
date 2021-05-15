@@ -5,6 +5,7 @@ import { BTankManager } from '../btank';
 import { ObjectsFactory } from '../objFactory';
 import { BaseGameObject } from './baseGameObj';
 import { Bullet } from '../bullet';
+import { Player } from '../player';
 
 type InertiaDirections = { [key in Direction]: number };
 
@@ -281,7 +282,9 @@ export class BaseCSW extends BaseGameObject {
                     this,
                     [ObjectType.SHIP],
                 );
-                if (found) {
+                if (found &&
+                    (found.hasOwnProperty('isHidden') 
+                        && !(found as Player).isHidden)) {
                     ux = 0;
                     uy = 0;
                     this.inertiaDirections[direction] = 0;
