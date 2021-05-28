@@ -282,9 +282,12 @@ export class BaseCSW extends BaseGameObject {
                     this,
                     [ObjectType.SHIP],
                 );
-                if (found &&
-                    (found.hasOwnProperty('isHidden') 
-                        && !(found as Player).isHidden)) {
+                if (
+                    found &&
+                    (found.type === CONST.USER
+                        ? !(found as Player).isHidden
+                        : true)
+                ) {
                     ux = 0;
                     uy = 0;
                     this.inertiaDirections[direction] = 0;

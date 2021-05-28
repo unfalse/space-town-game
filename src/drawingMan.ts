@@ -287,10 +287,11 @@ export class DrawingManager {
 
     drawBackground() {
         const relXY = this.gameCam.getRelCoords(0, 0);
-        const blackHeight =
-            CONST.SCREENMAXY * CONST.CELLSIZES.MAXY * CONST.SCALE.Y;
-        const blackWidth =
-            CONST.SCREENMAXX * CONST.CELLSIZES.MAXX * CONST.SCALE.X;
+        const blackHeight = document.body.clientHeight;
+        // CONST.SCREENMAXY * CONST.CELLSIZES.MAXY * CONST.SCALE.Y;
+        const blackWidth = document.body.clientWidth;
+        // CONST.SCREENMAXX * CONST.CELLSIZES.MAXX * CONST.SCALE.X;
+
         this.imagesStore.blackbackgroundImage.draw(
             0,
             0,

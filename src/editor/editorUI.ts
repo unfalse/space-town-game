@@ -60,7 +60,7 @@ class EditorUI {
         this.editorInst.editorMode = !this.editorInst.editorMode;
         if (this.editorInst.editorMode) {
             this.editorBlock.style.display = 'flex';
-            this.editorBlock.style.justifyContent = 'center';
+            // this.editorBlock.style.justifyContent = 'center';
 
             this.editorCurrentObject.style.backgroundImage = this.editorInst.editorCurrentObjectBrush.imageUrl;
             this.editorCurrentObject.style.width = '40px';

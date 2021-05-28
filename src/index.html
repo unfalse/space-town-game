@@ -9,13 +9,23 @@
 
   <body>
 
-    <div id="titleBlock">
+    <div id="container">
 
-      <!-- <canvas id="gameInfo" height="70" width="500"></canvas> -->
+      <div id="gameOverBlock"></div>
+      <button id="playAgainBtn" onclick="location.reload();">
+        Play again
+      </button>
+
+      <canvas id="gameField">
+        Please, upgrade your browser.
+      </canvas>
+
+      <div id="titleBlock">
+        <div id="editorFileList"></div>
+      </div>
 
       <div id="editorBlock">
-        <div id="editorCurrentObject">
-
+        <div id="editorCurrentObject">  
         </div>
         <button id="editorNewBtn" disabled>
           New
@@ -33,38 +43,7 @@
           Play
         </button>
       </div>
-      <div id="editorFileList"></div>
-      <div id="todoList" style="display: none;">
-        <ul>
-          <li>add deploy instructions in readme (how to build and then run pm2)</li>
-          <li>place editor buttons at the top of game field but not above it (popup)</li>
-          <li>place a label Space Town at the top left corner</li>
-          <li>write a help for editor</li>
-          <li>use nodemon and concurrently packages to run server and webpack-dev-server in parallel</li>
-        </ul>
-      </div>
-    </div>
 
-    <div style="display: flex; justify-content: center; align-items: center;">
-
-      <div id="gameOverBlock"></div>
-      <button id="playAgainBtn" onclick="location.reload();">
-        Play again
-      </button>
-
-      <canvas
-        id="gameField"
-        height="1000"
-        width="1000"
-        style="border: 1px solid white;"
-        >Please, upgrade your browser.</canvas
-      >
-
-    </div>
-
-    <div style="text-align: center; color: gray;">
-      Controls:<br />
-      arrow keys - to move; eng. "a" - to shoot
     </div>
 </body>
 </html>

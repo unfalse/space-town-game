@@ -1,0 +1,5 @@
+ - add deploy instructions in readme (how to build and then run pm2)
+(DONE) place editor buttons at the top of game field but not above it (popup)
+ - place a label Space Town at the top left corner
+ - write a help for editor
+(DONE) use nodemon and concurrently packages to run server and webpack-dev-server in parallel

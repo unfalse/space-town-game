@@ -48,10 +48,14 @@ export class BTankManager {
             'gameField',
         ) as HTMLCanvasElement;
 
-        gameField.height =
-            CONST.SCREENMAXY * CONST.CELLSIZES.MAXY * CONST.SCALE.Y;
-        gameField.width =
-            CONST.SCREENMAXX * CONST.CELLSIZES.MAXX * CONST.SCALE.X;
+        gameField.height = document.body.clientHeight;
+        // CONST.SCREENMAXY * CONST.CELLSIZES.MAXY * CONST.SCALE.Y;
+
+        gameField.width = document.body.clientWidth;
+        // CONST.SCREENMAXX * CONST.CELLSIZES.MAXX * CONST.SCALE.X;
+
+        CONST.CAM.CENTERY = gameField.height / 2;
+        CONST.CAM.CENTERX = gameField.width / 2;
 
         // TODO: create new ui class and move these things to it
         // this.gameInfo = document.getElementById("gameInfo");
