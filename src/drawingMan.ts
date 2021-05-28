@@ -127,6 +127,7 @@ export class DrawingManager {
     imagesStore: ImagesStore;
     gameCam: Camera;
     dimensions: Dimensions;
+    // TODO: place here in-memory canvas
 
     constructor(imagesStoreInstance: ImagesStore, cameraInstance: Camera) {
         this.imagesStore = imagesStoreInstance;

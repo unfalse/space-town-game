@@ -5,14 +5,17 @@ type InternalOnLoadHandler = () => void;
 export class Images {
     image: HTMLImageElement;
     loaded: boolean;
+
     static loadImage: (
         imagePath: string,
         onLoad: OnLoadHandler,
     ) => Promise<unknown>;
+
     static loadManyImages: (
         imagePaths: Array<string>,
         targetImages: Array<Images>,
     ) => Promise<unknown>;
+
     static drawContext: CanvasRenderingContext2D;
 
     constructor(src: string, onLoadHandler: InternalOnLoadHandler) {

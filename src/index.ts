@@ -163,6 +163,8 @@ class Game {
                 },
             );
         }
+
+        // TODO: copy image from in-memory canvas to screen canvas
     }
 
     gameCycle(timestamp: number) {
