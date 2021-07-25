@@ -4,6 +4,7 @@ class EditorUI {
     editorInst: Editor;
     editorBlock: HTMLDivElement;
     editorCurrentObject: HTMLDivElement;
+    buttons: Record<string, HTMLButtonElement> = {};
 
     constructor(editorInst: Editor) {
         this.editorInst = editorInst;
@@ -14,36 +15,36 @@ class EditorUI {
         this.editorCurrentObject = document.querySelector(
             '#editorCurrentObject',
         );
-        const editorNewBtn = document.querySelector('#editorNewBtn');
-        const editorPlayBtn = document.querySelector('#editorPlayBtn');
-        const editorSaveBtn = document.querySelector('#editorSaveBtn');
-        const editorSaveAsBtn = document.querySelector('#editorSaveAsBtn');
-        const editorLoadBtn = document.querySelector('#editorLoadBtn');
+        this.buttons['new'] = document.querySelector('#editorNewBtn');
+        this.buttons['play'] = document.querySelector('#editorPlayBtn');
+        this.buttons['save'] = document.querySelector('#editorSaveBtn');
+        this.buttons['saveas'] = document.querySelector('#editorSaveAsBtn');
+        this.buttons['load'] = document.querySelector('#editorLoadBtn');
         const editorFileListContainer = document.querySelector(
             '#editorFileList',
         );
 
-        editorNewBtn.addEventListener(
+        this.buttons['new'].addEventListener(
             'click',
             this.editorInst.newEditorLevel.bind(this.editorInst),
         );
 
-        editorPlayBtn.addEventListener(
+        this.buttons['play'].addEventListener(
             'click',
             this.editorInst.playEditorLevel.bind(this.editorInst),
         );
 
-        editorSaveBtn.addEventListener(
+        this.buttons['save'].addEventListener(
             'click',
             this.editorInst.saveEditorLevel.bind(this.editorInst),
         );
 
-        editorSaveAsBtn.addEventListener(
+        this.buttons['saveas'].addEventListener(
             'click',
             this.editorInst.saveAsEditorLevel.bind(this.editorInst),
         );
 
-        editorLoadBtn.addEventListener(
+        this.buttons['load'].addEventListener(
             'click',
             this.editorInst.showLevelChooseDialog.bind(
                 this.editorInst,
@@ -54,6 +55,18 @@ class EditorUI {
 
     setEditorCurrentObjectIconImage(): void {
         this.editorCurrentObject.style.backgroundImage = this.editorInst.editorCurrentObjectBrush.imageUrl;
+    }
+
+    enableButton(name: string): void {
+        if (this.buttons[name]) {
+            this.buttons[name].disabled = false;
+        }
+    }
+
+    disableButton(name: string): void {
+        if (this.buttons[name]) {
+            this.buttons[name].disabled = true;
+        }
     }
 
     toggleEditorControls(): void {

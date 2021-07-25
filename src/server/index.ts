@@ -73,6 +73,7 @@ app.get('/level', function (request: any, response: any) {
 
 app.post('/save', function (request: any, response: any) {
     const newLevel = request.body;
+    console.log(newLevel);
     const contents = getFileContents();
     const newLevels = contents.levels.map(level => {
         if (level.id === newLevel.id) {

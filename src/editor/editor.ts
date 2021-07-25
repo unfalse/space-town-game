@@ -64,6 +64,9 @@ export class Editor {
         this.editorGhosts = [];
         this.currentShipWithWaypoints = null;
         this.playerCell = { x: 0, y: 0 };
+        this.editorUI.disableButton('new');
+        this.editorUI.disableButton('save');
+        this.editorUI.disableButton('saveas');
     }
 
     newEditorLevel(): void {
