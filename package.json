@@ -14,15 +14,16 @@
     "lint": "eslint . --ext .ts",
     "prettier": "prettier",
     "server": "yarn build && yarn compile && node dist/server/index.js",
-    "serverfast": "yarn build:dev && yarn compile && node dist/server/index.js",
-    "server:dev": "yarn compile && node dist/server/index.js",
+    "server:fast": "yarn build:dev && yarn compile && node dist/server/index.js",
+    "server:compile": "yarn compile && node dist/server/index.js",
+    "server:dev": "yarn build:dev && yarn compile && node dist/server/index.js",
     "start": "webpack-dev-server --mode=development",
     "type-check": "tsc --noEmit",
     "watch": "webpack --watch",
     "devserver": "nodemon src/server/index.ts",
     "devclient": "nodemon --watch src --ignore src/server/index.ts --exec yarn server",
     "devboth": "nodemon -e ts --watch src/server/index.ts --watch src --ignore src/server/index.ts --exec yarn server",
-    "dev": "nodemon -e ts,html,css --watch src --exec yarn serverfast --delay 5"
+    "dev": "nodemon -e ts,html,css --watch src --exec yarn server:fast --delay 5"
   },
   "devDependencies": {
     "@types/cors": "^2.8.8",
