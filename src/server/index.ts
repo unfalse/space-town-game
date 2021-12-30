@@ -26,7 +26,7 @@ app.options('*', cors());
 
 app.use(express.static(gameApp()));
 
-console.log('Server is running on port', PORT);
+console.log(`[${new Date().toLocaleString('ru-RU')}] Server is running on port`, PORT);
 
 const getFileContents = (): Contents =>
     JSON.parse(
