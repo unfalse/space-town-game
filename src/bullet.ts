@@ -70,7 +70,7 @@ export class Bullet extends BaseGameObject {
                 default:
                     break;
             }
-        } else if (typeof nd === 'object') {
+        } else if (typeof nd === 'object' && nd != null) {
             const newX: NewXY = { 0: width / 2, 1: width, '-1': -1 };
             const newY: NewXY = { 0: height / 2, 1: height + 1, '-1': -1 };
             x = nx + newX[nd.vx];
