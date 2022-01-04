@@ -133,11 +133,11 @@ export class DrawingManager {
         this.gameCam = cameraInstance;
     }
 
-    init() {
+    init(): Promise<unknown[]> {
         return this.imagesStore.init();
     }
 
-    initDimensions(who: Who) {
+    initDimensions(who: Who): Dimensions {
         return {
             0: this.getShipDimensions(0, who),
             1: this.getShipDimensions(1, who),
@@ -160,7 +160,7 @@ export class DrawingManager {
 
     // user
     // TODO: move entirely to the player class
-    drawcswmt9(x: number, y: number, d: Direction) {
+    drawcswmt9(x: number, y: number, d: Direction): void {
         // console.log(["gamecam:", this.gameCam.x, this.gameCam.y]);
         this.imagesStore.playerImages[d].draw(
             x,
@@ -173,7 +173,7 @@ export class DrawingManager {
         // this.drawContext.lineWidth=0.1;
     }
 
-    drawcswmt9ghost(x: number, y: number, d: Direction) {
+    drawcswmt9ghost(x: number, y: number, d: Direction): void {
         const relXY = this.gameCam.getRelCoords(x, y);
         this.imagesStore.playerImages[d].draw(
             relXY.x,
@@ -184,7 +184,7 @@ export class DrawingManager {
     }
 
     // cpu
-    drawcswmt5(x: number, y: number, d: Direction) {
+    drawcswmt5(x: number, y: number, d: Direction): void {
         const relXY = this.gameCam.getRelCoords(x, y);
         this.imagesStore.cpuImages[d].draw(
             relXY.x,
@@ -196,7 +196,7 @@ export class DrawingManager {
         // this.drawContext.strokeRect(x, y, 39,39);
     }
 
-    drawObstacle(x: number, y: number) {
+    drawObstacle(x: number, y: number): void {
         const relXY = this.gameCam.getRelCoords(x, y);
         this.imagesStore.obstacleImage.draw(
             relXY.x,
@@ -208,7 +208,7 @@ export class DrawingManager {
         // this.drawContext.strokeRect(x, y, 39,39);
     }
 
-    drawBorder(x: number, y: number) {
+    drawBorder(x: number, y: number): void {
         const relXY = this.gameCam.getRelCoords(x, y);
         this.imagesStore.borderImage.draw(
             relXY.x,
@@ -220,7 +220,7 @@ export class DrawingManager {
         // this.drawContext.strokeRect(x, y, 39,39);
     }
 
-    drawStaticShip(x: number, y: number) {
+    drawStaticShip(x: number, y: number): void {
         const relXY = this.gameCam.getRelCoords(x, y);
         this.imagesStore.cpuImages[0].draw(
             relXY.x,
@@ -232,7 +232,7 @@ export class DrawingManager {
         // this.drawContext.strokeRect(x, y, 39,39);
     }
 
-    drawSpaceBrick(x: number, y: number, n: number) {
+    drawSpaceBrick(x: number, y: number, n: number): void {
         const relXY = this.gameCam.getRelCoords(x, y);
         this.imagesStore.spaceBrickImages[n].draw(
             relXY.x,
@@ -242,7 +242,7 @@ export class DrawingManager {
         );
     }
 
-    drawWayPoint(x: number, y: number, n: number) {
+    drawWayPoint(x: number, y: number, n: number): void {
         const relXY = this.gameCam.getRelCoords(x, y);
         this.imagesStore.counterImages[n].draw(
             relXY.x,
@@ -252,7 +252,7 @@ export class DrawingManager {
         );
     }
 
-    drawCounter(x: number, y: number, n: number) {
+    drawCounter(x: number, y: number, n: number): void {
         const relXY = this.gameCam.getRelCoords(x, y);
         this.imagesStore.counterImages[n].draw(
             relXY.x,
@@ -262,7 +262,7 @@ export class DrawingManager {
         );
     }
 
-    DrawCrash(x: number, y: number, frameNumber: number) {
+    DrawCrash(x: number, y: number, frameNumber: number): void {
         const relXY = this.gameCam.getRelCoords(x, y);
         this.imagesStore.crashImages[frameNumber].draw(
             relXY.x,
@@ -273,19 +273,19 @@ export class DrawingManager {
         // this.crashImage.draw(x, y, 0, onDelayEnd);
     }
 
-    drawPlayerBullet(x: number, y: number) {
+    drawPlayerBullet(x: number, y: number): void {
         Images.drawContext.fillStyle = '#F00';
         const relXY = this.gameCam.getRelCoords(x, y);
         Images.drawContext.fillRect(relXY.x, relXY.y, 4, 4);
     }
 
-    drawCPUBullet(x: number, y: number) {
+    drawCPUBullet(x: number, y: number): void {
         Images.drawContext.fillStyle = '#FF0';
         const relXY = this.gameCam.getRelCoords(x, y);
         Images.drawContext.fillRect(relXY.x, relXY.y, 4, 4);
     }
 
-    drawBackground() {
+    drawBackground(): void {
         const relXY = this.gameCam.getRelCoords(0, 0);
         const blackHeight = document.body.clientHeight;
         // CONST.SCREENMAXY * CONST.CELLSIZES.MAXY * CONST.SCALE.Y;

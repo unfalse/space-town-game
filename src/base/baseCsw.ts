@@ -5,7 +5,7 @@ import { BTankManager } from '../btank';
 import { ObjectsFactory } from '../objFactory';
 import { BaseGameObject } from './baseGameObj';
 import { Bullet } from '../bullet';
-import { Player } from '../player';
+// import { Player } from '../player';
 
 type InertiaDirections = { [key in Direction]: number };
 
@@ -92,11 +92,11 @@ export class BaseCSW extends BaseGameObject {
         return null;
     }
 
-    setGhost(ghost: boolean) {
+    setGhost(ghost: boolean): void {
         this.ghost = ghost;
     }
 
-    draw() {
+    draw(): void {
         this.drawingManagerInst.drawcswmt5(this.x, this.y, this.d);
     }
 
@@ -274,20 +274,16 @@ export class BaseCSW extends BaseGameObject {
         }
 
         const disableCollisionChecks = false;
+        const disableCollisionsWithShips = false;
         if (!disableCollisionChecks) {
             if (ux != 0 || uy != 0) {
                 const found = this.BTankInst.checkIfTwoShipsCross(
                     this.x + ux, //Math.floor(ux), //Math.ceil(ux),
                     this.y + uy, //Math.floor(uy),//Math.ceil(uy),
                     this,
-                    [ObjectType.SHIP],
+                    disableCollisionsWithShips ? null : [ObjectType.SHIP],
                 );
-                if (
-                    found &&
-                    (found.type === CONST.USER
-                        ? !(found as Player).isHidden
-                        : true)
-                ) {
+                if (found) {
                     ux = 0;
                     uy = 0;
                     this.inertiaDirections[direction] = 0;
@@ -316,7 +312,7 @@ export class BaseCSW extends BaseGameObject {
         this.draw();
     }
 
-    hitByBullet(bulletInstance: Bullet): void {
+    hitByBullet(_bulletInstance: Bullet): void {
         return null;
     }
 }

@@ -26,14 +26,17 @@ app.options('*', cors());
 
 app.use(express.static(gameApp()));
 
-console.log(`[${new Date().toLocaleString('ru-RU')}] Server is running on port`, PORT);
+console.log(
+    `[${new Date().toLocaleString('ru-RU')}] Server is running on port`,
+    PORT,
+);
 
 const getFileContents = (): Contents =>
     JSON.parse(
         fs.readFileSync(process.cwd() + '/src/server/' + filename).toString(),
     );
 
-app.get('/', (req, res) => {
+app.get('/', (_req, res) => {
     res.sendFile(gameApp('index.html'));
 });
 
