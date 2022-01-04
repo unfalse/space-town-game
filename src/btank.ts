@@ -43,7 +43,7 @@ export class BTankManager {
         this.playerInstance = player;
     }
 
-    init() {
+    init(): void {
         const gameField: HTMLCanvasElement = document.getElementById(
             'gameField',
         ) as HTMLCanvasElement;
@@ -139,7 +139,7 @@ export class BTankManager {
         height--;
 
         const tArr = this.cswArr.filter((csw: BaseCSW) => {
-            if (whoAsks === csw || typesToIgnore.indexOf(csw.type) >= 0) {
+            if (whoAsks === csw || typesToIgnore?.indexOf(csw.type) >= 0) {
                 return false;
             }
 
@@ -211,8 +211,8 @@ export class BTankManager {
         this.cswArr.push(ship);
     }
 
-    setPlayer(player: BaseCSW): void {
-        this.playerInstance = <Player>player;
+    setPlayer(player: Player): void {
+        this.playerInstance = player;
     }
 
     // TODO: move into the ParticleManager (define it firstly)
@@ -241,17 +241,17 @@ export class BTankManager {
         this.cswArr = this.cswArr.filter(s => s !== ship);
     }
 
-    destroyAll() {
+    destroyAll(): void {
         this.cswArr = [];
     }
 
-    showGameOver() {
+    showGameOver(): void {
         this.gameOverBlock.innerText = 'GAME OVER';
         this.againBtn.style.display = 'block';
         this.gameOverBlock.style.display = 'block';
     }
 
-    showWin() {
+    showWin(): void {
         this.againBtn.style.display = 'block';
         this.gameOverBlock.innerText = 'YOU WIN';
         this.gameOverBlock.style.display = 'block';

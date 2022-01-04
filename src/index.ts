@@ -138,7 +138,7 @@ class Game {
         );
     }
 
-    editorCycle(timestamp: number) {
+    editorCycle(_timestamp: number) {
         this.detectEditorMovement();
         // player1.update();
         // gameCam.setCoords(player1.x, player1.y);
@@ -416,7 +416,8 @@ class Game {
             this.player1.stop();
         }
         if (this.keys[Utils.KEY_CODE.h_KEY as keyof Keys]) {
-            this.BTankInst.playerInstance.isHidden = !this.BTankInst.playerInstance.isHidden;
+            this.BTankInst.playerInstance.isHidden =
+                !this.BTankInst.playerInstance.isHidden;
         }
     }
 }

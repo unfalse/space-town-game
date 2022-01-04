@@ -4,7 +4,6 @@ import { BaseGameObject } from './base/baseGameObj';
 import { BTankManager } from './btank';
 import { CONST } from './const';
 import { DelayedPic } from './delayedPic';
-import { DrawingManager } from './drawingMan';
 import { Direction, Who } from './types';
 
 type NewXY = {

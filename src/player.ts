@@ -3,21 +3,25 @@ import { Bullet } from './bullet';
 import { CONST } from './const';
 import { Direction, Who } from './types';
 
+const MAX_LIFE = 1;
+
 class Player extends BaseCSW {
     PLAYER_BULLETS_INTERVAL: number;
     accel: number;
     stopAccel: boolean;
     isHidden: boolean;
+    isImmortal: boolean;
 
     constructor() {
         super();
         this.type = CONST.USER;
         this.PLAYER_BULLETS_INTERVAL = 700;
         this.isHidden = false;
+        this.isImmortal = true;
     }
 
     childInit(): void {
-        this.maxlife = 100;
+        this.maxlife = MAX_LIFE;
         this.life = this.maxlife;
     }
 
@@ -25,7 +29,7 @@ class Player extends BaseCSW {
         this.accel += value;
     }
 
-    draw(ghost?: boolean) {
+    draw(ghost?: boolean): void {
         if (ghost) {
             this.drawingManagerInst.drawcswmt9ghost(this.x, this.y, this.d);
         } else {
@@ -57,7 +61,7 @@ class Player extends BaseCSW {
     }
 
     // TODO: maybe move acceleration, direction and inertia control functions into the separate class
-    setDirectionAndAddAccel(d: Direction, accel: number) {
+    setDirectionAndAddAccel(d: Direction, accel: number): void {
         this.d = d;
 
         // TODO: not sure if it's a right place to change inertia directions
@@ -79,6 +83,7 @@ class Player extends BaseCSW {
     }
 
     hitByBullet(bulletInstance: Bullet): void {
+        if (this.isImmortal) return;
         if (bulletInstance.parentShip.iam === CONST.COMPUTER) {
             if (this.iam === CONST.USER) {
                 this.life--;

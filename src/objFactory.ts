@@ -112,9 +112,9 @@ export class ObjectsFactory {
     createBaseObj(
         x: number,
         y: number,
-        who: Who, // TODO: this field should be in ship class (csw or cswai or obstacle)
+        _who: Who, // TODO: this field should be in ship class (csw or cswai or obstacle)
         typeParam?: ObjectType,
-        ghost?: boolean,
+        _ghost?: boolean,
     ): BaseGameObject {
         let c1 = null;
         const type = typeParam || ObjectType.SHIP;
@@ -125,7 +125,7 @@ export class ObjectsFactory {
         }
     }
 
-    initBaseCSW(obj: BaseCSW, x: number, y: number, who: Who) {
+    initBaseCSW(obj: BaseCSW, x: number, y: number, who: Who): void {
         obj.init(
             x,
             y,
@@ -141,7 +141,7 @@ export class ObjectsFactory {
         x: number,
         y: number,
         d?: Direction,
-    ) {
+    ): void {
         obj.init(x, y, d, this.drawingManagerInst, this.bTankManagerInst, this);
     }
 }
