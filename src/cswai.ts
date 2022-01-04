@@ -326,6 +326,7 @@ class StaticShip extends BaseCSW {
     constructor() {
         super();
         this.type = CONST.TYPES.SHIP;
+        // this.BTankInst.staticCollisionGrid
     }
 
     draw(): void {
@@ -341,6 +342,7 @@ class SpaceBrick extends BaseCSW {
 
     childInit(): void {
         this.life = 9;
+        this.addThisObjectToStaticGrid(this.x, this.y);
     }
 
     draw(): void {

@@ -8,6 +8,14 @@ import { Player } from './player';
 import { Ghosts } from './ghosts';
 // import { IPlayer } from './interfaces';
 
+type CollisionGridColumns = {
+    [key in number]: BaseCSW[];
+};
+
+export type CollisionGridRows = {
+    [key in number]: CollisionGridColumns;
+};
+
 // -------------------------------------
 //    TOFIX! bullet dep propagation
 // -------------------------------------
@@ -31,6 +39,9 @@ export class BTankManager {
     // gameCam: Camera;
     playerInstance: Player;
 
+    dynamicCollisionGrid: CollisionGridRows;
+    staticCollisionGrid: CollisionGridRows;
+
     constructor(player: Player) {
         // TODO: write the full paths to classes
         this.cswArr = [];
@@ -41,6 +52,8 @@ export class BTankManager {
         this.againBtn = null;
         this.gameOverBlock = null;
         this.playerInstance = player;
+        this.dynamicCollisionGrid = [];
+        this.staticCollisionGrid = [];
     }
 
     init(): void {

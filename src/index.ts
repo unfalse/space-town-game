@@ -172,9 +172,14 @@ class Game {
             this.cameraInst.setCoords(this.player1.x, this.player1.y);
         }
 
+        // temporarily disabled bullets
+        // I will deal with their collisions later
+        // when collisions with ships will be finished
+        /*
         this.BTankInst.getAllBullets().forEach(bullet => {
             bullet.fly();
         });
+        */
 
         this.BTankInst.getAllShips().forEach(ship => {
             ship.update(timestamp);

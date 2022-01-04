@@ -1,6 +1,11 @@
 import { CONST } from '../const';
 import { Direction } from '../types';
 
+export type PointXY = {
+    x: number;
+    y: number;
+}
+
 export class BaseCoordinates {
     x: number;
     y: number;

@@ -8,6 +8,7 @@ import { ObjectsFactory } from '../objFactory';
 import { placeBorders } from '../drawUtils';
 import { EditorUI } from './editorUI';
 import { Ghosts } from '../ghosts';
+import { Player } from '../player';
 
 const PORT = process.env.NODE_ENV === 'production' ? 80 : port;
 
@@ -86,7 +87,7 @@ export class Editor {
     }
 
     playEditorLevel(): void {
-        const player = this.BTankInst.getAllShips()[0];
+        const player = this.BTankInst.getAllShips()[0] as Player;
         this.BTankInst.destroyAll();
 
         // TODO: add player1 to the empty array

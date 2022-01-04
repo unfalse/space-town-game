@@ -1,10 +1,11 @@
 import { CONST } from '../const';
 import { Dimensions, Direction, ObjectType, Who } from '../types';
 import { DrawingManager } from '../drawingMan';
-import { BTankManager } from '../btank';
+import { BTankManager, CollisionGridRows } from '../btank';
 import { ObjectsFactory } from '../objFactory';
 import { BaseGameObject } from './baseGameObj';
 import { Bullet } from '../bullet';
+import { PointXY } from './baseCoord';
 // import { Player } from '../player';
 
 type InertiaDirections = { [key in Direction]: number };
@@ -273,7 +274,7 @@ export class BaseCSW extends BaseGameObject {
             return;
         }
 
-        const disableCollisionChecks = false;
+        const disableCollisionChecks = true;
         const disableCollisionsWithShips = false;
         if (!disableCollisionChecks) {
             if (ux != 0 || uy != 0) {
@@ -293,6 +294,65 @@ export class BaseCSW extends BaseGameObject {
         }
         this.x = this.x + ux;
         this.y = this.y + uy;
+
+        this.updateCollisionGrid(direction);
+    }
+
+    // collision detection: broad phase
+    updateCollisionGrid(direction: Direction): void {
+        const { width, height } = this.dimensions[direction];
+        // TODO: check if object is already in grid's cell so there's no need to add it
+        // pass only direction ?
+        this.addFourPointsToDynamicGrid(this.x, this.y, width, height);
+    }
+
+    addFourPointsToDynamicGrid(
+        x: number,
+        y: number,
+        width: number,
+        height: number,
+    ): void {
+        this.addThisObjectToDynamicGrid(this.x, this.y);
+        this.addThisObjectToDynamicGrid(this.x + width, this.y);
+        this.addThisObjectToDynamicGrid(this.x, this.y + height);
+        this.addThisObjectToDynamicGrid(this.x + width, this.y + height);
+    }
+
+    addFourPointsToStaticGrid(
+        x: number,
+        y: number,
+        width: number,
+        height: number,
+    ): void {
+        this.addThisObjectToStaticGrid(this.x, this.y);
+        this.addThisObjectToStaticGrid(this.x + width, this.y);
+        this.addThisObjectToStaticGrid(this.x, this.y + height);
+        this.addThisObjectToStaticGrid(this.x + width, this.y + height);
+    }
+
+    addThisObjectToGrid(x: number, y: number, grid: CollisionGridRows): void {
+        const gridPoint: PointXY = {
+            x: Math.floor(x / CONST.COLLISION_GRID.WIDTH),
+            y: Math.floor(y / CONST.COLLISION_GRID.HEIGHT),
+        };
+        let gridRow = grid[gridPoint.y];
+        if (!gridRow) {
+            gridRow = {};
+        }
+        let gridCell = gridRow[gridPoint.x];
+        if (!gridCell) {
+            gridCell = [];
+        }
+        gridCell.push(this);
+    }
+
+    // TODO: check memory usage on cleanup
+    addThisObjectToDynamicGrid(x: number, y: number): void {
+        this.addThisObjectToGrid(x, y, this.BTankInst.dynamicCollisionGrid);
+    }
+
+    addThisObjectToStaticGrid(x: number, y: number): void {
+        this.addThisObjectToGrid(x, y, this.BTankInst.staticCollisionGrid);
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
