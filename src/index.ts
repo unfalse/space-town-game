@@ -218,6 +218,37 @@ class Game {
     processCollisions() {
         // process collisions
         console.log('processing collisions, please wait...');
+        const btank = this.BTankInst;
+        const dynamicGrid = btank.dynamicCollisionGrid;
+        const staticGrid = btank.staticCollisionGrid;
+        const rows = Object.keys(dynamicGrid);
+
+        for (const rowNum of rows) {
+            const row = dynamicGrid[Number(rowNum)];
+            const columns = Object.keys(row);
+            const staticRow = staticGrid[Number(rowNum)];
+
+            for (const columnNum of columns) {
+                const ships = row[Number(columnNum)];
+                const column = staticRow ? staticRow[Number(columnNum)] : [];
+                const obstacles = column || [];
+                const objectsToCheck = ships.concat(obstacles);
+                if (objectsToCheck.length > 1) {
+                    for (const gameObject of objectsToCheck) {
+                        const collision = this.BTankInst.checkIfTwoObjectsCrossInsideACell(
+                            gameObject,
+                            objectsToCheck,
+                        );
+                        if (collision) {
+                            // console.log('collision!');
+                            // console.log(collision);
+                            // debugger;
+                        }
+                    }
+                }
+            }
+        }
+
         // clear dynamic grid
         this.BTankInst.dynamicCollisionGrid = [];
     }

@@ -171,6 +171,69 @@ export class BTankManager {
         return tArr.length > 0 ? tArr[0] : null;
     }
 
+    checkIfTwoObjectsCrossInsideACell(
+        whoAsks: BaseCSW,
+        objects: BaseCSW[],
+        typesToIgnore?: ObjectType[],
+    ): unknown {
+        // const debugDraw = (function(x,y,w,h) {
+        //     this.drawContext.strokeStyle = "#0f0";
+        //     this.drawContext.strokeRect(x, y, w, h);
+        // }).bind(this);
+        // const typeToCheck = typeToCheckParam || CONST.TYPES.SHIP;
+
+        const checkSquare = (csw: BaseCSW, x: number, y: number) => {
+            let { width, height } = csw.dimensions[csw.d];
+            width--;
+            height--;
+            // debugDraw(csw.x, csw.y, width, height);
+
+            return (
+                x >= csw.x &&
+                x <= csw.x + width &&
+                y >= csw.y &&
+                y <= csw.y + height
+            );
+        };
+
+        let { width, height } = whoAsks.dimensions[whoAsks.d];
+        const { x, y } = whoAsks;
+        width--;
+        height--;
+
+        const tArr = objects
+            .map((csw: BaseCSW) => {
+                if (whoAsks === csw || typesToIgnore?.indexOf(csw.type) >= 0) {
+                    return false;
+                }
+
+                const result = [
+                    // left top
+                    checkSquare(csw, x, y),
+                    // right top
+                    checkSquare(csw, x + width, y),
+                    // left bottom
+                    checkSquare(csw, x, y + height),
+                    // right bottom
+                    checkSquare(csw, x + width, y + height),
+                    // center up
+                    checkSquare(csw, x + width / 2, y),
+                    // left center
+                    checkSquare(csw, x, y + height / 2),
+                    // right center
+                    checkSquare(csw, x + width, y + height / 2),
+                    // center bottom
+                    checkSquare(csw, x + width / 2, y + height),
+                ];
+                return result.includes(true)
+                    ? { result, collidedObject: csw }
+                    : undefined;
+            }, this)
+            .filter(obj => !!obj);
+
+        return tArr.length > 0 ? tArr[0] : null;
+    }
+
     getBulletWithPixelPrecision(
         x: number,
         y: number,
@@ -256,6 +319,8 @@ export class BTankManager {
 
     destroyAll(): void {
         this.cswArr = [];
+        this.dynamicCollisionGrid = [];
+        this.staticCollisionGrid = [];
     }
 
     showGameOver(): void {

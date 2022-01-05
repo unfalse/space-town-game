@@ -54,8 +54,8 @@ const CONST = {
 
     COLLISION_GRID: {
         WIDTH: 200,
-        HEIGHT: 200
-    }
+        HEIGHT: 200,
+    },
 };
 
 export { CONST };
