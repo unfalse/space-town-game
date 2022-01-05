@@ -8,7 +8,7 @@ import { Player } from './player';
 import { Ghosts } from './ghosts';
 // import { IPlayer } from './interfaces';
 
-type CollisionGridColumns = {
+export type CollisionGridColumns = {
     [key in number]: BaseCSW[];
 };
 

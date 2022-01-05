@@ -1,7 +1,7 @@
 import { CONST } from '../const';
 import { Dimensions, Direction, ObjectType, Who } from '../types';
 import { DrawingManager } from '../drawingMan';
-import { BTankManager, CollisionGridRows } from '../btank';
+import { BTankManager, CollisionGridColumns, CollisionGridRows } from '../btank';
 import { ObjectsFactory } from '../objFactory';
 import { BaseGameObject } from './baseGameObj';
 import { Bullet } from '../bullet';
@@ -335,15 +335,22 @@ export class BaseCSW extends BaseGameObject {
             x: Math.floor(x / CONST.COLLISION_GRID.WIDTH),
             y: Math.floor(y / CONST.COLLISION_GRID.HEIGHT),
         };
-        let gridRow = grid[gridPoint.y];
+
+        let gridRow = grid[gridPoint.y] as CollisionGridColumns;
         if (!gridRow) {
-            gridRow = {};
+            grid[gridPoint.y] = {};
+            gridRow = grid[gridPoint.y] as CollisionGridColumns;
         }
-        let gridCell = gridRow[gridPoint.x];
+
+        let gridCell = gridRow[gridPoint.x] as BaseCSW[];
         if (!gridCell) {
-            gridCell = [];
+            gridRow[gridPoint.x] = [];
+            gridCell = gridRow[gridPoint.x] as BaseCSW[];
         }
-        gridCell.push(this);
+
+        if (!gridCell.includes(this)) {
+            gridCell.push(this);
+        }
     }
 
     // TODO: check memory usage on cleanup
@@ -369,7 +376,7 @@ export class BaseCSW extends BaseGameObject {
             }
         }
 
-        this.draw();
+        // this.draw();
     }
 
     hitByBullet(_bulletInstance: Bullet): void {

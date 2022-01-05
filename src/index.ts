@@ -185,6 +185,12 @@ class Game {
             ship.update(timestamp);
         });
 
+        this.processCollisions();
+
+        this.BTankInst.getAllShips().forEach(ship => {
+            ship.draw();
+        });
+
         this.BTankInst.getAllDelayedPics().forEach(pic => {
             pic.draw();
         });
@@ -207,6 +213,13 @@ class Game {
             this.gameOver = true;
         }
         //console.log('cswArr = ', BTank.cswArr.length);
+    }
+
+    processCollisions() {
+        // process collisions
+        console.log('processing collisions, please wait...');
+        // clear dynamic grid
+        this.BTankInst.dynamicCollisionGrid = [];
     }
 
     editorMouseDownHandler(event: MouseEvent) {
@@ -419,8 +432,7 @@ class Game {
             this.player1.stop();
         }
         if (this.keys[Utils.KEY_CODE.h_KEY as keyof Keys]) {
-            this.BTankInst.playerInstance.isHidden =
-                !this.BTankInst.playerInstance.isHidden;
+            this.player1.isHidden = !this.player1.isHidden;
         }
     }
 }

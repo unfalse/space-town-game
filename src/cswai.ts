@@ -306,6 +306,10 @@ class Obstacle extends BaseCSW {
         this.type = CONST.TYPES.OBSTACLE;
     }
 
+    childInit(): void {
+        this.addThisObjectToStaticGrid(this.x, this.y);
+    }
+
     draw(): void {
         this.drawingManagerInst.drawObstacle(this.x, this.y);
     }
