@@ -14,7 +14,6 @@ class Player extends BaseCSW {
 
     constructor() {
         super();
-        this.type = CONST.USER;
         this.PLAYER_BULLETS_INTERVAL = 700;
         this.isHidden = false;
         this.isImmortal = true;

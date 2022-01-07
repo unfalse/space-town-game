@@ -1,7 +1,11 @@
 import { CONST } from '../const';
 import { Dimensions, Direction, ObjectType, Who } from '../types';
 import { DrawingManager } from '../drawingMan';
-import { BTankManager, CollisionGridColumns, CollisionGridRows } from '../btank';
+import {
+    BTankManager,
+    CollisionGridColumns,
+    CollisionGridRows,
+} from '../btank';
 import { ObjectsFactory } from '../objFactory';
 import { BaseGameObject } from './baseGameObj';
 import { Bullet } from '../bullet';
@@ -222,6 +226,16 @@ export class BaseCSW extends BaseGameObject {
         }
     }
 
+    getNewCoordinatesDelta(direction: Direction): any {
+        const nvxy = super.getVXY(direction);
+        const acceleration = this.CSWSPEED + this.inertiaDirections[direction];
+
+        return {
+            ux: nvxy.vx * acceleration,
+            uy: nvxy.vy * acceleration,
+        };
+    }
+
     /*
     
     TODO: make this.x and this.y as the center of csw
@@ -235,11 +249,7 @@ export class BaseCSW extends BaseGameObject {
     
     */
     move(direction: Direction): void {
-        const nvxy = super.getVXY(direction);
-        const acceleration = this.CSWSPEED + this.inertiaDirections[direction];
-
-        let ux = nvxy.vx * acceleration;
-        let uy = nvxy.vy * acceleration;
+        let { ux, uy } = this.getNewCoordinatesDelta(direction);
 
         // get ship dimensions by current direction and 'iam' flag
         let { width, height } = this.dimensions[direction];
@@ -370,7 +380,8 @@ export class BaseCSW extends BaseGameObject {
 
         this.inertiaStartAttempt();
 
-        if (!this.stopAccel) {
+        // cpu ships cannot use inertia!
+        if (!this.stopAccel && this.iam === CONST.COMPUTER) {
             for (let d = 0; d < 4; d++) {
                 this.move(d as Direction);
             }

@@ -23,8 +23,8 @@ export class Bullet extends BaseGameObject {
 
     constructor() {
         super();
-        //this.BULLETSPEED = whoFire ? (whoFire.type === CONST.USER ? 2.5 : 2.5) : 2.5;
-        // this.BULLETSPEED = whoFire ? (whoFire.type === CONST.USER ? 10 : 5) : 5;
+        //this.BULLETSPEED = whoFire ? (whoFire.iam === CONST.USER ? 2.5 : 2.5) : 2.5;
+        // this.BULLETSPEED = whoFire ? (whoFire.iam === CONST.USER ? 10 : 5) : 5;
         this.BULLETSPEED = 30; //100; // 30;
     }
 
