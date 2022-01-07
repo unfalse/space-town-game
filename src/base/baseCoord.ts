@@ -40,7 +40,11 @@ export class BaseCoordinates {
     //   return mapDirections[d];
     // }
 
-    initCoords(nx: number, ny: number, nd = CONST.UP as Direction): void {
+    initCoords(
+        nx: number,
+        ny: number,
+        nd = CONST.DIRECTIONS.UP as Direction,
+    ): void {
         //x: 0, // x coordinate
         //y: 0, // y coordinate
         //d: 0,  // direction { 0 - right > , 1 - down v, 2 - left <, 3 - up ^ }

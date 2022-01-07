@@ -39,10 +39,12 @@ const CONST = {
         CENTERY: 360,
     },
 
-    RIGHT: 0,
-    DOWN: 1,
-    LEFT: 2,
-    UP: 3,
+    DIRECTIONS: {
+        RIGHT: 0,
+        DOWN: 1,
+        LEFT: 2,
+        UP: 3,
+    },
 
     DIR_OPPOSITES: {
         0: 2,

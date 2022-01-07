@@ -14,6 +14,22 @@ import { PointXY } from './baseCoord';
 
 type InertiaDirections = { [key in Direction]: number };
 
+type CheckBoundsParameters = {
+    ux: number,
+    uy: number,
+    width: number,
+    height: number,
+    direction: Direction
+};
+
+type StepsHistory = {
+    x: number;
+    y: number;
+    ux: number;
+    uy: number;
+    direction: Direction;
+};
+
 // TODO: csw: cosmo ship war, the old title
 // TODO: rename csw to something more understandable - tank? SpaceShip ?
 // TODO: maybe the CPU and player should have separate classes? And several base classes.
@@ -37,6 +53,7 @@ export class BaseCSW extends BaseGameObject {
     // y: number;
     type: ObjectType;
     ghost: boolean;
+    stepsHistory: StepsHistory[];
 
     constructor() {
         super();
@@ -172,6 +189,7 @@ export class BaseCSW extends BaseGameObject {
             // this way the momentum will be the same every time till zero acceleration
             // stopAccel should be for every direction!
             // Then inertia will stop fade only for directions which are not accelerated at the moment
+            this.stepsHistory = [];
             for (let d: Direction = 0; d < 4; d++) {
                 if (this.inertiaDirections[d as Direction] > 0) {
                     // this.inertiaDirections[d] -= 0.1;
@@ -236,6 +254,41 @@ export class BaseCSW extends BaseGameObject {
         };
     }
 
+    canItMove({
+        ux,
+        uy,
+        width,
+        height,
+        direction,
+    }: CheckBoundsParameters): unknown {
+        if (
+            this.x + ux + width > CONST.MAXX * CONST.CELLSIZES.MAXX ||
+            this.x + ux < 0
+        ) {
+            if (this.x + ux < 0) this.x = 0;
+            if (this.x + ux + width > CONST.MAXX * CONST.CELLSIZES.MAXX) {
+                this.x = CONST.MAXX * CONST.CELLSIZES.MAXX - width;
+            }
+            this.inertiaDirections[direction] = 0;
+            return false;
+        }
+
+        if (
+            this.y + uy + height > CONST.MAXY * CONST.CELLSIZES.MAXY ||
+            this.y + uy < 0
+        ) {
+            if (this.y + uy < 0) {
+                this.y = 0;
+            }
+            if (this.y + uy + height > CONST.MAXY * CONST.CELLSIZES.MAXY) {
+                this.y = CONST.MAXY * CONST.CELLSIZES.MAXY - height;
+            }
+            this.inertiaDirections[direction] = 0;
+            return false;
+        }
+        return true;
+    }
+
     /*
     
     TODO: make this.x and this.y as the center of csw
@@ -249,59 +302,33 @@ export class BaseCSW extends BaseGameObject {
     
     */
     move(direction: Direction): void {
-        let { ux, uy } = this.getNewCoordinatesDelta(direction);
+        const { ux, uy } = this.getNewCoordinatesDelta(direction);
 
         // get ship dimensions by current direction and 'iam' flag
         let { width, height } = this.dimensions[direction];
         width--;
         height--;
 
-        if (
-            this.x + ux + width > CONST.MAXX * CONST.CELLSIZES.MAXX ||
-            this.x + ux < 0
-        ) {
-            if (this.x + ux < 0) this.x = 0;
-            if (this.x + ux + width > CONST.MAXX * CONST.CELLSIZES.MAXX) {
-                this.x = CONST.MAXX * CONST.CELLSIZES.MAXX - width;
-            }
-            ux = 0;
-            this.inertiaDirections[direction] = 0;
+        // TODO: these checks should be moved to processCollisions function
+        if (!this.canItMove({ ux, uy, width, height, direction })) {
+            this.stepsHistory.push({
+                x: this.x,
+                y: this.y,
+                ux,
+                uy,
+                direction,
+            });
             return;
         }
 
-        if (
-            this.y + uy + height > CONST.MAXY * CONST.CELLSIZES.MAXY ||
-            this.y + uy < 0
-        ) {
-            if (this.y + uy < 0) {
-                this.y = 0;
-            }
-            if (this.y + uy + height > CONST.MAXY * CONST.CELLSIZES.MAXY) {
-                this.y = CONST.MAXY * CONST.CELLSIZES.MAXY - height;
-            }
-            uy = 0;
-            this.inertiaDirections[direction] = 0;
-            return;
-        }
+        this.stepsHistory.push({
+            x: this.x,
+            y: this.y,
+            ux,
+            uy,
+            direction,
+        });
 
-        const disableCollisionChecks = true;
-        const disableCollisionsWithShips = false;
-        if (!disableCollisionChecks) {
-            if (ux != 0 || uy != 0) {
-                const found = this.BTankInst.checkIfTwoShipsCross(
-                    this.x + ux, //Math.floor(ux), //Math.ceil(ux),
-                    this.y + uy, //Math.floor(uy),//Math.ceil(uy),
-                    this,
-                    disableCollisionsWithShips ? null : [ObjectType.SHIP],
-                );
-                if (found) {
-                    ux = 0;
-                    uy = 0;
-                    this.inertiaDirections[direction] = 0;
-                    return;
-                }
-            }
-        }
         this.x = this.x + ux;
         this.y = this.y + uy;
 
@@ -382,6 +409,7 @@ export class BaseCSW extends BaseGameObject {
 
         // cpu ships cannot use inertia!
         if (!this.stopAccel && this.iam === CONST.COMPUTER) {
+            this.stepsHistory = [];
             for (let d = 0; d < 4; d++) {
                 this.move(d as Direction);
             }

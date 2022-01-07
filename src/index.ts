@@ -11,6 +11,7 @@ import { Direction } from './types';
 import { ObjectsFactory } from './objFactory';
 import { placeBorders } from './drawUtils';
 import { EditorUI } from './editor/editorUI';
+import { PointXY } from './base/baseCoord';
 // import { IPlayer } from './interfaces';
 // import { addDemoCounters } from './demoUtils';
 
@@ -216,8 +217,6 @@ class Game {
     }
 
     processCollisions() {
-        // process collisions
-        console.log('processing collisions, please wait...');
         const btank = this.BTankInst;
         const dynamicGrid = btank.dynamicCollisionGrid;
         const staticGrid = btank.staticCollisionGrid;
@@ -234,15 +233,73 @@ class Game {
                 const obstacles = column || [];
                 const objectsToCheck = ships.concat(obstacles);
                 if (objectsToCheck.length > 1) {
-                    for (const gameObject of objectsToCheck) {
+                    for (const gameObject of ships) {
                         const collision = this.BTankInst.checkIfTwoObjectsCrossInsideACell(
                             gameObject,
                             objectsToCheck,
                         );
                         if (collision) {
-                            // console.log('collision!');
-                            // console.log(collision);
-                            // debugger;
+                            const { stepsHistory } = gameObject;
+                            const initialXY: PointXY = {
+                                x: stepsHistory[0].x,
+                                y: stepsHistory[0].y,
+                            };
+                            const newCoords_horizontal: PointXY = {
+                                x:
+                                    initialXY.x +
+                                    stepsHistory[CONST.DIRECTIONS.RIGHT].ux +
+                                    stepsHistory[CONST.DIRECTIONS.LEFT].ux,
+                                y:
+                                    initialXY.y +
+                                    stepsHistory[CONST.DIRECTIONS.RIGHT].uy +
+                                    stepsHistory[CONST.DIRECTIONS.LEFT].uy,
+                            };
+                            const newCoords_vertical: PointXY = {
+                                x:
+                                    initialXY.x +
+                                    stepsHistory[CONST.DIRECTIONS.UP].ux +
+                                    stepsHistory[CONST.DIRECTIONS.DOWN].ux,
+                                y:
+                                    initialXY.y +
+                                    stepsHistory[CONST.DIRECTIONS.UP].uy +
+                                    stepsHistory[CONST.DIRECTIONS.DOWN].uy,
+                            };
+                            const collision2 = this.BTankInst.checkIfTwoObjectsCrossInsideACell(
+                                gameObject,
+                                objectsToCheck,
+                                newCoords_horizontal,
+                            );
+                            if (collision2) {
+                                gameObject.inertiaDirections[
+                                    CONST.DIRECTIONS.LEFT as Direction
+                                ] = 0;
+                                gameObject.inertiaDirections[
+                                    CONST.DIRECTIONS.RIGHT as Direction
+                                ] = 0;
+                                gameObject.initCoords(
+                                    initialXY.x,
+                                    initialXY.y,
+                                    gameObject.d,
+                                );
+                            }
+                            const collision3 = this.BTankInst.checkIfTwoObjectsCrossInsideACell(
+                                gameObject,
+                                objectsToCheck,
+                                newCoords_vertical,
+                            );
+                            if (collision3) {
+                                gameObject.inertiaDirections[
+                                    CONST.DIRECTIONS.UP as Direction
+                                ] = 0;
+                                gameObject.inertiaDirections[
+                                    CONST.DIRECTIONS.DOWN as Direction
+                                ] = 0;
+                                gameObject.initCoords(
+                                    initialXY.x,
+                                    initialXY.y,
+                                    gameObject.d,
+                                );
+                            }
                         }
                     }
                 }

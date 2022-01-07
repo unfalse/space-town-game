@@ -6,6 +6,7 @@ import { ObjectType } from './types';
 import { BaseCSW } from './base/baseCsw';
 import { Player } from './player';
 import { Ghosts } from './ghosts';
+import { PointXY } from './base/baseCoord';
 // import { IPlayer } from './interfaces';
 
 export type CollisionGridColumns = {
@@ -174,6 +175,7 @@ export class BTankManager {
     checkIfTwoObjectsCrossInsideACell(
         whoAsks: BaseCSW,
         objects: BaseCSW[],
+        newCoords?: PointXY,
         typesToIgnore?: ObjectType[],
     ): unknown {
         // const debugDraw = (function(x,y,w,h) {
@@ -197,7 +199,7 @@ export class BTankManager {
         };
 
         let { width, height } = whoAsks.dimensions[whoAsks.d];
-        const { x, y } = whoAsks;
+        const { x, y } = newCoords || whoAsks;
         width--;
         height--;
 
