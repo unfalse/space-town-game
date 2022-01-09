@@ -232,7 +232,7 @@ class Game {
                 const column = staticRow ? staticRow[Number(columnNum)] : [];
                 const obstacles = column || [];
                 const objectsToCheck = ships.concat(obstacles);
-                if (objectsToCheck.length > 0) {
+                if (objectsToCheck.length > 1) {
                     for (const gameObject of ships) {
                         const collision = this.BTankInst.checkIfTwoObjectsCrossInsideACell(
                             gameObject,
