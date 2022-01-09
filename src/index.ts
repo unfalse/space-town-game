@@ -232,7 +232,7 @@ class Game {
                 const column = staticRow ? staticRow[Number(columnNum)] : [];
                 const obstacles = column || [];
                 const objectsToCheck = ships.concat(obstacles);
-                if (objectsToCheck.length > 1) {
+                if (objectsToCheck.length > 0) {
                     for (const gameObject of ships) {
                         const collision = this.BTankInst.checkIfTwoObjectsCrossInsideACell(
                             gameObject,
@@ -300,6 +300,24 @@ class Game {
                                     gameObject.d,
                                 );
                             }
+                        } else {
+                            // const { stepsHistory } = gameObject;
+                            // const initialXY: PointXY = {
+                            //     x: stepsHistory[0].x,
+                            //     y: stepsHistory[0].y,
+                            // };
+                            // gameObject.x +=
+                            //     // initialXY.x +
+                            //     stepsHistory[CONST.DIRECTIONS.RIGHT].ux +
+                            //     stepsHistory[CONST.DIRECTIONS.LEFT].ux +
+                            //     stepsHistory[CONST.DIRECTIONS.UP].ux +
+                            //     stepsHistory[CONST.DIRECTIONS.DOWN].ux;
+                            // gameObject.y +=
+                            //     // initialXY.y +
+                            //     stepsHistory[CONST.DIRECTIONS.RIGHT].uy +
+                            //     stepsHistory[CONST.DIRECTIONS.LEFT].uy +
+                            //     stepsHistory[CONST.DIRECTIONS.UP].uy +
+                            //     stepsHistory[CONST.DIRECTIONS.DOWN].uy;
                         }
                     }
                 }
@@ -477,9 +495,10 @@ class Game {
         }
     }
 
+    // TODO: move to keyboard.js or something like controls.js
     detectMovement(timestamp: number) {
         // code here must change ONLY DIRECTION
-        const ACCEL = 0.7; // 0.7; // 0.3;
+        const ACCEL = 0.5; // 0.7; // 0.3;
 
         if (this.keys[Utils.KEY_CODE.UP as keyof Keys]) {
             this.player1.setDirectionAndAddAccel(

@@ -5,27 +5,29 @@ import { Direction, Who } from './types';
 
 const MAX_LIFE = 1;
 
+type InertiaBuffer = {
+    direction: Direction;
+    accel: number;
+};
+
 class Player extends BaseCSW {
     PLAYER_BULLETS_INTERVAL: number;
-    accel: number;
     stopAccel: boolean;
     isHidden: boolean;
     isImmortal: boolean;
+    inertiaBuffer: InertiaBuffer[];
 
     constructor() {
         super();
         this.PLAYER_BULLETS_INTERVAL = 700;
         this.isHidden = false;
         this.isImmortal = true;
+        this.inertiaBuffer = [];
     }
 
     childInit(): void {
         this.maxlife = MAX_LIFE;
         this.life = this.maxlife;
-    }
-
-    addAccel(value: number): void {
-        this.accel += value;
     }
 
     draw(ghost?: boolean): void {

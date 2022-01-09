@@ -405,14 +405,13 @@ export class BaseCSW extends BaseGameObject {
             this.BTankInst.removeShip(this);
         }
 
-        this.inertiaStartAttempt();
+        // this.inertiaStartAttempt();
 
         // cpu ships cannot use inertia!
-        if (!this.stopAccel && this.iam === CONST.COMPUTER) {
-            this.stepsHistory = [];
-            for (let d = 0; d < 4; d++) {
-                this.move(d as Direction);
-            }
+        // if (!this.stopAccel && this.iam === CONST.COMPUTER) {
+        this.stepsHistory = [];
+        for (let d = 0; d < 4; d++) {
+            this.move(d as Direction);
         }
 
         // this.draw();

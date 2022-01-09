@@ -29,8 +29,8 @@ const CONST = {
         Y: 1,
     },
 
-    MAXX: 500,
-    MAXY: 500,
+    MAXX: 1000,
+    MAXY: 1000,
     SCREENMAXX: 25,
     SCREENMAXY: 18,
 
