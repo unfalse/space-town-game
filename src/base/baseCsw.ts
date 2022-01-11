@@ -15,11 +15,11 @@ import { PointXY } from './baseCoord';
 type InertiaDirections = { [key in Direction]: number };
 
 type CheckBoundsParameters = {
-    ux: number,
-    uy: number,
-    width: number,
-    height: number,
-    direction: Direction
+    ux: number;
+    uy: number;
+    width: number;
+    height: number;
+    direction?: Direction;
 };
 
 type StepsHistory = {
@@ -29,6 +29,8 @@ type StepsHistory = {
     uy: number;
     direction: Direction;
 };
+
+type BordersCheckResult = 'X' | 'Y' | 'OK';
 
 // TODO: csw: cosmo ship war, the old title
 // TODO: rename csw to something more understandable - tank? SpaceShip ?
@@ -244,16 +246,6 @@ export class BaseCSW extends BaseGameObject {
         }
     }
 
-    getNewCoordinatesDelta(direction: Direction): any {
-        const nvxy = super.getVXY(direction);
-        const acceleration = this.CSWSPEED + this.inertiaDirections[direction];
-
-        return {
-            ux: nvxy.vx * acceleration,
-            uy: nvxy.vy * acceleration,
-        };
-    }
-
     canItMove({
         ux,
         uy,
@@ -287,6 +279,50 @@ export class BaseCSW extends BaseGameObject {
             return false;
         }
         return true;
+    }
+
+    canItMove2({
+        ux,
+        uy,
+        width,
+        height,
+    }: CheckBoundsParameters): BordersCheckResult {
+        if (
+            this.x + ux + width > CONST.MAXX * CONST.CELLSIZES.MAXX ||
+            this.x + ux < 0
+        ) {
+            if (this.x + ux < 0) this.x = 0;
+            if (this.x + ux + width > CONST.MAXX * CONST.CELLSIZES.MAXX) {
+                this.x = CONST.MAXX * CONST.CELLSIZES.MAXX - width;
+            }
+
+            return 'X';
+        }
+
+        if (
+            this.y + uy + height > CONST.MAXY * CONST.CELLSIZES.MAXY ||
+            this.y + uy < 0
+        ) {
+            if (this.y + uy < 0) {
+                this.y = 0;
+            }
+            if (this.y + uy + height > CONST.MAXY * CONST.CELLSIZES.MAXY) {
+                this.y = CONST.MAXY * CONST.CELLSIZES.MAXY - height;
+            }
+
+            return 'Y';
+        }
+        return 'OK';
+    }
+
+    getNewCoordinatesDelta(direction: Direction): any {
+        const nvxy = super.getVXY(direction);
+        const acceleration = this.CSWSPEED + this.inertiaDirections[direction];
+
+        return {
+            ux: nvxy.vx * acceleration,
+            uy: nvxy.vy * acceleration,
+        };
     }
 
     /*
@@ -333,6 +369,105 @@ export class BaseCSW extends BaseGameObject {
         this.y = this.y + uy;
 
         this.updateCollisionGrid(direction);
+    }
+
+    move2(): void {
+        const { ux: uxR, uy: uyR } = this.getNewCoordinatesDelta(
+            CONST.DIRECTIONS.RIGHT as Direction,
+        );
+        const { ux: uxD, uy: uyD } = this.getNewCoordinatesDelta(
+            CONST.DIRECTIONS.DOWN as Direction,
+        );
+        const { ux: uxL, uy: uyL } = this.getNewCoordinatesDelta(
+            CONST.DIRECTIONS.LEFT as Direction,
+        );
+        const { ux: uxU, uy: uyU } = this.getNewCoordinatesDelta(
+            CONST.DIRECTIONS.UP as Direction,
+        );
+        let { width, height } = this.dimensions[
+            CONST.DIRECTIONS.RIGHT as Direction
+        ];
+        width--;
+        height--;
+
+        const horizontalUXY = {
+            ux: uxR + uxL,
+            uy: uyR + uyL,
+        };
+
+        const verticalUXY = {
+            ux: uxD + uxU,
+            uy: uyD + uyL,
+        };
+
+        const check1 = this.canItMove2({
+            ux: horizontalUXY.ux,
+            uy: horizontalUXY.uy,
+            width,
+            height,
+        });
+        const check2 = this.canItMove2({
+            ux: verticalUXY.ux,
+            uy: verticalUXY.uy,
+            width,
+            height,
+        });
+
+        this.setInertiaDirections(check1);
+        this.setInertiaDirections(check2);
+
+        this.stepsHistory.push({
+            x: this.x,
+            y: this.y,
+            ux: horizontalUXY.ux,
+            uy: horizontalUXY.uy,
+            direction: 0,
+        });
+        this.stepsHistory.push({
+            x: this.x,
+            y: this.y,
+            ux: verticalUXY.ux,
+            uy: verticalUXY.uy,
+            direction: CONST.DIRECTIONS.RIGHT as Direction,
+        });
+
+        if (check1 !== 'OK' || check2 !== 'OK') {
+            return;
+        }
+
+        this.x = this.x + horizontalUXY.ux + verticalUXY.ux;
+        this.y = this.y + horizontalUXY.uy + verticalUXY.uy;
+
+        this.updateCollisionGrid(CONST.DIRECTIONS.RIGHT as Direction);
+    }
+
+    setInertiaDirections(result: BordersCheckResult): void {
+        if (result === 'X') {
+            this.inertiaDirections[CONST.DIRECTIONS.RIGHT as Direction] = 0;
+            this.inertiaDirections[CONST.DIRECTIONS.LEFT as Direction] = 0;
+        }
+        if (result === 'Y') {
+            this.inertiaDirections[CONST.DIRECTIONS.DOWN as Direction] = 0;
+            this.inertiaDirections[CONST.DIRECTIONS.UP as Direction] = 0;
+        }
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    update(timestamp: number): void {
+        if (this.life <= 0) {
+            this.BTankInst.removeShip(this);
+        }
+
+        // this.inertiaStartAttempt();
+
+        // cpu ships cannot use inertia!
+        // if (!this.stopAccel && this.iam === CONST.COMPUTER) {
+        this.stepsHistory = [];
+        for (let d = 0; d < 4; d++) {
+            this.move(d as Direction);
+        }
+
+        // this.draw();
     }
 
     // collision detection: broad phase
@@ -397,24 +532,6 @@ export class BaseCSW extends BaseGameObject {
 
     addThisObjectToStaticGrid(x: number, y: number): void {
         this.addThisObjectToGrid(x, y, this.BTankInst.staticCollisionGrid);
-    }
-
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    update(timestamp: number): void {
-        if (this.life <= 0) {
-            this.BTankInst.removeShip(this);
-        }
-
-        // this.inertiaStartAttempt();
-
-        // cpu ships cannot use inertia!
-        // if (!this.stopAccel && this.iam === CONST.COMPUTER) {
-        this.stepsHistory = [];
-        for (let d = 0; d < 4; d++) {
-            this.move(d as Direction);
-        }
-
-        // this.draw();
     }
 
     hitByBullet(_bulletInstance: Bullet): void {
