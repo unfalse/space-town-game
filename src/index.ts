@@ -192,6 +192,10 @@ class Game {
             ship.draw();
         });
 
+        this.BTankInst.getAllObstacles().forEach(ship => {
+            ship.draw();
+        });
+
         this.BTankInst.getAllDelayedPics().forEach(pic => {
             pic.draw();
         });
@@ -214,6 +218,28 @@ class Game {
             this.gameOver = true;
         }
         //console.log('cswArr = ', BTank.cswArr.length);
+    }
+
+    collisionFixX(result: number[]) {
+        const resultMask = result.join(',').replace(/,/g, '');
+        if (CONST.COLLISION_MASKS.RIGHT.includes(resultMask)) {
+            return -40;
+        }
+        if (CONST.COLLISION_MASKS.LEFT.includes(resultMask)) {
+            return 40;
+        }
+        return 0;
+    }
+
+    collisionFixY(result: number[]) {
+        const resultMask = result.join(',').replace(/,/g, '');
+        if (CONST.COLLISION_MASKS.DOWN.includes(resultMask)) {
+            return -40;
+        }
+        if (CONST.COLLISION_MASKS.UP.includes(resultMask)) {
+            return 40;
+        }
+        return 0;
     }
 
     processCollisions() {
@@ -245,79 +271,71 @@ class Game {
                                 y: stepsHistory[0].y,
                             };
                             const newCoords_horizontal: PointXY = {
-                                x:
-                                    initialXY.x +
-                                    stepsHistory[CONST.DIRECTIONS.RIGHT].ux +
-                                    stepsHistory[CONST.DIRECTIONS.LEFT].ux,
-                                y:
-                                    initialXY.y +
-                                    stepsHistory[CONST.DIRECTIONS.RIGHT].uy +
-                                    stepsHistory[CONST.DIRECTIONS.LEFT].uy,
+                                x: initialXY.x + stepsHistory[0].ux,
+                                y: initialXY.y + stepsHistory[0].uy,
                             };
                             const newCoords_vertical: PointXY = {
-                                x:
-                                    initialXY.x +
-                                    stepsHistory[CONST.DIRECTIONS.UP].ux +
-                                    stepsHistory[CONST.DIRECTIONS.DOWN].ux,
-                                y:
-                                    initialXY.y +
-                                    stepsHistory[CONST.DIRECTIONS.UP].uy +
-                                    stepsHistory[CONST.DIRECTIONS.DOWN].uy,
+                                x: initialXY.x + stepsHistory[1].ux,
+                                y: initialXY.y + stepsHistory[1].uy,
                             };
-                            const collision2 = this.BTankInst.checkIfTwoObjectsCrossInsideACell(
+
+                            // let newX = gameObject.x,
+                            //     newY = gameObject.y;
+
+                            // newX =
+                            //     collision.collidedObject.x +
+                            //     this.collisionFixX(collision.result);
+                            // newY =
+                            //     collision.collidedObject.y +
+                            //     this.collisionFixY(collision.result);
+                            const collisionHorizontal = this.BTankInst.checkIfTwoObjectsCrossInsideACell(
                                 gameObject,
                                 objectsToCheck,
                                 newCoords_horizontal,
                             );
-                            if (collision2) {
+
+                            let newX = gameObject.x,
+                                newY = gameObject.y;
+                            if (collisionHorizontal) {
                                 gameObject.inertiaDirections[
                                     CONST.DIRECTIONS.LEFT as Direction
                                 ] = 0;
                                 gameObject.inertiaDirections[
                                     CONST.DIRECTIONS.RIGHT as Direction
                                 ] = 0;
-                                gameObject.initCoords(
-                                    initialXY.x,
-                                    initialXY.y,
-                                    gameObject.d,
+                                const fixX = this.collisionFixX(
+                                    collisionHorizontal.result,
                                 );
+                                newX =
+                                    fixX === 0
+                                        ? gameObject.x
+                                        : collisionHorizontal.collidedObject.x +
+                                          fixX;
                             }
-                            const collision3 = this.BTankInst.checkIfTwoObjectsCrossInsideACell(
+
+                            const collisionVertical = this.BTankInst.checkIfTwoObjectsCrossInsideACell(
                                 gameObject,
                                 objectsToCheck,
                                 newCoords_vertical,
                             );
-                            if (collision3) {
+                            if (collisionVertical) {
                                 gameObject.inertiaDirections[
                                     CONST.DIRECTIONS.UP as Direction
                                 ] = 0;
                                 gameObject.inertiaDirections[
                                     CONST.DIRECTIONS.DOWN as Direction
                                 ] = 0;
-                                gameObject.initCoords(
-                                    initialXY.x,
-                                    initialXY.y,
-                                    gameObject.d,
+                                const fixY = this.collisionFixY(
+                                    collisionVertical.result,
                                 );
+                                newY =
+                                    fixY === 0
+                                        ? gameObject.y
+                                        : collisionVertical.collidedObject.y +
+                                          fixY;
                             }
-                        } else {
-                            // const { stepsHistory } = gameObject;
-                            // const initialXY: PointXY = {
-                            //     x: stepsHistory[0].x,
-                            //     y: stepsHistory[0].y,
-                            // };
-                            // gameObject.x +=
-                            //     // initialXY.x +
-                            //     stepsHistory[CONST.DIRECTIONS.RIGHT].ux +
-                            //     stepsHistory[CONST.DIRECTIONS.LEFT].ux +
-                            //     stepsHistory[CONST.DIRECTIONS.UP].ux +
-                            //     stepsHistory[CONST.DIRECTIONS.DOWN].ux;
-                            // gameObject.y +=
-                            //     // initialXY.y +
-                            //     stepsHistory[CONST.DIRECTIONS.RIGHT].uy +
-                            //     stepsHistory[CONST.DIRECTIONS.LEFT].uy +
-                            //     stepsHistory[CONST.DIRECTIONS.UP].uy +
-                            //     stepsHistory[CONST.DIRECTIONS.DOWN].uy;
+
+                            gameObject.initCoords(newX, newY, gameObject.d);
                         }
                     }
                 }

@@ -17,6 +17,13 @@ export type CollisionGridRows = {
     [key in number]: CollisionGridColumns;
 };
 
+// type CollisionMap = Array<number>[8];
+
+// type CheckObjectsCrossResult = {
+//     result: CollisionMap;
+//     collidedObject: BaseCSW;
+// } | false;
+
 // -------------------------------------
 //    TOFIX! bullet dep propagation
 // -------------------------------------
@@ -177,7 +184,8 @@ export class BTankManager {
         objects: BaseCSW[],
         newCoords?: PointXY,
         typesToIgnore?: ObjectType[],
-    ): unknown {
+    ): any {
+        // ): CheckObjectsCrossResult {
         // const debugDraw = (function(x,y,w,h) {
         //     this.drawContext.strokeStyle = "#0f0";
         //     this.drawContext.strokeRect(x, y, w, h);
@@ -211,29 +219,34 @@ export class BTankManager {
 
                 const result = [
                     // left top
-                    checkSquare(csw, x, y),
+                    +checkSquare(csw, x, y),
+                    // center top
+                    +checkSquare(csw, x + width / 2, y),
                     // right top
-                    checkSquare(csw, x + width, y),
-                    // left bottom
-                    checkSquare(csw, x, y + height),
-                    // right bottom
-                    checkSquare(csw, x + width, y + height),
-                    // center up
-                    checkSquare(csw, x + width / 2, y),
+                    +checkSquare(csw, x + width, y),
                     // left center
-                    checkSquare(csw, x, y + height / 2),
+                    +checkSquare(csw, x, y + height / 2),
+                    // center center
+                    +checkSquare(csw, x + width / 2, y + height / 2),
                     // right center
-                    checkSquare(csw, x + width, y + height / 2),
+                    +checkSquare(csw, x + width, y + height / 2),
+                    // left bottom
+                    +checkSquare(csw, x, y + height),
                     // center bottom
-                    checkSquare(csw, x + width / 2, y + height),
+                    +checkSquare(csw, x + width / 2, y + height),
+                    // right bottom
+                    +checkSquare(csw, x + width, y + height),
                 ];
-                return result.includes(true)
+                return result.includes(1)
                     ? { result, collidedObject: csw }
                     : undefined;
             }, this)
-            .filter(obj => !!obj);
+            .filter(obj => !!obj === true);
 
-        return tArr.length > 0 ? tArr[0] : null;
+        if (tArr.length > 0) {
+            return tArr[0];
+        }
+        return null;
     }
 
     getBulletWithPixelPrecision(
@@ -278,7 +291,17 @@ export class BTankManager {
     }
 
     getAllShips(): BaseCSW[] {
-        return this.cswArr;
+        const filtered = this.cswArr.filter(ship =>
+            [CONST.TYPES.PLAYER, CONST.TYPES.SHIP].includes(ship.type),
+        );
+        return filtered;
+    }
+
+    getAllObstacles(): BaseCSW[] {
+        const filtered = this.cswArr.filter(ship => {
+            return ![CONST.TYPES.PLAYER, CONST.TYPES.SHIP].includes(ship.type);
+        });
+        return filtered;
     }
 
     getAllBullets(): Bullet[] {

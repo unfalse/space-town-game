@@ -120,6 +120,10 @@ export class BaseCSW extends BaseGameObject {
         this.ghost = ghost;
     }
 
+    setType(type: ObjectType): void {
+        this.type = type;
+    }
+
     draw(): void {
         this.drawingManagerInst.drawcswmt5(this.x, this.y, this.d);
     }
@@ -397,7 +401,7 @@ export class BaseCSW extends BaseGameObject {
 
         const verticalUXY = {
             ux: uxD + uxU,
-            uy: uyD + uyL,
+            uy: uyD + uyU,
         };
 
         const check1 = this.canItMove2({
@@ -421,14 +425,14 @@ export class BaseCSW extends BaseGameObject {
             y: this.y,
             ux: horizontalUXY.ux,
             uy: horizontalUXY.uy,
-            direction: 0,
+            direction: CONST.DIRECTIONS.RIGHT as Direction,
         });
         this.stepsHistory.push({
             x: this.x,
             y: this.y,
             ux: verticalUXY.ux,
             uy: verticalUXY.uy,
-            direction: CONST.DIRECTIONS.RIGHT as Direction,
+            direction: CONST.DIRECTIONS.DOWN as Direction,
         });
 
         if (check1 !== 'OK' || check2 !== 'OK') {
@@ -463,9 +467,10 @@ export class BaseCSW extends BaseGameObject {
         // cpu ships cannot use inertia!
         // if (!this.stopAccel && this.iam === CONST.COMPUTER) {
         this.stepsHistory = [];
-        for (let d = 0; d < 4; d++) {
-            this.move(d as Direction);
-        }
+        // for (let d = 0; d < 4; d++) {
+        //     this.move(d as Direction);
+        // }
+        this.move2();
 
         // this.draw();
     }
