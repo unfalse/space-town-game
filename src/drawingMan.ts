@@ -123,14 +123,19 @@ export class ImagesStore {
     }
 }
 
+const CELL_WIDTH = CONST.CELLSIZES.MAXX * CONST.SCALE.X;
+const CELL_HEIGHT = CONST.CELLSIZES.MAXY * CONST.SCALE.Y;
+
 export class DrawingManager {
     imagesStore: ImagesStore;
     gameCam: Camera;
     dimensions: Dimensions;
+    showDebugRectangle: boolean;
 
     constructor(imagesStoreInstance: ImagesStore, cameraInstance: Camera) {
         this.imagesStore = imagesStoreInstance;
         this.gameCam = cameraInstance;
+        this.showDebugRectangle = false;
     }
 
     init(): Promise<unknown[]> {
@@ -161,16 +166,23 @@ export class DrawingManager {
     // user
     // TODO: move entirely to the player class
     drawcswmt9(x: number, y: number, d: Direction): void {
-        // console.log(["gamecam:", this.gameCam.x, this.gameCam.y]);
         this.imagesStore.playerImages[d].draw(
             x,
             y,
-            CONST.CELLSIZES.MAXX * CONST.SCALE.X,
-            CONST.CELLSIZES.MAXY * CONST.SCALE.Y,
+            CELL_WIDTH,
+            CELL_HEIGHT,
         );
-        // this.drawContext.strokeStyle="#f00";
-        // this.drawContext.strokeRect(Math.floor(x), Math.floor(y), 39,39);
-        // this.drawContext.lineWidth=0.1;
+        
+        this.drawDebugRectangle(x, y);
+    }
+
+    drawDebugRectangle(x: number, y: number) {
+        
+        if (!this.showDebugRectangle) return;
+
+        Images.drawContext.strokeStyle="#f00";
+        Images.drawContext.strokeRect(Math.round(x), Math.round(y), CELL_WIDTH, CELL_HEIGHT);
+        Images.drawContext.lineWidth = 1;
     }
 
     drawcswmt9ghost(x: number, y: number, d: Direction): void {
@@ -178,9 +190,11 @@ export class DrawingManager {
         this.imagesStore.playerImages[d].draw(
             relXY.x,
             relXY.y,
-            CONST.CELLSIZES.MAXX * CONST.SCALE.X,
-            CONST.CELLSIZES.MAXY * CONST.SCALE.Y,
+            CELL_WIDTH,
+            CELL_HEIGHT,
         );
+
+        this.drawDebugRectangle(relXY.x, relXY.y);
     }
 
     // cpu
@@ -189,23 +203,24 @@ export class DrawingManager {
         this.imagesStore.cpuImages[d].draw(
             relXY.x,
             relXY.y,
-            CONST.CELLSIZES.MAXX * CONST.SCALE.X,
-            CONST.CELLSIZES.MAXY * CONST.SCALE.Y,
+            CELL_WIDTH,
+            CELL_HEIGHT,
         );
-        // this.drawContext.strokeStyle="#f00";
-        // this.drawContext.strokeRect(x, y, 39,39);
+
+        this.drawDebugRectangle(relXY.x, relXY.y);
     }
 
     drawObstacle(x: number, y: number): void {
         const relXY = this.gameCam.getRelCoords(x, y);
+
         this.imagesStore.obstacleImage.draw(
             relXY.x,
             relXY.y,
-            CONST.CELLSIZES.MAXX * CONST.SCALE.X,
-            CONST.CELLSIZES.MAXY * CONST.SCALE.Y,
+            CELL_WIDTH,
+            CELL_HEIGHT,
         );
-        // this.drawContext.strokeStyle="#f00";
-        // this.drawContext.strokeRect(x, y, 39,39);
+
+        this.drawDebugRectangle(relXY.x, relXY.y);
     }
 
     drawBorder(x: number, y: number): void {
@@ -213,11 +228,11 @@ export class DrawingManager {
         this.imagesStore.borderImage.draw(
             relXY.x,
             relXY.y,
-            CONST.CELLSIZES.MAXX * CONST.SCALE.X,
-            CONST.CELLSIZES.MAXY * CONST.SCALE.Y,
+            CELL_WIDTH,
+            CELL_HEIGHT,
         );
-        // this.drawContext.strokeStyle="#f00";
-        // this.drawContext.strokeRect(x, y, 39,39);
+        
+        this.drawDebugRectangle(relXY.x, relXY.y);
     }
 
     drawStaticShip(x: number, y: number): void {
@@ -225,11 +240,11 @@ export class DrawingManager {
         this.imagesStore.cpuImages[0].draw(
             relXY.x,
             relXY.y,
-            CONST.CELLSIZES.MAXX * CONST.SCALE.X,
-            CONST.CELLSIZES.MAXY * CONST.SCALE.Y,
+            CELL_WIDTH,
+            CELL_HEIGHT,
         );
-        // this.drawContext.strokeStyle="#f00";
-        // this.drawContext.strokeRect(x, y, 39,39);
+        
+        this.drawDebugRectangle(relXY.x, relXY.y);
     }
 
     drawSpaceBrick(x: number, y: number, n: number): void {
@@ -237,9 +252,11 @@ export class DrawingManager {
         this.imagesStore.spaceBrickImages[n].draw(
             relXY.x,
             relXY.y,
-            CONST.CELLSIZES.MAXX * CONST.SCALE.X,
-            CONST.CELLSIZES.MAXY * CONST.SCALE.Y,
+            CELL_WIDTH,
+            CELL_HEIGHT,
         );
+
+        this.drawDebugRectangle(relXY.x, relXY.y);
     }
 
     drawWayPoint(x: number, y: number, n: number): void {
@@ -247,9 +264,11 @@ export class DrawingManager {
         this.imagesStore.counterImages[n].draw(
             relXY.x,
             relXY.y,
-            CONST.CELLSIZES.MAXX * CONST.SCALE.X,
-            CONST.CELLSIZES.MAXY * CONST.SCALE.Y,
+            CELL_WIDTH,
+            CELL_HEIGHT,
         );
+
+        this.drawDebugRectangle(relXY.x, relXY.y);
     }
 
     drawCounter(x: number, y: number, n: number): void {
@@ -257,9 +276,11 @@ export class DrawingManager {
         this.imagesStore.counterImages[n].draw(
             relXY.x,
             relXY.y,
-            CONST.CELLSIZES.MAXX * CONST.SCALE.X,
-            CONST.CELLSIZES.MAXY * CONST.SCALE.Y,
+            CELL_WIDTH,
+            CELL_HEIGHT,
         );
+
+        this.drawDebugRectangle(relXY.x, relXY.y);
     }
 
     DrawCrash(x: number, y: number, frameNumber: number): void {
@@ -270,7 +291,8 @@ export class DrawingManager {
             20 * CONST.SCALE.X * 2,
             20 * CONST.SCALE.Y * 2,
         );
-        // this.crashImage.draw(x, y, 0, onDelayEnd);
+
+        this.drawDebugRectangle(relXY.x, relXY.y);
     }
 
     drawPlayerBullet(x: number, y: number): void {

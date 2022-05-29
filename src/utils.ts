@@ -1,4 +1,22 @@
+import { InertiaDirections } from "./types";
+
 console.log('utils!');
+
+export const resetInertiaDirections = (): InertiaDirections => ({
+    0: 0,
+    1: 0,
+    2: 0,
+    3: 0,
+    '-1': 0,
+});
+
+export const mergeInertiaDirections = (id1: InertiaDirections, id2: InertiaDirections) => ({
+    0: id1[0] || id2[0],
+    1: id1[1] || id2[1],
+    2: id1[2] || id2[2],
+    3: id1[3] || id2[3],
+    '-1': id1['-1'] || id2['-1'],
+});
 
 export const Utils = {
     KEY_CODE: {

@@ -87,7 +87,7 @@ export class Editor {
     }
 
     playEditorLevel(): void {
-        const player = this.BTankInst.getAllShips()[0] as Player;
+        const player = this.BTankInst.getPlayer() as Player; // this.BTankInst.getAllShips()[0] as Player;
         this.BTankInst.destroyAll();
 
         // TODO: add player1 to the empty array

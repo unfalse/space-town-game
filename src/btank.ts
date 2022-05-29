@@ -194,16 +194,16 @@ export class BTankManager {
 
         const checkSquare = (csw: BaseCSW, x: number, y: number) => {
             let { width, height } = csw.dimensions[csw.d];
-            width--;
-            height--;
+            // width--;
+            // height--;
             // debugDraw(csw.x, csw.y, width, height);
 
             return (
                 x >= csw.x &&
-                x <= csw.x + width &&
-                y >= csw.y &&
-                y <= csw.y + height
-            );
+                x <= csw.x + width - 0.5 &&
+                y >= csw.y - 0.5 &&
+                y <= csw.y + height - 0.5
+            ) ? '1' : '0';
         };
 
         let { width, height } = whoAsks.dimensions[whoAsks.d];
@@ -217,27 +217,31 @@ export class BTankManager {
                     return false;
                 }
 
-                const result = [
+                const result = 
                     // left top
-                    +checkSquare(csw, x, y),
+                    checkSquare(csw, x, y) +
                     // center top
-                    +checkSquare(csw, x + width / 2, y),
+                    checkSquare(csw, x + width / 2, y) +
                     // right top
-                    +checkSquare(csw, x + width, y),
+                    checkSquare(csw, x + width, y) +
                     // left center
-                    +checkSquare(csw, x, y + height / 2),
+                    checkSquare(csw, x, y + height / 2) + 
                     // center center
-                    +checkSquare(csw, x + width / 2, y + height / 2),
+                    checkSquare(csw, x + width / 2, y + height / 2) +
                     // right center
-                    +checkSquare(csw, x + width, y + height / 2),
+                    checkSquare(csw, x + width, y + height / 2) +
                     // left bottom
-                    +checkSquare(csw, x, y + height),
+                    checkSquare(csw, x, y + height) +
                     // center bottom
-                    +checkSquare(csw, x + width / 2, y + height),
+                    checkSquare(csw, x + width / 2, y + height) +
                     // right bottom
-                    +checkSquare(csw, x + width, y + height),
-                ];
-                return result.includes(1)
+                    checkSquare(csw, x + width, y + height);
+
+                if (result !== '000000000') {
+                    console.log(result);
+                }
+
+                return result !== '000000000'
                     ? { result, collidedObject: csw }
                     : undefined;
             }, this)
@@ -290,9 +294,13 @@ export class BTankManager {
         return this.ghosts;
     }
 
+    getPlayer(): Player {
+        return this.cswArr[0] as Player;
+    }
+
     getAllShips(): BaseCSW[] {
         const filtered = this.cswArr.filter(ship =>
-            [CONST.TYPES.PLAYER, CONST.TYPES.SHIP].includes(ship.type),
+            (ship.iam !== CONST.USER) && (ship.type === CONST.TYPES.SHIP)
         );
         return filtered;
     }

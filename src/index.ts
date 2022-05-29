@@ -170,7 +170,6 @@ class Game {
         if (this.player1.life > 0) {
             this.detectMovement(timestamp);
             this.player1.update(timestamp);
-            this.cameraInst.setCoords(this.player1.x, this.player1.y);
         }
 
         // temporarily disabled bullets
@@ -187,6 +186,9 @@ class Game {
         });
 
         this.processCollisions();
+
+        this.player1.draw();
+        this.cameraInst.setCoords(this.player1.x, this.player1.y);
 
         this.BTankInst.getAllShips().forEach(ship => {
             ship.draw();
@@ -220,23 +222,23 @@ class Game {
         //console.log('cswArr = ', BTank.cswArr.length);
     }
 
-    collisionFixX(result: number[]) {
-        const resultMask = result.join(',').replace(/,/g, '');
-        if (CONST.COLLISION_MASKS.RIGHT.includes(resultMask)) {
+    collisionFixX(result: string) {
+        // an object is moving to the RIGHT and colliding with the left side
+        if (CONST.COLLISION_MASKS.RIGHT.includes(result)) {
             return -40;
         }
-        if (CONST.COLLISION_MASKS.LEFT.includes(resultMask)) {
+        // an object is moving to the LEFT and colliding with the right side
+        if (CONST.COLLISION_MASKS.LEFT.includes(result)) {
             return 40;
         }
         return 0;
     }
 
-    collisionFixY(result: number[]) {
-        const resultMask = result.join(',').replace(/,/g, '');
-        if (CONST.COLLISION_MASKS.DOWN.includes(resultMask)) {
+    collisionFixY(result: string) {
+        if (CONST.COLLISION_MASKS.DOWN.includes(result)) {
             return -40;
         }
-        if (CONST.COLLISION_MASKS.UP.includes(resultMask)) {
+        if (CONST.COLLISION_MASKS.UP.includes(result)) {
             return 40;
         }
         return 0;
@@ -265,6 +267,10 @@ class Game {
                             objectsToCheck,
                         );
                         if (collision) {
+                            console.log('collision!');
+                            console.log({x: gameObject.x, y: gameObject.y});
+                            console.log({collision});
+                            console.log('---------------');
                             const { stepsHistory } = gameObject;
                             const initialXY: PointXY = {
                                 x: stepsHistory[0].x,
@@ -309,8 +315,7 @@ class Game {
                                 newX =
                                     fixX === 0
                                         ? gameObject.x
-                                        : collisionHorizontal.collidedObject.x +
-                                          fixX;
+                                        : collisionHorizontal.collidedObject.x + fixX;
                             }
 
                             const collisionVertical = this.BTankInst.checkIfTwoObjectsCrossInsideACell(
@@ -331,8 +336,7 @@ class Game {
                                 newY =
                                     fixY === 0
                                         ? gameObject.y
-                                        : collisionVertical.collidedObject.y +
-                                          fixY;
+                                        : collisionVertical.collidedObject.y + fixY;
                             }
 
                             gameObject.initCoords(newX, newY, gameObject.d);

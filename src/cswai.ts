@@ -212,6 +212,7 @@ class CSWAI_customPaths extends BaseCPU {
     wpStartTime: number;
     currentWp: WayPoints;
     wayPoints: WayPoints[];
+    disableScan: boolean;
 
     constructor() {
         super();
@@ -220,6 +221,7 @@ class CSWAI_customPaths extends BaseCPU {
         this.wpStartTime = -1;
         this.currentWp = null;
         this.wayPoints = [];
+        this.disableScan = true;
         // this.d = 0;
     }
 
@@ -281,7 +283,7 @@ class CSWAI_customPaths extends BaseCPU {
             }
         }
 
-        const scanResult: Direction = this.BTankInst.playerInstance.isHidden
+        const scanResult: Direction = (this.BTankInst.playerInstance.isHidden || this.disableScan)
             ? -1
             : this.plusShapedScan(10);
         if (scanResult !== null && scanResult > -1) {

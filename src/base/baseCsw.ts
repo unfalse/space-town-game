@@ -1,5 +1,5 @@
 import { CONST } from '../const';
-import { Dimensions, Direction, ObjectType, Who } from '../types';
+import { Dimensions, Direction, InertiaDirections, ObjectType, Who } from '../types';
 import { DrawingManager } from '../drawingMan';
 import {
     BTankManager,
@@ -10,9 +10,8 @@ import { ObjectsFactory } from '../objFactory';
 import { BaseGameObject } from './baseGameObj';
 import { Bullet } from '../bullet';
 import { PointXY } from './baseCoord';
+import { mergeInertiaDirections, resetInertiaDirections } from '../utils';
 // import { Player } from '../player';
-
-type InertiaDirections = { [key in Direction]: number };
 
 type CheckBoundsParameters = {
     ux: number;
@@ -39,6 +38,8 @@ export class BaseCSW extends BaseGameObject {
     lastBulletTimeStamp: number;
     CSWSPEED: number;
     inertiaDirections: InertiaDirections;
+    newInertiaDirections: InertiaDirections;
+    inertiaDirectionsQueue: InertiaDirections[];
     inertiaTimerIsRunning: boolean;
     d: Direction;
     stopAccel: boolean;
@@ -70,6 +71,15 @@ export class BaseCSW extends BaseGameObject {
             3: 0,
             '-1': 0,
         };
+
+        this.newInertiaDirections = {
+            0: 0,
+            1: 0,
+            2: 0,
+            3: 0,
+            '-1': 0,
+        };
+
         this.inertiaTimerIsRunning = false;
         this.d = 0; // direction
         this.stopAccel = true;
@@ -80,6 +90,16 @@ export class BaseCSW extends BaseGameObject {
         // this.CONST = CONST;
         // this.bullet = Bullet;
         this.BTankInst = null;
+    }
+
+    resetNewInertiaDirections() {
+        this.newInertiaDirections = {
+            0: 0,
+            1: 0,
+            2: 0,
+            3: 0,
+            '-1': 0,
+        };
     }
 
     // TODO: place code from init above!
@@ -207,7 +227,7 @@ export class BaseCSW extends BaseGameObject {
             // this.draw();
             // setTimeout(this.inertia.bind(this), 10);
 
-            this.waitAndCall(this.inertia.bind(this), 10); // TODO: need investigation wtf is this
+            // this.waitAndCall(this.inertia.bind(this), 10); // TODO: need investigation wtf is this
         } else {
             this.inertiaTimerIsRunning = false;
         }
@@ -238,7 +258,7 @@ export class BaseCSW extends BaseGameObject {
         ) {
             this.inertiaTimerIsRunning = true;
             // setTimeout(this.inertia.bind(this), 10);
-            this.waitAndCall(this.inertia.bind(this), 10);
+            // this.waitAndCall(this.inertia.bind(this), 10);
         }
     }
 
@@ -470,6 +490,18 @@ export class BaseCSW extends BaseGameObject {
         // for (let d = 0; d < 4; d++) {
         //     this.move(d as Direction);
         // }
+
+        // console.log(this.inertiaDirectionsQueue.length);
+
+        // if (this.iam === CONST.USER) {
+        //     const lastID =
+        //         this.inertiaDirectionsQueue.length > 0 ?
+        //             this.inertiaDirectionsQueue.shift() :
+        //             resetInertiaDirections();
+        //     // this.inertiaDirections = mergeInertiaDirections(this.inertiaDirections, lastID);
+        //     this.inertiaDirections = lastID;
+        // }
+
         this.move2();
 
         // this.draw();

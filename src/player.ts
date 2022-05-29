@@ -1,7 +1,8 @@
 import { BaseCSW } from './base/baseCsw';
 import { Bullet } from './bullet';
 import { CONST } from './const';
-import { Direction, Who } from './types';
+import { Direction, InertiaDirections, Who } from './types';
+import { resetInertiaDirections } from './utils';
 
 const MAX_LIFE = 1;
 
@@ -23,6 +24,7 @@ class Player extends BaseCSW {
         this.isHidden = false;
         this.isImmortal = true;
         this.inertiaBuffer = [];
+        this.inertiaDirectionsQueue = [];
     }
 
     childInit(): void {
@@ -63,6 +65,7 @@ class Player extends BaseCSW {
 
     // TODO: maybe move acceleration, direction and inertia control functions into the separate class
     setDirectionAndAddAccel(d: Direction, accel: number): void {
+        // const newInertiaDirections: InertiaDirections = resetInertiaDirections();
         this.d = d;
 
         // TODO: not sure if it's a right place to change inertia directions
@@ -70,6 +73,7 @@ class Player extends BaseCSW {
             this.inertiaDirections[
                 CONST.DIR_OPPOSITES[d] as Direction
             ] -= accel;
+
             if (
                 this.inertiaDirections[CONST.DIR_OPPOSITES[d] as Direction] < 0
             ) {
@@ -81,6 +85,15 @@ class Player extends BaseCSW {
             }
             this.inertiaDirections[d] += accel;
         }
+
+        // this.inertiaDirectionsQueue.push(newInertiaDirections);
+    }
+
+    setOnlyOneDirection(d: Direction): void {
+        this.d = d;
+
+        this.inertiaDirections = resetInertiaDirections();
+        this.inertiaDirections[d] = 5;
     }
 
     hitByBullet(bulletInstance: Bullet): void {

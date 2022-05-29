@@ -43,5 +43,7 @@ export type Point = {
 
 export type WayPoints = number[];
 
+export type InertiaDirections = { [key in Direction]: number };
+
 // export { Who, ObjectType };
 // export type { Direction, Dimensions, RectSize, PathUnit, Point, WayPoints };
