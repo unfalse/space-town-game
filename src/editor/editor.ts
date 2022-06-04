@@ -2,7 +2,7 @@ import { BaseCSW } from '../base/baseCsw';
 import { BTankManager } from '../btank';
 import { CONST } from '../const';
 import { port } from '../server/server.json';
-import { ObjectType, Point, WayPoints } from '../types';
+import { LevelObject, ObjectType, Point, WayPoints } from '../types';
 import { CSWAI_customPaths } from '../cswai';
 import { ObjectsFactory } from '../objFactory';
 import { placeBorders } from '../drawUtils';
@@ -15,12 +15,6 @@ const PORT = process.env.NODE_ENV === 'production' ? 80 : port;
 console.log(process.env.NODE_ENV);
 
 const EDITOR_SERVER_ADDRESS = `${window.location.protocol}//${window.location.hostname}:${PORT}`;
-
-type LevelObject = {
-    id: number;
-    name: string;
-    data: string;
-};
 
 type ObjectBrush = {
     type: ObjectType;
@@ -67,9 +61,9 @@ export class Editor {
         this.playerCell = { x: 0, y: 0 };
     }
 
-    newEditorLevel(): void {
-        this.prepareLevelForSaving();
-    }
+    // newEditorLevel(): void {
+    //     this.prepareLevelForSaving();
+    // }
 
     uploadNewLevel(): void {
         fetch(`${EDITOR_SERVER_ADDRESS}/new`, {
@@ -125,53 +119,72 @@ export class Editor {
         this.editorUI.toggleEditorControls();
     }
 
-    prepareLevelForSaving(): void {
-        let levelData = [this.playerCell.x, this.playerCell.y].join(';') + '|';
-        levelData += this.editorUnits.reduce(
+    prepareLevelForSaving(
+        playerCell: Point,
+        currentLevelObj: LevelObject,
+        editorUnits: BaseCSW[]
+        // levelName: string
+    ): LevelObject {
+
+        let levelData = `${playerCell.x};${playerCell.y}|`;
+        
+        levelData += editorUnits.reduce(
             function (prev: string, curr: BaseCSW) {
+
                 let wayPoints = '';
+
                 if (curr.type === CONST.TYPES.SHIP) {
                     wayPoints = JSON.stringify(
                         (curr as CSWAI_customPaths).wayPoints,
                     );
                 }
+
                 return (
-                    prev +
-                    wayPoints +
-                    ';' +
-                    !!curr.ghost +
-                    ';' +
-                    curr.type +
-                    ';' +
-                    curr.y +
-                    ';' +
-                    curr.x +
-                    '|'
+                    `${prev}${wayPoints};${!!curr.ghost};${curr.type};${curr.y};${curr.x}|`
                 );
-            }.bind(this),
+            },
             '',
         );
-        this.currentLevelObj.data = levelData;
+
+        return {
+            ...currentLevelObj,
+            data: levelData
+        };
     }
 
-    uploadLevel(): void {
-        fetch(`${EDITOR_SERVER_ADDRESS}/save`, {
-            method: 'post',
-            headers: {
-                Accept: 'application/json',
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                ...this.currentLevelObj,
-            }),
-        }).then(() => {
-            alert('Level has been saved!');
-        });
+    async uploadLevel(currentLevelObj: LevelObject): Promise<void> {
+
+        try {
+            const uploadingResponse =
+                await fetch(`${EDITOR_SERVER_ADDRESS}/save`, {
+                    method: 'post',
+                    headers: {
+                        Accept: 'application/json',
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(currentLevelObj),
+                });
+            
+            if (uploadingResponse.status === 200) {
+                alert('Level has been saved!');
+            }
+        }
+        catch(ex) {
+            alert('Ошибка при сохранении уровня на сервер! Подробности в консоли.');
+            console.error(ex);
+        }
+
     }
 
     saveEditorLevel(): void {
-        this.prepareLevelForSaving();
-        this.uploadLevel();
+        const levelName = prompt('Enter the name of the level', '');
+
+        if (levelName !== null) {
+            this.currentLevelObj.name = levelName;
+            this.currentLevelObj =
+                this.prepareLevelForSaving(this.playerCell, this.currentLevelObj, this.editorUnits);
+            this.uploadLevel(this.currentLevelObj);
+        }
     }
 
     saveAsEditorLevel(): void {
@@ -183,49 +196,58 @@ export class Editor {
         this.currentShipWithWaypoints = ship;
     }
 
-    showLevelChooseDialog(editorFileListContainer: HTMLDivElement): void {
-        // this.editorGhosts = [];
-        fetch(`${EDITOR_SERVER_ADDRESS}/list`)
-            .then(r => r.json())
-            .then(r => {
-                editorFileListContainer.style.display = 'block';
-                const ul = document.createElement('ul');
-                const title = document.createElement('span');
-                title.innerText = 'Which level to open?';
-                editorFileListContainer.append(title);
-                r.forEach((level: LevelObject) => {
-                    const li = document.createElement('li');
-                    li.innerText = level.name;
-                    li.addEventListener(
-                        'click',
-                        function () {
-                            this.currentLevelObj = {
-                                ...level,
-                            };
-                            this.loadTheEditorLevel(level.id);
-                            editorFileListContainer.style.display = 'none';
-                            title.innerText = '';
-                            editorFileListContainer.removeChild(ul);
-                        }.bind(this),
-                    );
-                    ul.append(li);
-                });
-                editorFileListContainer.append(ul);
-            })
-            .catch(e => {
-                console.log(e);
-            });
+    async showLevelChooseDialog(editorFileListContainer: HTMLDivElement): Promise<void> {
+
+        let result;
+        try {
+            result = await fetch(`${EDITOR_SERVER_ADDRESS}/list`).then(r => r.json());
+        } catch(e) {
+            console.error(e);
+            return;
+        }
+
+        editorFileListContainer.style.display = 'block';
+        const ul = document.createElement('ul');
+        const title = document.createElement('span');
+        title.innerText = 'Which level to open?';
+        editorFileListContainer.append(title);
+
+        result.forEach((level: LevelObject) => {
+            const li = document.createElement('li');
+            li.innerText = level.name;
+
+            li.addEventListener(
+                'click',
+                function () {
+                    this.currentLevelObj = {
+                        ...level,
+                    };
+                    this.loadTheEditorLevel(level.id);
+                    editorFileListContainer.style.display = 'none';
+                    title.innerText = '';
+                    editorFileListContainer.removeChild(ul);
+                }.bind(this),
+            );
+
+            ul.append(li);
+        });
+        
+        editorFileListContainer.append(ul);
     }
 
     loadTheEditorLevel(id: string): void {
+
         const DATA_SEPARATOR = '|';
+
         fetch(`${EDITOR_SERVER_ADDRESS}/level?id=${id}`)
             .then(r => r.json())
             .then(r => {
                 r.data
                     .split(DATA_SEPARATOR)
                     .forEach((objStr: string, strIndex: number) => {
+
                         const fields = objStr.split(';');
+
                         if (strIndex === 0) {
                             //this.playerCell = { x: fields[0], y: fields[1] };
                             this.createEditorUnit(
@@ -235,6 +257,7 @@ export class Editor {
                                 true,
                             );
                         }
+
                         if (strIndex > 0 && objStr !== '') {
                             if (objStr !== '') {
                                 if (fields.length === 1) {
@@ -257,7 +280,10 @@ export class Editor {
                             }
                         }
                     });
-            });
+            })
+        .catch(e => {
+            console.error(e);
+        });
     }
 
     pushNewObjects(objects: Array<BaseCSW>, ghost: boolean): void {

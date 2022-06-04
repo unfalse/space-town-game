@@ -23,10 +23,10 @@ class EditorUI {
             '#editorFileList',
         );
 
-        editorNewBtn.addEventListener(
-            'click',
-            this.editorInst.newEditorLevel.bind(this.editorInst),
-        );
+        // editorNewBtn.addEventListener(
+        //     'click',
+        //     this.editorInst.newEditorLevel.bind(this.editorInst),
+        // );
 
         editorPlayBtn.addEventListener(
             'click',

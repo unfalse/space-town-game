@@ -1,21 +1,16 @@
 import cors from 'cors';
-import express from 'express';
+import express, { Request, Response } from 'express';
 import fs from 'fs';
 import path from 'path';
+import { LevelObject } from '../types';
 
 import { port as PORT } from './server.json';
 
-type Level = {
-    id: string;
-    name: string;
-    data: string;
-};
+type FileLevelContents = {
+    levels: Array<LevelObject>;
+}
 
-type Contents = {
-    levels: Array<Level>;
-};
-
-const filename = 'levels.json';
+const LEVELS_FILENAME = 'levels.json';
 
 const gameApp = (file?: string) => path.join(__dirname, '../', file || '');
 
@@ -31,63 +26,141 @@ console.log(
     PORT,
 );
 
-const getFileContents = (): Contents =>
-    JSON.parse(
-        fs.readFileSync(process.cwd() + '/src/server/' + filename).toString(),
-    );
+const getLevelsFileContents = (): FileLevelContents => {
+    let contents;
+    try {
+        contents = fs.readFileSync(process.cwd() + '/src/server/' + LEVELS_FILENAME);
+    } catch(err) {
+        throw new Error(err);
+    }
 
-app.get('/', (_req, res) => {
-    res.sendFile(gameApp('index.html'));
+    return JSON.parse(contents.toString());
+}
+
+app.get('/', (_req, res, next) => {
+    res.sendFile(gameApp('index.html'), (err) => {
+        if (err) {
+            console.log('Error on sending index.html!');
+            next(err);
+        } else {
+            console.log('index.html has been sent successfully');
+        }
+    });
 });
 
 app.get('/list', function (request: any, response: any) {
-    const contents = getFileContents();
+
+    let contents;
+    try {
+        contents = getLevelsFileContents();
+    } catch(err) {
+        response.status(500).send('Error on reading levels from disk!');
+        return;
+    }
+
     const names = contents.levels.map(level => ({
         id: level.id,
         name: level.name,
     }));
+
     response.send(names);
 });
 
-app.get('/new', function (request: any) {
+app.get('/new', function (request: any, response: any) {
+
+    let contents;
+    try {
+        contents = getLevelsFileContents();
+    } catch(err) {
+        response.status(500).send('Error on reading levels from disk!');
+        return;
+    }
+
     const newLevelData = request.body;
-    const contents = getFileContents();
     const lastId = contents.levels.slice(-1)[0];
     const newId = lastId === undefined ? 0 : +lastId + 1;
-    const levelData: Level = {
-        id: newId.toString(),
+    const levelData: LevelObject = {
+        id: newId,
         name: 'level' + newId,
         data: newLevelData,
     };
 
     const newContents = { levels: contents.levels.concat([levelData]) };
-    fs.writeFileSync(
-        process.cwd() + '/src/server/' + 'levelsTest.json',
-        JSON.stringify(newContents),
-    );
+
+    try {
+        fs.writeFileSync(
+            process.cwd() + '/src/server/' + 'levelsTest.json',
+            JSON.stringify(newContents),
+        );
+    } catch(err) {
+        response.status(500).send('Error on writing the level on disk!');
+        return;
+    }
+
 });
 
 app.get('/level', function (request: any, response: any) {
-    const contents = getFileContents();
+
+    let contents;
+    try {
+        contents = getLevelsFileContents();
+    } catch(err) {
+        response.status(500).send('Error on reading levels from disk!');
+        return;
+    }
+
     const id = request.query.id;
     const level = contents.levels.find(level => level.id === id);
     response.send(level);
 });
 
-app.post('/save', function (request: any, response: any) {
-    const newLevel = request.body;
-    const contents = getFileContents();
-    const newLevels = contents.levels.map(level => {
-        if (level.id === newLevel.id) {
-            level.data = newLevel.data;
+app.post('/save', function (request: Request, response: Response) {
+
+    let contents;
+    try {
+        contents = getLevelsFileContents();
+    } catch(err) {
+        response.status(500).send('Error on reading levels from disk!');
+        return;
+    }
+
+    const newLevel = request.body as LevelObject;
+    let newContents;
+
+    if (newLevel.id != null) {
+        newContents = {
+            levels:
+                contents.levels.map(level => {
+                    if (level.id === newLevel.id) {
+                        level.data = newLevel.data;
+                    }
+                    return level;
+                })
         }
-        return level;
-    });
-    const newContents = { levels: newLevels };
-    fs.writeFileSync(
-        process.cwd() + '/src/server/' + filename,
-        JSON.stringify(newContents),
-    );
+    }
+
+    if (newLevel.id === null || newLevel.id === void 0) {
+        const lastId = (contents.levels.slice(-1)[0]).id;
+        const newId = Number(lastId) + 1;
+
+        newContents = {
+            levels: contents.levels.concat({
+                ...newLevel,
+                id: newId.toString()
+            })
+        };
+    }
+
+    try {
+        fs.writeFileSync(
+            process.cwd() + '/src/server/' + LEVELS_FILENAME,
+            JSON.stringify(newContents),
+        );
+    } catch(err) {
+        response.status(500).send('Error on writing the level on disk!');
+        return;
+    }
+
     response.sendStatus(200);
 });
 
