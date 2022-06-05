@@ -352,6 +352,9 @@ class Game {
 
     editorMouseDownHandler(event: MouseEvent) {
         if (this.EditorInst.editorMode && event.buttons === 1) {
+            
+            this.EditorInst.mapHasEdited = true;
+            
             const leftTop = {
                 x: this.cameraInst.x - CONST.CAM.CENTERX,
                 y: this.cameraInst.y - CONST.CAM.CENTERY,
