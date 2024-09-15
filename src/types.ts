@@ -1,3 +1,4 @@
+import { BaseCSW } from './base/baseCsw';
 import { CONST } from './const';
 
 export enum Who {
@@ -42,6 +43,24 @@ export type Point = {
 };
 
 export type WayPoints = number[];
+
+export type CollisionMatrix = number[];
+
+export type CollisionDirections = {
+    down: boolean;
+    up: boolean;
+    left: boolean;
+    right: boolean;
+    upleft: boolean;
+    upright: boolean;
+    downleft: boolean;
+    downright: boolean;
+};
+
+export type CollisionInfo = {
+    cd: CollisionDirections;
+    object: BaseCSW;
+};
 
 // export { Who, ObjectType };
 // export type { Direction, Dimensions, RectSize, PathUnit, Point, WayPoints };

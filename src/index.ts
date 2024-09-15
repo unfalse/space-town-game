@@ -169,6 +169,7 @@ class Game {
     gameCycle(timestamp: number) {
         if (this.player1.life > 0) {
             this.detectMovement(timestamp);
+            // this.processCollisions();
             this.player1.update(timestamp);
             this.cameraInst.setCoords(this.player1.x, this.player1.y);
         }
@@ -183,10 +184,10 @@ class Game {
         */
 
         this.BTankInst.getAllShips().forEach(ship => {
-            ship.update(timestamp);
+            if (ship.iam !== 1) ship.update(timestamp);
         });
 
-        this.processCollisions();
+        // this.processCollisions();
 
         this.BTankInst.getAllShips().forEach(ship => {
             ship.draw();
@@ -264,8 +265,9 @@ class Game {
                             gameObject,
                             objectsToCheck,
                         );
-                        if (collision) {
+                        if (collision !== null) {
                             const { stepsHistory } = gameObject;
+                            // console.log('collision! ', { stepsHistory });
                             const initialXY: PointXY = {
                                 x: stepsHistory[0].x,
                                 y: stepsHistory[0].y,

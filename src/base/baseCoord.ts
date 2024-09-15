@@ -9,16 +9,48 @@ export type PointXY = {
 export class BaseCoordinates {
     x: number;
     y: number;
+    centerx: number;
+    centery: number;
     d: Direction;
 
     constructor() {
         this.x = 0;
         this.y = 0;
         this.d = 0;
+        this.centerx = 0;
+        this.centery = 0;
     }
 
     getVXY(d: Direction): { vx: number; vy: number } {
         // returns direction where to go
+        // let updatedVx = 0,
+        //     updatedVy = 0;
+
+        // switch (d) {
+        //     case 0: {
+        //         updatedVx = 1;
+        //         break;
+        //     }
+        //     case 1: {
+        //         updatedVx = 1;
+        //         break;
+        //     }
+        //     case 2: {
+        //         updatedVx = -1;
+        //         break;
+        //     }
+        //     case 3: {
+        //         updatedVy = -1;
+        //     }
+        //     default:
+        //         break;
+        // }
+
+        // return {
+        //     vx: updatedVx,
+        //     vy: updatedVy,
+        // };
+
         return {
             vx: (-(d >> 1) | 1) * ((d & 1) ^ 1),
             vy: (-(d >> 1) | 1) * (d & 1 & 1),
@@ -51,5 +83,7 @@ export class BaseCoordinates {
         this.x = nx;
         this.y = ny;
         this.d = nd;
+        this.centerx = nx;
+        this.centery = ny;
     }
 }

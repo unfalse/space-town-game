@@ -194,8 +194,8 @@ export class BTankManager {
 
         const checkSquare = (csw: BaseCSW, x: number, y: number) => {
             let { width, height } = csw.dimensions[csw.d];
-            width--;
-            height--;
+            // width--;
+            // height--;
             // debugDraw(csw.x, csw.y, width, height);
 
             return (
@@ -208,8 +208,8 @@ export class BTankManager {
 
         let { width, height } = whoAsks.dimensions[whoAsks.d];
         const { x, y } = newCoords || whoAsks;
-        width--;
-        height--;
+        // width--;
+        // height--;
 
         const tArr = objects
             .map((csw: BaseCSW) => {
@@ -226,7 +226,7 @@ export class BTankManager {
                     +checkSquare(csw, x + width, y),
                     // left center
                     +checkSquare(csw, x, y + height / 2),
-                    // center center
+                    // center center (index = 4)
                     +checkSquare(csw, x + width / 2, y + height / 2),
                     // right center
                     +checkSquare(csw, x + width, y + height / 2),
@@ -237,14 +237,15 @@ export class BTankManager {
                     // right bottom
                     +checkSquare(csw, x + width, y + height),
                 ];
-                return result.includes(1)
+                return result.some(r => r !== 0)
                     ? { result, collidedObject: csw }
                     : undefined;
             }, this)
             .filter(obj => !!obj === true);
 
         if (tArr.length > 0) {
-            return tArr[0];
+            return tArr;
+            // return tArr[0];
         }
         return null;
     }
