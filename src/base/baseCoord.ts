@@ -11,6 +11,8 @@ export class BaseCoordinates {
     y: number;
     centerx: number;
     centery: number;
+    dx: number;
+    dy: number;
     d: Direction;
 
     constructor() {
@@ -19,6 +21,8 @@ export class BaseCoordinates {
         this.d = 0;
         this.centerx = 0;
         this.centery = 0;
+        this.dx = 0;
+        this.dy = 0;
     }
 
     getVXY(d: Direction): { vx: number; vy: number } {
@@ -85,5 +89,7 @@ export class BaseCoordinates {
         this.d = nd;
         this.centerx = nx;
         this.centery = ny;
+        this.dx = 0;
+        this.dy = 0;
     }
 }

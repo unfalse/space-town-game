@@ -29,6 +29,7 @@ export enum ObjectType {
     STATICSHIP = 8,
     BULLET = 9,
     DELAYED_PIC = 10,
+    INGAMEBORDER = 11,
 }
 
 export type PathUnit = {

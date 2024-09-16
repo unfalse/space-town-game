@@ -301,9 +301,12 @@ class CSWAI_customPaths extends BaseCPU {
 }
 
 class Obstacle extends BaseCSW {
+    inGameBorder: boolean;
+
     constructor() {
         super();
         this.type = CONST.TYPES.OBSTACLE;
+        this.inGameBorder = false;
     }
 
     childInit(): void {
@@ -312,6 +315,10 @@ class Obstacle extends BaseCSW {
 
     draw(): void {
         this.drawingManagerInst.drawObstacle(this.x, this.y);
+    }
+
+    setInGameBorder(b: boolean): void {
+        this.inGameBorder = b;
     }
 }
 

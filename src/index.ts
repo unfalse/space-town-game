@@ -7,7 +7,7 @@ import { Utils } from './utils';
 import { CSWAI_customPaths } from './cswai';
 import { Player } from './player';
 import { Camera } from './camera';
-import { Direction } from './types';
+import { Direction, ObjectType } from './types';
 import { ObjectsFactory } from './objFactory';
 import { placeBorders } from './drawUtils';
 import { EditorUI } from './editor/editorUI';
@@ -187,7 +187,11 @@ class Game {
             if (ship.iam !== 1) ship.update(timestamp);
         });
 
-        // this.processCollisions();
+        this.processCollisions();
+
+        this.BTankInst.getAllShips().forEach(ship => {
+            ship.updateEnd();
+        });
 
         this.BTankInst.getAllShips().forEach(ship => {
             ship.draw();
@@ -243,6 +247,37 @@ class Game {
         return 0;
     }
 
+    // checkCollisionsByGrid(gameObject: BaseCSW, updatedCoords: PointXY): any {
+    //     const btank = this.BTankInst;
+    //     const dynamicGrid = btank.dynamicCollisionGrid;
+    //     const staticGrid = btank.staticCollisionGrid;
+    //     const rows = Object.keys(dynamicGrid);
+    //     const collisions = [];
+
+    //     for (const rowNum of rows) {
+    //         const row = dynamicGrid[Number(rowNum)];
+    //         const columns = Object.keys(row);
+    //         const staticRow = staticGrid[Number(rowNum)];
+
+    //         for (const columnNum of columns) {
+    //             const ships = row[Number(columnNum)];
+    //             const column = staticRow ? staticRow[Number(columnNum)] : [];
+    //             const obstacles = column || [];
+    //             const objectsToCheck = ships.concat(obstacles);
+    //             if (objectsToCheck.length > 1) {
+    //                 const collision = this.BTankInst.checkIfTwoObjectsCrossInsideACell(
+    //                     gameObject,
+    //                     objectsToCheck,
+    //                     updatedCoords,
+    //                 );
+    //                 if (collision !== null) collisions.push(collision);
+    //             }
+    //         }
+    //     }
+
+    //     return collisions;
+    // }
+
     processCollisions() {
         const btank = this.BTankInst;
         const dynamicGrid = btank.dynamicCollisionGrid;
@@ -261,84 +296,82 @@ class Game {
                 const objectsToCheck = ships.concat(obstacles);
                 if (objectsToCheck.length > 1) {
                     for (const gameObject of ships) {
-                        const collision = this.BTankInst.checkIfTwoObjectsCrossInsideACell(
-                            gameObject,
-                            objectsToCheck,
-                        );
-                        if (collision !== null) {
-                            const { stepsHistory } = gameObject;
-                            // console.log('collision! ', { stepsHistory });
-                            const initialXY: PointXY = {
-                                x: stepsHistory[0].x,
-                                y: stepsHistory[0].y,
-                            };
-                            const newCoords_horizontal: PointXY = {
-                                x: initialXY.x + stepsHistory[0].ux,
-                                y: initialXY.y + stepsHistory[0].uy,
-                            };
-                            const newCoords_vertical: PointXY = {
-                                x: initialXY.x + stepsHistory[1].ux,
-                                y: initialXY.y + stepsHistory[1].uy,
+                        // const gameObjectCollisions = [];
+
+                        if (
+                            gameObject.checkHorizontal === 'OK' &&
+                            gameObject.checkVertical === 'OK' &&
+                            (gameObject.dx !== 0 || gameObject.dy !== 0)
+                        ) {
+                            const updatedXY: PointXY = {
+                                x: gameObject.x + gameObject.dx,
+                                y: gameObject.y + gameObject.dy,
                             };
 
-                            // let newX = gameObject.x,
-                            //     newY = gameObject.y;
-
-                            // newX =
-                            //     collision.collidedObject.x +
-                            //     this.collisionFixX(collision.result);
-                            // newY =
-                            //     collision.collidedObject.y +
-                            //     this.collisionFixY(collision.result);
-                            const collisionHorizontal = this.BTankInst.checkIfTwoObjectsCrossInsideACell(
+                            const collisions = this.BTankInst.checkIfTwoObjectsCrossInsideACell(
                                 gameObject,
                                 objectsToCheck,
-                                newCoords_horizontal,
+                                updatedXY,
+                                [ObjectType.INGAMEBORDER],
                             );
+                            // if (collisions !== null)
+                            //     gameObjectCollisions.push(collisions);
+                            if (collisions !== null && collisions.length) {
+                                collisions.forEach((cl: any) => {
+                                    const dirInfo = gameObject.getDirectionByCollisions(
+                                        cl.result,
+                                    );
 
-                            let newX = gameObject.x,
-                                newY = gameObject.y;
-                            if (collisionHorizontal) {
-                                gameObject.inertiaDirections[
-                                    CONST.DIRECTIONS.LEFT as Direction
-                                ] = 0;
-                                gameObject.inertiaDirections[
-                                    CONST.DIRECTIONS.RIGHT as Direction
-                                ] = 0;
-                                const fixX = this.collisionFixX(
-                                    collisionHorizontal.result,
-                                );
-                                newX =
-                                    fixX === 0
-                                        ? gameObject.x
-                                        : collisionHorizontal.collidedObject.x +
-                                          fixX;
+                                    if (dirInfo.right) {
+                                        gameObject.dx =
+                                            cl.collidedObject.centerx -
+                                            gameObject.centerx -
+                                            40;
+                                    }
+
+                                    if (dirInfo.left) {
+                                        gameObject.dx =
+                                            cl.collidedObject.centerx -
+                                            gameObject.centerx +
+                                            40;
+                                    }
+
+                                    if (dirInfo.down) {
+                                        gameObject.dy =
+                                            cl.collidedObject.centery -
+                                            gameObject.centery -
+                                            40;
+                                    }
+
+                                    if (dirInfo.up) {
+                                        gameObject.dy =
+                                            cl.collidedObject.centery -
+                                            gameObject.centery +
+                                            40;
+                                    }
+
+                                    if (dirInfo.upleft) {
+                                        console.log('upleft!');
+                                    }
+
+                                    if (dirInfo.upright) {
+                                        console.log('upright!');
+                                    }
+
+                                    if (gameObject.dx === 0)
+                                        gameObject.checkHorizontal = 'X';
+                                    if (gameObject.dy === 0)
+                                        gameObject.checkVertical = 'Y';
+                                });
                             }
-
-                            const collisionVertical = this.BTankInst.checkIfTwoObjectsCrossInsideACell(
-                                gameObject,
-                                objectsToCheck,
-                                newCoords_vertical,
-                            );
-                            if (collisionVertical) {
-                                gameObject.inertiaDirections[
-                                    CONST.DIRECTIONS.UP as Direction
-                                ] = 0;
-                                gameObject.inertiaDirections[
-                                    CONST.DIRECTIONS.DOWN as Direction
-                                ] = 0;
-                                const fixY = this.collisionFixY(
-                                    collisionVertical.result,
-                                );
-                                newY =
-                                    fixY === 0
-                                        ? gameObject.y
-                                        : collisionVertical.collidedObject.y +
-                                          fixY;
-                            }
-
-                            gameObject.initCoords(newX, newY, gameObject.d);
                         }
+
+                        gameObject.setInertiaDirections(
+                            gameObject.checkHorizontal,
+                        );
+                        gameObject.setInertiaDirections(
+                            gameObject.checkVertical,
+                        );
                     }
                 }
             }

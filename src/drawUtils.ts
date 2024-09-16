@@ -15,7 +15,7 @@ export const placeBorders = (
                 (x - 1) * CONST.CELLSIZES.MAXX,
                 -1 * CONST.CELLSIZES.MAXY,
                 CONST.COMPUTER,
-                ObjectType.OBSTACLE,
+                ObjectType.INGAMEBORDER,
             ),
         );
         borders.push(
@@ -23,7 +23,7 @@ export const placeBorders = (
                 (x - 1) * CONST.CELLSIZES.MAXX,
                 CONST.MAXY * CONST.CELLSIZES.MAXY,
                 CONST.COMPUTER,
-                ObjectType.OBSTACLE,
+                ObjectType.INGAMEBORDER,
             ),
         );
     }
@@ -34,7 +34,7 @@ export const placeBorders = (
                 -1 * CONST.CELLSIZES.MAXX,
                 (y - 1) * CONST.CELLSIZES.MAXY,
                 CONST.COMPUTER,
-                ObjectType.OBSTACLE,
+                ObjectType.INGAMEBORDER,
             ),
         );
         borders.push(
@@ -42,7 +42,7 @@ export const placeBorders = (
                 CONST.MAXX * CONST.CELLSIZES.MAXX,
                 (y - 1) * CONST.CELLSIZES.MAXY,
                 CONST.COMPUTER,
-                ObjectType.OBSTACLE,
+                ObjectType.INGAMEBORDER,
             ),
         );
     }

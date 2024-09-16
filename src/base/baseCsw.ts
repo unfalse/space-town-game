@@ -58,6 +58,8 @@ export class BaseCSW extends BaseGameObject {
     type: ObjectType;
     ghost: boolean;
     stepsHistory: StepsHistory[];
+    checkHorizontal: BordersCheckResult;
+    checkVertical: BordersCheckResult;
 
     constructor() {
         super();
@@ -274,6 +276,10 @@ export class BaseCSW extends BaseGameObject {
         }
     }
 
+    move(d: Direction): void {
+        console.log('move not implemented!', d);
+    }
+
     canItMove({
         ux,
         uy,
@@ -353,51 +359,9 @@ export class BaseCSW extends BaseGameObject {
         };
     }
 
-    /*
-    
-    TODO: make this.x and this.y as the center of csw
-    Right now this.x and this.y is point o (upper left point)
-    
-    o----------
-    |
-    |
-    |
-    |
-    
-    */
-    move(direction: Direction): void {
-        const { ux, uy } = this.getNewCoordinatesDelta(direction);
+    // checkBounds() {
 
-        // get ship dimensions by current direction and 'iam' flag
-        let { width, height } = this.dimensions[direction];
-        width--;
-        height--;
-
-        // TODO: these checks should be moved to processCollisions function
-        if (!this.canItMove({ ux, uy, width, height, direction })) {
-            this.stepsHistory.push({
-                x: this.x,
-                y: this.y,
-                ux,
-                uy,
-                direction,
-            });
-            return;
-        }
-
-        this.stepsHistory.push({
-            x: this.x,
-            y: this.y,
-            ux,
-            uy,
-            direction,
-        });
-
-        this.x = this.x + ux;
-        this.y = this.y + uy;
-
-        this.updateCollisionGrid(direction);
-    }
+    // }
 
     move2(): void {
         const { ux: uxR, uy: uyR } = this.getNewCoordinatesDelta(
@@ -412,7 +376,7 @@ export class BaseCSW extends BaseGameObject {
         const { ux: uxU, uy: uyU } = this.getNewCoordinatesDelta(
             CONST.DIRECTIONS.UP as Direction,
         );
-        let { width, height } = this.dimensions[
+        const { width, height } = this.dimensions[
             CONST.DIRECTIONS.RIGHT as Direction
         ];
         // width--;
@@ -428,19 +392,22 @@ export class BaseCSW extends BaseGameObject {
             uy: uyD + uyU,
         };
 
-        let checkHorizontal = this.canItMove2({
+        // TODO: canItMove2 should be rewritten!
+        const checkHorizontal = this.canItMove2({
             ux: horizontalUXY.ux,
             uy: horizontalUXY.uy,
             width,
             height,
         });
-        let checkVertical = this.canItMove2({
+
+        const checkVertical = this.canItMove2({
             ux: verticalUXY.ux,
             uy: verticalUXY.uy,
             width,
             height,
         });
 
+        /*
         console.log({
             hx: horizontalUXY.ux,
             hy: horizontalUXY.uy,
@@ -451,7 +418,9 @@ export class BaseCSW extends BaseGameObject {
             vx: verticalUXY.ux,
             vy: verticalUXY.uy,
         });
+        */
 
+        /*
         if (
             checkHorizontal === 'OK' &&
             checkVertical === 'OK' &&
@@ -462,20 +431,11 @@ export class BaseCSW extends BaseGameObject {
         ) {
             const dx = horizontalUXY.ux + verticalUXY.ux;
             const dy = horizontalUXY.uy + verticalUXY.uy;
-            // const dx =
-            //     horizontalUXY.ux + verticalUXY.ux !== 0
-            //         ? (horizontalUXY.ux + verticalUXY.ux) /
-            //           (horizontalUXY.ux + verticalUXY.ux)
-            //         : 0;
-            // const dy =
-            //     horizontalUXY.uy + verticalUXY.uy !== 0
-            //         ? (horizontalUXY.uy + verticalUXY.uy) /
-            //           (horizontalUXY.uy + verticalUXY.uy)
-            //         : 0;
             const updatedXY: PointXY = {
                 x: this.x + dx,
                 y: this.y + dy,
             };
+
             const collisions = this.checkCollisionsByGrid(this, updatedXY);
             if (collisions.length) {
                 console.log({
@@ -488,8 +448,6 @@ export class BaseCSW extends BaseGameObject {
                     collisions,
                 });
 
-                const results: { ux: number }[] = [];
-                // const collisionInfoArray: CollisionInfo[] = [];
                 collisions.forEach((cl: any[]) =>
                     cl.forEach(cl2 => {
                         const dirInfo = this.getDirectionByCollisions(
@@ -526,75 +484,55 @@ export class BaseCSW extends BaseGameObject {
 
                         if (horizontalUXY.ux === 0) checkHorizontal = 'X';
                         if (verticalUXY.uy === 0) checkVertical = 'Y';
-
-                        // if (this.d === 0)
-                        //     results.push({
-                        //         ux: cl2.collidedObject.x - this.x - 40,
-                        //     });
-
-                        // collisionInfoArray.push({
-                        //     cd: this.getDirectionByCollisions(cl2.result),
-                        //     object: cl2.collidedObject,
-                        // });
-                        // collisionDirections
-                        // if (this.d === 3)
-                        //     results.push({
-                        //         ux: 1,
-                        //     });
                     }),
                 );
-                // console.log({ results });
+*/
+        // console.log({ results });
 
-                // TODO: get the biggest ux and use it
-                // if (this.d === 0) {
-                //     horizontalUXY.ux = results[0].ux;
-                //     if (horizontalUXY.ux === 0) {
-                //         checkHorizontal = 'X';
-                //     }
-                // }
-
-                // checkHorizontal = 'X';
-                // checkVertical = 'Y';
-                // }
-            }
-        }
-
-        this.setInertiaDirections(checkHorizontal);
-        this.setInertiaDirections(checkVertical);
-
-        this.stepsHistory.push({
-            x: this.x,
-            y: this.y,
-            ux: horizontalUXY.ux,
-            uy: horizontalUXY.uy,
-            direction: CONST.DIRECTIONS.RIGHT as Direction,
-        });
-        this.stepsHistory.push({
-            x: this.x,
-            y: this.y,
-            ux: verticalUXY.ux,
-            uy: verticalUXY.uy,
-            direction: CONST.DIRECTIONS.DOWN as Direction,
-        });
-
-        // if (checkHorizontal !== 'OK' || checkVertical !== 'OK') {
-        //     console.log('returned!');
-        //     return;
+        // TODO: get the biggest ux and use it
+        // if (this.d === 0) {
+        //     horizontalUXY.ux = results[0].ux;
+        //     if (horizontalUXY.ux === 0) {
+        //         checkHorizontal = 'X';
+        //     }
         // }
 
-        console.log('updating x!', {
-            x: this.x,
-            newx: this.x + horizontalUXY.ux + verticalUXY.ux,
-            ux: horizontalUXY.ux + verticalUXY.ux,
-        });
-        console.log('updating y!', {
-            y: this.y,
-            newy: this.y + horizontalUXY.uy + verticalUXY.uy,
-            uy: horizontalUXY.uy + verticalUXY.uy,
-        });
+        // checkHorizontal = 'X';
+        // checkVertical = 'Y';
+        // }
 
-        this.x = this.x + horizontalUXY.ux + verticalUXY.ux;
-        this.y = this.y + horizontalUXY.uy + verticalUXY.uy;
+        /*
+            }
+        }
+        */
+
+        /*
+        this.setInertiaDirections(checkHorizontal);
+        this.setInertiaDirections(checkVertical);
+        */
+
+        // console.log('updating x!', {
+        //     x: this.x,
+        //     newx: this.x + horizontalUXY.ux + verticalUXY.ux,
+        //     ux: horizontalUXY.ux + verticalUXY.ux,
+        // });
+        // console.log('updating y!', {
+        //     y: this.y,
+        //     newy: this.y + horizontalUXY.uy + verticalUXY.uy,
+        //     uy: horizontalUXY.uy + verticalUXY.uy,
+        // });
+
+        this.checkHorizontal = checkHorizontal;
+        this.checkVertical = checkVertical;
+        this.dx = horizontalUXY.ux + verticalUXY.ux;
+        this.dy = horizontalUXY.uy + verticalUXY.uy;
+
+        // this.updateCollisionGrid(CONST.DIRECTIONS.RIGHT as Direction);
+    }
+
+    updateEnd(): void {
+        this.x = this.x + this.dx;
+        this.y = this.y + this.dy;
 
         this.centerx = this.x + (CONST.CELLSIZES.MAXX * CONST.SCALE.X) / 2;
         this.centery = this.y + (CONST.CELLSIZES.MAXY * CONST.SCALE.Y) / 2;

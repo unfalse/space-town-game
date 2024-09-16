@@ -79,6 +79,14 @@ export class ObjectsFactory {
                 return c1;
             }
 
+            if (type === ObjectType.INGAMEBORDER) {
+                c1 = new Obstacle();
+                this.initBaseCSW(c1, x, y, who, type);
+                c1.setGhost(ghost);
+                c1.setInGameBorder(true);
+                return c1;
+            }
+
             if (type === ObjectType.SPACEBRICK) {
                 c1 = new SpaceBrick();
                 this.initBaseCSW(c1, x, y, who, type);
