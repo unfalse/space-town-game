@@ -2,7 +2,7 @@ import { CONST } from './const';
 import { Bullet } from './bullet';
 import { Images } from './images';
 import { DelayedPic } from './delayedPic';
-import { ObjectType } from './types';
+import { CollisionDistance, ObjectType } from './types';
 import { BaseCSW } from './base/baseCsw';
 import { Player } from './player';
 import { Ghosts } from './ghosts';
@@ -248,6 +248,55 @@ export class BTankManager {
             // return tArr[0];
         }
         return null;
+    }
+
+    getVectorsOfCollidedObjectsByCenter(
+        whoAsks: BaseCSW,
+        objects: BaseCSW[],
+        newCoords?: PointXY, // x and y coordinates of object's center
+        typesToIgnore?: ObjectType[],
+    ): CollisionDistance[] {
+        const { x, y } = newCoords || whoAsks;
+
+        const collidedObjects = objects
+            // .filter(
+            //     obj => whoAsks !== obj || typesToIgnore?.indexOf(obj.type) < 0,
+            // )
+            .reduce((prevValue: CollisionDistance[], currentCSW: BaseCSW) => {
+                if (
+                    whoAsks === currentCSW ||
+                    typesToIgnore?.indexOf(currentCSW.type) >= 0
+                ) {
+                    return prevValue;
+                }
+
+                const objToCheck: PointXY = {
+                    x: currentCSW.centerx,
+                    y: currentCSW.centery,
+                };
+
+                const distance = Math.sqrt(
+                    (objToCheck.x - x) * (objToCheck.x - x) +
+                        (objToCheck.y - y) * (objToCheck.y - y),
+                );
+
+                if (distance < CONST.CELLSIZES.MAXX) {
+                    const distanceX = objToCheck.x - x;
+
+                    const distanceY = objToCheck.y - y;
+
+                    return prevValue.concat({
+                        distance,
+                        distanceX,
+                        distanceY,
+                        collidedObject: currentCSW,
+                    });
+                }
+
+                return prevValue;
+            }, []);
+
+        return collidedObjects;
     }
 
     getBulletWithPixelPrecision(

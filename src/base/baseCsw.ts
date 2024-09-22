@@ -473,76 +473,61 @@ export class BaseCSW extends BaseGameObject {
             //           (horizontalUXY.uy + verticalUXY.uy)
             //         : 0;
             const updatedXY: PointXY = {
-                x: this.x + dx,
-                y: this.y + dy,
+                x: this.centerx + dx,
+                y: this.centery + dy,
             };
             const collisions = this.checkCollisionsByGrid(this, updatedXY);
             if (collisions.length) {
-                console.log({
-                    checkedx: updatedXY.x,
-                    checkedy: updatedXY.y,
-                });
                 console.log({
                     currentx: this.x,
                     currenty: this.y,
                     collisions,
                 });
 
-                const results: { ux: number }[] = [];
-                // const collisionInfoArray: CollisionInfo[] = [];
-                collisions.forEach((cl: any[]) =>
-                    cl.forEach(cl2 => {
-                        const dirInfo = this.getDirectionByCollisions(
-                            cl2.result,
-                        );
+                console.log({
+                    checkedx: updatedXY.x,
+                    checkedy: updatedXY.y,
+                });
 
-                        if (dirInfo.right) {
-                            horizontalUXY.ux =
-                                cl2.collidedObject.centerx - this.centerx - 40;
-                        }
+                // collisions.forEach((cl: any[]) =>
+                //     cl.forEach(cl2 => {
+                //         const dirInfo = this.getDirectionByCollisions(
+                //             cl2.result,
+                //         );
 
-                        if (dirInfo.left) {
-                            horizontalUXY.ux =
-                                cl2.collidedObject.centerx - this.centerx + 40;
-                        }
+                //         if (dirInfo.right) {
+                //             horizontalUXY.ux =
+                //                 cl2.collidedObject.centerx - this.centerx - 40;
+                //         }
 
-                        if (dirInfo.down) {
-                            verticalUXY.uy =
-                                cl2.collidedObject.centery - this.centery - 40;
-                        }
+                //         if (dirInfo.left) {
+                //             horizontalUXY.ux =
+                //                 cl2.collidedObject.centerx - this.centerx + 40;
+                //         }
 
-                        if (dirInfo.up) {
-                            verticalUXY.uy =
-                                cl2.collidedObject.centery - this.centery + 40;
-                        }
+                //         if (dirInfo.down) {
+                //             verticalUXY.uy =
+                //                 cl2.collidedObject.centery - this.centery - 40;
+                //         }
 
-                        if (dirInfo.upleft) {
-                            console.log('upleft!');
-                        }
+                //         if (dirInfo.up) {
+                //             verticalUXY.uy =
+                //                 cl2.collidedObject.centery - this.centery + 40;
+                //         }
 
-                        if (dirInfo.upright) {
-                            console.log('upright!');
-                        }
+                //         if (dirInfo.upleft) {
+                //             console.log('upleft!');
+                //         }
 
-                        if (horizontalUXY.ux === 0) checkHorizontal = 'X';
-                        if (verticalUXY.uy === 0) checkVertical = 'Y';
+                //         if (dirInfo.upright) {
+                //             console.log('upright!');
+                //         }
 
-                        // if (this.d === 0)
-                        //     results.push({
-                        //         ux: cl2.collidedObject.x - this.x - 40,
-                        //     });
+                //         if (horizontalUXY.ux === 0) checkHorizontal = 'X';
+                //         if (verticalUXY.uy === 0) checkVertical = 'Y';
+                //     }),
+                // );
 
-                        // collisionInfoArray.push({
-                        //     cd: this.getDirectionByCollisions(cl2.result),
-                        //     object: cl2.collidedObject,
-                        // });
-                        // collisionDirections
-                        // if (this.d === 3)
-                        //     results.push({
-                        //         ux: 1,
-                        //     });
-                    }),
-                );
                 // console.log({ results });
 
                 // TODO: get the biggest ux and use it
@@ -620,12 +605,17 @@ export class BaseCSW extends BaseGameObject {
                 const obstacles = column || [];
                 const objectsToCheck = ships.concat(obstacles);
                 if (objectsToCheck.length > 1) {
-                    const collision = this.BTankInst.checkIfTwoObjectsCrossInsideACell(
+                    const collision = this.BTankInst.getVectorsOfCollidedObjectsByCenter(
                         gameObject,
                         objectsToCheck,
                         updatedCoords,
                     );
-                    if (collision !== null) collisions.push(collision);
+                    // const collision = this.BTankInst.checkIfTwoObjectsCrossInsideACell(
+                    //     gameObject,
+                    //     objectsToCheck,
+                    //     updatedCoords,
+                    // );
+                    if (collision.length) collisions.push(collision);
                 }
             }
         }

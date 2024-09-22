@@ -62,5 +62,12 @@ export type CollisionInfo = {
     object: BaseCSW;
 };
 
+export type CollisionDistance = {
+    distance: number;
+    distanceX: number;
+    distanceY: number;
+    collidedObject: BaseCSW;
+};
+
 // export { Who, ObjectType };
 // export type { Direction, Dimensions, RectSize, PathUnit, Point, WayPoints };
