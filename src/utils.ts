@@ -1,4 +1,18 @@
+import { port } from './server/server.json';
+
 console.log('utils!');
+
+// let logArray: string[] = [];
+
+const PORT = process.env.NODE_ENV === 'production' ? 80 : port;
+
+const EDITOR_SERVER_ADDRESS = `${window.location.protocol}//${window.location.hostname}:${PORT}`;
+
+let logsEnabled = false;
+
+const SERVER_ADDRESS = `${window.location.protocol}//${
+    window.location.hostname
+}:${8666}`;
 
 export const Utils = {
     KEY_CODE: {
@@ -9,6 +23,8 @@ export const Utils = {
         a_KEY: 'a',
         h_KEY: 'h',
         s_KEY: 's',
+        l_KEY: 'l', // toggle adding logs
+        p_KEY: 'p', // flush logs
         F1_KEY: 'F1',
         N1_KEY: '1',
         N2_KEY: '2',
@@ -17,7 +33,11 @@ export const Utils = {
         N5_KEY: '5',
         N6_KEY: '6',
         N7_KEY: '7',
+        EQUAL_KEY: '=',
+        MINUS_KEY: '-',
     },
+
+    logArray: [] as string[],
 
     // event.type должен быть keypress
     getChar(event: KeyboardEvent): string {
@@ -43,5 +63,39 @@ export const Utils = {
 
     text(str: string): void {
         console.log(str);
+    },
+
+    outputDebugInfo(paramsArr: string[]): void {
+        const debugPanel = document.querySelector('#debug_panel');
+        const firstStrings = `logsEnabled: ${logsEnabled.toString()} <br> logs counter: ${
+            this.logArray.length
+        } <br> `;
+        debugPanel.innerHTML = paramsArr.reduce(
+            (prev: string, curr: string) => `${prev}<br>${curr}`,
+            firstStrings,
+        );
+    },
+
+    addLog(str: string): void {
+        if (logsEnabled) this.logArray.push(str);
+    },
+
+    toggleLogs(): void {
+        logsEnabled = !logsEnabled;
+    },
+
+    flushLogs(): void {
+        // debugger;
+        fetch(`${EDITOR_SERVER_ADDRESS}/flushlogs`, {
+            method: 'post',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(this.logArray),
+        }).then(() => {
+            console.info('Logs flushed!');
+            this.logArray = [];
+        });
     },
 };

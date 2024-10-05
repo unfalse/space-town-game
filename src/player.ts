@@ -2,6 +2,7 @@ import { BaseCSW } from './base/baseCsw';
 import { Bullet } from './bullet';
 import { CONST } from './const';
 import { Direction, Who } from './types';
+import { Utils } from './utils';
 
 const MAX_LIFE = 1;
 
@@ -34,6 +35,9 @@ class Player extends BaseCSW {
         if (ghost) {
             this.drawingManagerInst.drawcswmt9ghost(this.x, this.y, this.d);
         } else {
+            Utils.addLog(
+                `Player.draw (39): player.x = ${this.x} | player.y = ${this.y}`,
+            );
             this.drawingManagerInst.drawcswmt9(
                 CONST.CAM.CENTERX,
                 CONST.CAM.CENTERY,

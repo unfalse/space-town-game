@@ -311,10 +311,19 @@ class Obstacle extends BaseCSW {
 
     childInit(): void {
         this.addThisObjectToStaticGrid(this.x, this.y);
+        // this.addThisObjectToStaticGrid(this.centerx, this.centery);
     }
 
     draw(): void {
         this.drawingManagerInst.drawObstacle(this.x, this.y);
+    }
+
+    drawDebug(): void {
+        this.drawingManagerInst.drawDebugObstacle(
+            this.x,
+            this.y,
+            this.BTankInst.debugDrawContext,
+        );
     }
 
     setInGameBorder(b: boolean): void {
@@ -354,6 +363,7 @@ class SpaceBrick extends BaseCSW {
     childInit(): void {
         this.life = 9;
         this.addThisObjectToStaticGrid(this.x, this.y);
+        // this.addThisObjectToStaticGrid(this.centerx, this.centery);
     }
 
     draw(): void {

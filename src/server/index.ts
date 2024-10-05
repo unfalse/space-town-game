@@ -15,11 +15,40 @@ type Contents = {
     levels: Array<Level>;
 };
 
+const formatDate = (inputDate: Date, format: string) => {
+    if (!inputDate) return '';
+
+    const padZero = (value: number) => (value < 10 ? `0${value}` : `${value}`);
+    const parts: any = {
+        yyyy: inputDate.getFullYear(),
+        MM: padZero(inputDate.getMonth() + 1),
+        dd: padZero(inputDate.getDate()),
+        HH: padZero(inputDate.getHours()),
+        hh: padZero(
+            inputDate.getHours() > 12
+                ? inputDate.getHours() - 12
+                : inputDate.getHours(),
+        ),
+        mm: padZero(inputDate.getMinutes()),
+        ss: padZero(inputDate.getSeconds()),
+        tt: inputDate.getHours() < 12 ? 'AM' : 'PM',
+    };
+
+    return format.replace(
+        /yyyy|MM|dd|HH|hh|mm|ss|tt/g,
+        (match: string) => parts[match],
+    );
+};
+
 const filename = 'levels.json';
 
 const gameApp = (file?: string) => path.join(__dirname, '../', file || '');
 
 const app = express();
+
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb' }));
+
 app.use(express.json());
 app.use(cors());
 app.options('*', cors());
@@ -72,6 +101,27 @@ app.get('/level', function (request: any, response: any) {
     const id = request.query.id;
     const level = contents.levels.find(level => level.id === id);
     response.send(level);
+});
+
+app.get('/testlogs', function (request: any, response: any) {
+    const testJSON = ['dsd', 'sda'];
+    response.send(JSON.stringify(testJSON));
+});
+
+app.post('/flushlogs', function (request: any, response: any) {
+    const dateStr = formatDate(new Date(), 'yyyy-MM-dd HH:mm:ss');
+    const logFileName =
+        formatDate(new Date(), 'yyyy-MM-dd_HH-mm-ss') + '_log.txt';
+    const fullPath = process.cwd() + '/src/server/' + logFileName;
+    const reqBody = request.body;
+    const listOfEntries = reqBody;
+
+    const contents = `------- ${dateStr} --------\n${listOfEntries.join(
+        '\n',
+    )}\n------- LOG ENDS --------`;
+
+    fs.writeFileSync(fullPath, contents);
+    response.sendStatus(200);
 });
 
 app.post('/save', function (request: any, response: any) {

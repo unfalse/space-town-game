@@ -2,7 +2,7 @@ import { CONST } from './const';
 import { Bullet } from './bullet';
 import { Images } from './images';
 import { DelayedPic } from './delayedPic';
-import { ObjectType } from './types';
+import { CollisionDistance, ObjectType } from './types';
 import { BaseCSW } from './base/baseCsw';
 import { Player } from './player';
 import { Ghosts } from './ghosts';
@@ -36,6 +36,7 @@ export class BTankManager {
     bulletsArr: Bullet[];
     delayedPics: DelayedPic[];
     drawContext: CanvasRenderingContext2D;
+    debugDrawContext: CanvasRenderingContext2D;
     // infoContext: any;
     againBtn: HTMLButtonElement;
     gameOverBlock: HTMLDivElement;
@@ -44,6 +45,8 @@ export class BTankManager {
     gameInfo: HTMLCanvasElement;
     titleBlock: HTMLDivElement;
     gameFieldBlock: HTMLCanvasElement;
+    debugLogParser: HTMLDivElement;
+    debugLogTextarea: HTMLTextAreaElement;
     // gameCam: Camera;
     playerInstance: Player;
 
@@ -57,6 +60,7 @@ export class BTankManager {
         this.bulletsArr = [];
         this.delayedPics = [];
         this.drawContext = null;
+        this.debugDrawContext = null;
         this.againBtn = null;
         this.gameOverBlock = null;
         this.playerInstance = player;
@@ -69,11 +73,20 @@ export class BTankManager {
             'gameField',
         ) as HTMLCanvasElement;
 
+        const debugField: HTMLCanvasElement = document.getElementById(
+            'debugField',
+        ) as HTMLCanvasElement;
+
+        const btankSelf = this;
+
         gameField.height = document.body.clientHeight;
         // CONST.SCREENMAXY * CONST.CELLSIZES.MAXY * CONST.SCALE.Y;
 
         gameField.width = document.body.clientWidth;
         // CONST.SCREENMAXX * CONST.CELLSIZES.MAXX * CONST.SCALE.X;
+
+        debugField.height = document.body.clientHeight;
+        debugField.width = document.body.clientWidth;
 
         CONST.CAM.CENTERY = gameField.height / 2;
         CONST.CAM.CENTERX = gameField.width / 2;
@@ -83,9 +96,12 @@ export class BTankManager {
         this.againBtn = document.querySelector('#playAgainBtn');
         this.gameOverBlock = document.querySelector('#gameOverBlock');
         this.titleBlock = document.querySelector('#titleBlock');
+        this.debugLogParser = document.querySelector('#debug_logs_parser');
+        this.debugLogTextarea = document.querySelector('#debug_log_textarea');
         this.gameFieldBlock = gameField;
 
         this.drawContext = gameField.getContext('2d');
+        this.debugDrawContext = debugField.getContext('2d');
         Images.drawContext = this.drawContext;
         //this.infoContext = this.gameInfo.getContext("2d");
 
@@ -192,7 +208,7 @@ export class BTankManager {
         // }).bind(this);
         // const typeToCheck = typeToCheckParam || CONST.TYPES.SHIP;
 
-        const checkSquare = (csw: BaseCSW, x: number, y: number) => {
+        const checkPlayerPointInCSW = (csw: BaseCSW, x: number, y: number) => {
             let { width, height } = csw.dimensions[csw.d];
             // width--;
             // height--;
@@ -206,7 +222,120 @@ export class BTankManager {
             );
         };
 
-        let { width, height } = whoAsks.dimensions[whoAsks.d];
+        const checkCSWPointInPlayer = (
+            playerCoords: PointXY,
+            pWidth: number,
+            pHeight: number,
+            x: number,
+            y: number,
+        ) => {
+            // debugDraw(csw.x, csw.y, width, height);
+
+            return (
+                x >= playerCoords.x &&
+                x <= playerCoords.x + pWidth &&
+                y >= playerCoords.y &&
+                y <= playerCoords.y + pHeight
+            );
+        };
+
+
+        const getPlayerCollidedPoints = (csw: BaseCSW) => [
+            // left top
+            +checkPlayerPointInCSW(csw, x, y),
+            // center top
+            +checkPlayerPointInCSW(csw, x + width / 2, y),
+            // right top
+            +checkPlayerPointInCSW(csw, x + width, y),
+            // left center
+            +checkPlayerPointInCSW(csw, x, y + height / 2),
+            // center center (index = 4)
+            +checkPlayerPointInCSW(csw, x + width / 2, y + height / 2),
+            // right center
+            +checkPlayerPointInCSW(csw, x + width, y + height / 2),
+            // left bottom
+            +checkPlayerPointInCSW(csw, x, y + height),
+            // center bottom
+            +checkPlayerPointInCSW(csw, x + width / 2, y + height),
+            // right bottom
+            +checkPlayerPointInCSW(csw, x + width, y + height),
+        ];
+
+        const getCSWCollidedPoints = (
+            pCoords: PointXY,
+            pWidth: number,
+            pHeight: number,
+            csw: BaseCSW,
+        ) => [
+            // left top
+            +checkCSWPointInPlayer(pCoords, pWidth, pHeight, csw.x, csw.y),
+            // center top
+            +checkCSWPointInPlayer(
+                pCoords,
+                pWidth,
+                pHeight,
+                csw.x + pWidth / 2,
+                csw.y,
+            ),
+            // right top
+            +checkCSWPointInPlayer(
+                pCoords,
+                pWidth,
+                pHeight,
+                csw.x + pWidth,
+                csw.y,
+            ),
+            // left center
+            +checkCSWPointInPlayer(
+                pCoords,
+                pWidth,
+                pHeight,
+                csw.x,
+                csw.y + pHeight / 2,
+            ),
+            // center center (index = 4)
+            +checkCSWPointInPlayer(
+                pCoords,
+                pWidth,
+                pHeight,
+                csw.x + pWidth / 2,
+                csw.y + pHeight / 2,
+            ),
+            // right center
+            +checkCSWPointInPlayer(
+                pCoords,
+                pWidth,
+                pHeight,
+                csw.x + pWidth,
+                csw.y + pHeight / 2,
+            ),
+            // left bottom
+            +checkCSWPointInPlayer(
+                pCoords,
+                pWidth,
+                pHeight,
+                csw.x,
+                csw.y + pHeight,
+            ),
+            // center bottom
+            +checkCSWPointInPlayer(
+                pCoords,
+                pWidth,
+                pHeight,
+                csw.x + pWidth / 2,
+                csw.y + pHeight,
+            ),
+            // right bottom
+            +checkCSWPointInPlayer(
+                pCoords,
+                pWidth,
+                pHeight,
+                csw.x + pWidth,
+                csw.y + pHeight,
+            ),
+        ];
+
+        const { width, height } = whoAsks.dimensions[whoAsks.d];
         const { x, y } = newCoords || whoAsks;
         // width--;
         // height--;
@@ -217,26 +346,15 @@ export class BTankManager {
                     return false;
                 }
 
-                const result = [
-                    // left top
-                    +checkSquare(csw, x, y),
-                    // center top
-                    +checkSquare(csw, x + width / 2, y),
-                    // right top
-                    +checkSquare(csw, x + width, y),
-                    // left center
-                    +checkSquare(csw, x, y + height / 2),
-                    // center center (index = 4)
-                    +checkSquare(csw, x + width / 2, y + height / 2),
-                    // right center
-                    +checkSquare(csw, x + width, y + height / 2),
-                    // left bottom
-                    +checkSquare(csw, x, y + height),
-                    // center bottom
-                    +checkSquare(csw, x + width / 2, y + height),
-                    // right bottom
-                    +checkSquare(csw, x + width, y + height),
-                ];
+                // const result = getPlayerCollidedPoints(csw);
+
+                const result = getCSWCollidedPoints(
+                    newCoords,
+                    width,
+                    height,
+                    csw,
+                );
+
                 return result.some(r => r !== 0)
                     ? { result, collidedObject: csw }
                     : undefined;
@@ -248,6 +366,55 @@ export class BTankManager {
             // return tArr[0];
         }
         return null;
+    }
+
+    getVectorsOfCollidedObjectsByCenter(
+        whoAsks: BaseCSW,
+        objects: BaseCSW[],
+        newCoords?: PointXY, // x and y coordinates of object's center
+        typesToIgnore?: ObjectType[],
+    ): CollisionDistance[] {
+        const { x, y } = newCoords || whoAsks;
+
+        const collidedObjects = objects
+            // .filter(
+            //     obj => whoAsks !== obj || typesToIgnore?.indexOf(obj.type) < 0,
+            // )
+            .reduce((prevValue: CollisionDistance[], currentCSW: BaseCSW) => {
+                if (
+                    whoAsks === currentCSW ||
+                    typesToIgnore?.indexOf(currentCSW.type) >= 0
+                ) {
+                    return prevValue;
+                }
+
+                const objToCheck: PointXY = {
+                    x: currentCSW.centerx,
+                    y: currentCSW.centery,
+                };
+
+                const distance = Math.sqrt(
+                    (objToCheck.x - x) * (objToCheck.x - x) +
+                        (objToCheck.y - y) * (objToCheck.y - y),
+                );
+
+                if (distance < CONST.CELLSIZES.MAXX) {
+                    const distanceX = objToCheck.x - x;
+
+                    const distanceY = objToCheck.y - y;
+
+                    return prevValue.concat({
+                        distance,
+                        distanceX,
+                        distanceY,
+                        collidedObject: currentCSW,
+                    });
+                }
+
+                return prevValue;
+            }, []);
+
+        return collidedObjects;
     }
 
     getBulletWithPixelPrecision(

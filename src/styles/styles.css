@@ -70,6 +70,10 @@ canvas {
     border: none;
 }
 
+#debugField {
+    border: none;
+}
+
 #editorBlock {
     display: none;
     text-align: center;

@@ -204,8 +204,38 @@ export class DrawingManager {
             CONST.CELLSIZES.MAXX * CONST.SCALE.X,
             CONST.CELLSIZES.MAXY * CONST.SCALE.Y,
         );
+
         // this.drawContext.strokeStyle="#f00";
         // this.drawContext.strokeRect(x, y, 39,39);
+    }
+
+    drawDebugObstacle(
+        x: number,
+        y: number,
+        drawContext: CanvasRenderingContext2D,
+    ): void {
+        const relXY = this.gameCam.getRelCoords(x, y);
+        drawContext.strokeStyle = '#0f0';
+        drawContext.strokeRect(
+            relXY.x,
+            relXY.y,
+            CONST.CELLSIZES.MAXX * CONST.SCALE.X,
+            CONST.CELLSIZES.MAXY * CONST.SCALE.Y,
+        );
+    }
+
+    drawEditorCursor(
+        x: number,
+        y: number,
+        drawContext: CanvasRenderingContext2D,
+    ): void {
+        drawContext.strokeStyle = 'green';
+        drawContext.strokeRect(
+            x,
+            y,
+            CONST.CELLSIZES.MAXX * CONST.SCALE.X,
+            CONST.CELLSIZES.MAXY * CONST.SCALE.Y,
+        );
     }
 
     drawBorder(x: number, y: number): void {

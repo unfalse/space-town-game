@@ -55,8 +55,8 @@ const CONST = {
     },
 
     COLLISION_GRID: {
-        WIDTH: 200,
-        HEIGHT: 200,
+        WIDTH: 200, //400, // 200,
+        HEIGHT: 200, //400, // 200,
     },
 
     COLLISION_MASKS: {

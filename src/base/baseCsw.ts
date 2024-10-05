@@ -1,5 +1,14 @@
 import { CONST } from '../const';
-import { CollisionDirections, CollisionInfo, CollisionMatrix, Dimensions, Direction, ObjectType, Who } from '../types';
+import {
+    AxisChange,
+    CollisionDirections,
+    CollisionInfo,
+    CollisionMatrix,
+    Dimensions,
+    Direction,
+    ObjectType,
+    Who,
+} from '../types';
 import { DrawingManager } from '../drawingMan';
 import {
     BTankManager,
@@ -10,6 +19,7 @@ import { ObjectsFactory } from '../objFactory';
 import { BaseGameObject } from './baseGameObj';
 import { Bullet } from '../bullet';
 import { PointXY } from './baseCoord';
+import { Utils } from '../utils';
 // import { Player } from '../player';
 
 type InertiaDirections = { [key in Direction]: number };
@@ -31,8 +41,6 @@ type StepsHistory = {
 };
 
 type BordersCheckResult = 'X' | 'Y' | 'OK';
-
-
 
 // TODO: csw: cosmo ship war, the old title
 // TODO: rename csw to something more understandable - tank? SpaceShip ?
@@ -60,6 +68,9 @@ export class BaseCSW extends BaseGameObject {
     stepsHistory: StepsHistory[];
     checkHorizontal: BordersCheckResult;
     checkVertical: BordersCheckResult;
+    horizontalUXY: AxisChange;
+    verticalUXY: AxisChange;
+    processed: boolean;
 
     constructor() {
         super();
@@ -84,6 +95,7 @@ export class BaseCSW extends BaseGameObject {
         // this.CONST = CONST;
         // this.bullet = Bullet;
         this.BTankInst = null;
+        this.processed = false;
     }
 
     // TODO: place code from init above!
@@ -526,16 +538,29 @@ export class BaseCSW extends BaseGameObject {
         this.checkVertical = checkVertical;
         this.dx = horizontalUXY.ux + verticalUXY.ux;
         this.dy = horizontalUXY.uy + verticalUXY.uy;
+        this.horizontalUXY = horizontalUXY;
+        this.verticalUXY = verticalUXY;
 
         // this.updateCollisionGrid(CONST.DIRECTIONS.RIGHT as Direction);
     }
 
     updateEnd(): void {
-        this.x = this.x + this.dx;
-        this.y = this.y + this.dy;
+        this.x = this.x + this.horizontalUXY.ux + this.verticalUXY.ux;
+        this.y = this.y + this.horizontalUXY.uy + this.verticalUXY.uy;
+
+        // this.x = this.x + this.dx;
+        // this.y = this.y + this.dy;
 
         this.centerx = this.x + (CONST.CELLSIZES.MAXX * CONST.SCALE.X) / 2;
         this.centery = this.y + (CONST.CELLSIZES.MAXY * CONST.SCALE.Y) / 2;
+
+        this.processed = false;
+
+        if (this.iam === 1) {
+            Utils.addLog(
+                `updateEnd (550): player.x = ${this.x} | player.y = ${this.y} | hux: ${this.horizontalUXY.ux} | vux: ${this.verticalUXY.ux} | huy: ${this.horizontalUXY.uy} | vuy: ${this.verticalUXY.uy}`,
+            );
+        }
 
         this.updateCollisionGrid(CONST.DIRECTIONS.RIGHT as Direction);
     }
@@ -608,6 +633,7 @@ export class BaseCSW extends BaseGameObject {
         // TODO: check if object is already in grid's cell so there's no need to add it
         // pass only direction ?
         this.addFourPointsToDynamicGrid(this.x, this.y, width, height);
+        // this.addThisObjectToDynamicGrid(this.centerx, this.centery);
     }
 
     addFourPointsToDynamicGrid(
@@ -616,6 +642,7 @@ export class BaseCSW extends BaseGameObject {
         width: number,
         height: number,
     ): void {
+        // TODO: add only one object by coordinates of object center
         this.addThisObjectToDynamicGrid(this.x, this.y);
         this.addThisObjectToDynamicGrid(this.x + width, this.y);
         this.addThisObjectToDynamicGrid(this.x, this.y + height);
@@ -628,6 +655,7 @@ export class BaseCSW extends BaseGameObject {
         width: number,
         height: number,
     ): void {
+        // TODO: add only one object by coordinates of object center
         this.addThisObjectToStaticGrid(this.x, this.y);
         this.addThisObjectToStaticGrid(this.x + width, this.y);
         this.addThisObjectToStaticGrid(this.x, this.y + height);
