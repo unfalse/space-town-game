@@ -35,9 +35,6 @@ class Player extends BaseCSW {
         if (ghost) {
             this.drawingManagerInst.drawcswmt9ghost(this.x, this.y, this.d);
         } else {
-            Utils.addLog(
-                `Player.draw (39): player.x = ${this.x} | player.y = ${this.y}`,
-            );
             this.drawingManagerInst.drawcswmt9(
                 CONST.CAM.CENTERX,
                 CONST.CAM.CENTERY,

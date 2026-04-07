@@ -85,56 +85,6 @@ class Game {
         this.EditorInst = new Editor(this.objFactoryGameInst);
         this.EditorUIInst = new EditorUI(this.EditorInst);
 
-        function debugLogParserOnKeyUp(event: Event): void {
-            event.stopPropagation();
-            function getLineNumberAndColumnIndex(
-                // textarea: HTMLTextAreaElement,
-                // btankinst: BTankManager
-                game: Game,
-            ) {
-                const textarea = game.BTankInst.debugLogTextarea;
-                const textLineStart = textarea.value.indexOf(
-                    '\n',
-                    textarea.selectionStart,
-                );
-                const textLineEnd = textarea.value.lastIndexOf(
-                    '\n',
-                    textarea.selectionStart,
-                );
-                const currentLine = textarea.value.substring(
-                    textLineStart,
-                    textLineEnd,
-                );
-                // console.log(currentLine);
-
-                function getStr(str: string): string {
-                    if (!str.includes(str)) return '';
-                    const st = currentLine.indexOf(str) + str.length;
-                    const en = currentLine.indexOf(' ', st);
-                    return currentLine.substring(st, en);
-                }
-                const strx = getStr('player.x = ');
-                const stry = getStr('player.y = ');
-
-                if (strx !== '' && stry !== '') {
-                    const xy: PointXY = {
-                        x: Number(strx),
-                        y: Number(stry),
-                    };
-                    console.log(xy);
-                    game.drawingManagerInst.drawDebugObstacle(
-                        xy.x,
-                        xy.y,
-                        game.BTankInst.debugDrawContext,
-                    );
-                }
-            }
-            getLineNumberAndColumnIndex(this);
-        }
-
-        this.BTankInst.debugLogParser.onkeyup = debugLogParserOnKeyUp.bind(
-            this,
-        );
     }
 
     start() {
@@ -210,17 +160,6 @@ class Game {
 
     editorCycle(_timestamp: number) {
         editorCycleCounter++;
-        if (editorCycleCounter % 10 === 0) {
-            Utils.outputDebugInfo([
-                `Editor mode!`,
-                `camera.x: ${this.cameraInst.x} ${
-                    this.cameraInst.x % 40 === 0 ? 'EVEN' : 'NOT'
-                }`,
-                `camera.y: ${this.cameraInst.y}  ${
-                    this.cameraInst.y % 40 === 0 ? 'EVEN' : 'NOT'
-                }`,
-            ]);
-        }
 
         this.detectEditorMovement();
         // this.player1.update();
@@ -256,8 +195,6 @@ class Game {
     gameCycle(timestamp: number) {
         gameCycleCounter++;
 
-        Utils.addLog(`gameCycleCounter: ${gameCycleCounter}`);
-
         this.BTankInst.debugDrawContext.clearRect(
             0,
             0,
@@ -265,17 +202,9 @@ class Game {
             document.body.clientHeight,
         );
 
-        if (gameCycleCounter % 10 === 0) {
-            Utils.outputDebugInfo([
-                `gameCycleCounter: ${gameCycleCounter}`,
-                `p.x: ${this.player1.x}`,
-                `p.y: ${this.player1.y}`,
-            ]);
-        }
         if (this.player1.life > 0) {
             this.detectMovement(timestamp);
             // this.processCollisions();
-            Utils.addLog(`player update!`);
             this.player1.update(timestamp);
         }
 
@@ -291,8 +220,6 @@ class Game {
         this.BTankInst.getAllShips().forEach(ship => {
             if (ship.iam !== 1) ship.update(timestamp);
         });
-
-        // this.debugDrawCollisionsGrid();
 
         this.processCollisions();
 
@@ -420,12 +347,6 @@ class Game {
     fixMovingObjectsVelocity(gameObject: BaseCSW, objectsToCheck: BaseCSW[]) {
         // const gameObjectCollisions = [];
 
-        if (gameObject.iam === 1) {
-            Utils.addLog(
-                `/---- processCollisions (327): player.x = ${gameObject.x} | player.y = ${gameObject.y} | hux: ${gameObject.horizontalUXY.ux} | vux: ${gameObject.verticalUXY.ux} | huy: ${gameObject.horizontalUXY.uy} | vuy: ${gameObject.verticalUXY.uy}`,
-            );
-        }
-
         if (
             // !gameObject.processed &&
             // gameObject.checkHorizontal === 'OK' &&
@@ -450,10 +371,6 @@ class Game {
 
             const allObjectsToCheck = moreObjectsToCheck; // objectsToCheck.concat(moreObjectsToCheck);
 
-            // allObjectsToCheck.forEach(obs => {
-            //     if ((obs as Obstacle).drawDebug) (obs as Obstacle).drawDebug();
-            // });
-
             const collisions = this.BTankInst.checkIfTwoObjectsCrossInsideACell(
                 gameObject,
                 allObjectsToCheck,
@@ -476,19 +393,6 @@ class Game {
                     gameObject.getDirectionByCollisions(c.result),
                 );
                 collisions.forEach((cl: any) => {
-                    if (gameObject.iam === 1) {
-                        Utils.addLog(
-                            `|---- processCollisions (379): collidedObj.x = ${
-                                cl.collidedObject.x
-                            } | collidedObj.y = ${
-                                cl.collidedObject.y
-                            } | collidedObj.x+width: ${
-                                cl.collidedObject.x + 40
-                            } | collidedObj.y+height: ${
-                                cl.collidedObject.y + 40
-                            }`,
-                        );
-                    }
 
                     const dirInfo = gameObject.getDirectionByCollisions(
                         cl.result,
@@ -546,9 +450,6 @@ class Game {
         gameObject.setInertiaDirections(gameObject.checkVertical);
 
         if (gameObject.iam === 1) {
-            Utils.addLog(
-                `\\---- processCollisions (449): player.x = ${gameObject.x} | player.y = ${gameObject.y} | hux: ${gameObject.horizontalUXY.ux} | vux: ${gameObject.verticalUXY.ux} | huy: ${gameObject.horizontalUXY.uy} | vuy: ${gameObject.verticalUXY.uy}`,
-            );
             gameObject.processed = true;
         }
     }
@@ -608,10 +509,6 @@ class Game {
                 const column = staticRow ? staticRow[Number(columnNum)] : [];
                 const obstacles = column || [];
                 const objectsToCheck = ships.concat(obstacles);
-                // objectsToCheck.forEach(obs => {
-                //     if ((obs as Obstacle).drawDebug)
-                //         (obs as Obstacle).drawDebug();
-                // });
                 if (objectsToCheck.length > 1) {
                     for (const gameObject of ships) {
                         this.fixMovingObjectsVelocity(
@@ -727,14 +624,6 @@ class Game {
 
         if (event.type === 'keyup') {
             this.keyUpHandler(kc);
-
-            if (kc === Utils.KEY_CODE.l_KEY) {
-                Utils.toggleLogs();
-            }
-
-            if (kc === Utils.KEY_CODE.p_KEY) {
-                Utils.flushLogs();
-            }
 
             if (kc === Utils.KEY_CODE.EQUAL_KEY) {
                 editorDX = editorDX === 26 ? 1 : 26;

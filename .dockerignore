@@ -1,0 +1,5 @@
+node_modules/
+dist/
+*.log
+src/server/*_log.txt
+src/server/levelsTest.json

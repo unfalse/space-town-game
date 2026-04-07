@@ -45,7 +45,6 @@ export class BTankManager {
     gameInfo: HTMLCanvasElement;
     titleBlock: HTMLDivElement;
     gameFieldBlock: HTMLCanvasElement;
-    debugLogParser: HTMLDivElement;
     debugLogTextarea: HTMLTextAreaElement;
     // gameCam: Camera;
     playerInstance: Player;
@@ -96,8 +95,6 @@ export class BTankManager {
         this.againBtn = document.querySelector('#playAgainBtn');
         this.gameOverBlock = document.querySelector('#gameOverBlock');
         this.titleBlock = document.querySelector('#titleBlock');
-        this.debugLogParser = document.querySelector('#debug_logs_parser');
-        this.debugLogTextarea = document.querySelector('#debug_log_textarea');
         this.gameFieldBlock = gameField;
 
         this.drawContext = gameField.getContext('2d');

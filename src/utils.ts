@@ -64,38 +64,4 @@ export const Utils = {
     text(str: string): void {
         console.log(str);
     },
-
-    outputDebugInfo(paramsArr: string[]): void {
-        const debugPanel = document.querySelector('#debug_panel');
-        const firstStrings = `logsEnabled: ${logsEnabled.toString()} <br> logs counter: ${
-            this.logArray.length
-        } <br> `;
-        debugPanel.innerHTML = paramsArr.reduce(
-            (prev: string, curr: string) => `${prev}<br>${curr}`,
-            firstStrings,
-        );
-    },
-
-    addLog(str: string): void {
-        if (logsEnabled) this.logArray.push(str);
-    },
-
-    toggleLogs(): void {
-        logsEnabled = !logsEnabled;
-    },
-
-    flushLogs(): void {
-        // debugger;
-        fetch(`${EDITOR_SERVER_ADDRESS}/flushlogs`, {
-            method: 'post',
-            headers: {
-                Accept: 'application/json',
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(this.logArray),
-        }).then(() => {
-            console.info('Logs flushed!');
-            this.logArray = [];
-        });
-    },
 };

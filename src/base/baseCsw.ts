@@ -556,12 +556,6 @@ export class BaseCSW extends BaseGameObject {
 
         this.processed = false;
 
-        if (this.iam === 1) {
-            Utils.addLog(
-                `updateEnd (550): player.x = ${this.x} | player.y = ${this.y} | hux: ${this.horizontalUXY.ux} | vux: ${this.verticalUXY.ux} | huy: ${this.horizontalUXY.uy} | vuy: ${this.verticalUXY.uy}`,
-            );
-        }
-
         this.updateCollisionGrid(CONST.DIRECTIONS.RIGHT as Direction);
     }
 
