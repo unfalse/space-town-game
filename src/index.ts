@@ -159,19 +159,9 @@ class Game {
     }
 
     editorCycle(_timestamp: number) {
-        editorCycleCounter++;
-
         this.detectEditorMovement();
-        // this.player1.update();
-        // gameCam.setCoords(player1.x, player1.y);
-        this.drawingManagerInst.drawEditorCursor(
-            CONST.CAM.CENTERX,
-            CONST.CAM.CENTERY,
-            this.BTankInst.debugDrawContext,
-        );
 
         this.EditorInst.editorUnits.forEach(unit => {
-            // unit.update(timestamp);
             unit.draw();
         });
 
@@ -193,29 +183,18 @@ class Game {
     }
 
     gameCycle(timestamp: number) {
-        gameCycleCounter++;
-
-        this.BTankInst.debugDrawContext.clearRect(
-            0,
-            0,
-            document.body.clientWidth,
-            document.body.clientHeight,
-        );
+        // this.BTankInst.debugDrawContext.clearRect(
+        //     0,
+        //     0,
+        //     document.body.clientWidth,
+        //     document.body.clientHeight,
+        // );
 
         if (this.player1.life > 0) {
             this.detectMovement(timestamp);
             // this.processCollisions();
             this.player1.update(timestamp);
         }
-
-        // temporarily disabled bullets
-        // I will deal with their collisions later
-        // when collisions with ships will be finished
-        /*
-        this.BTankInst.getAllBullets().forEach(bullet => {
-            bullet.fly();
-        });
-        */
 
         this.BTankInst.getAllShips().forEach(ship => {
             if (ship.iam !== 1) ship.update(timestamp);
@@ -674,7 +653,7 @@ class Game {
     }
 
     detectEditorMovement() {
-        const DX = editorDX;
+        const DX = 26; // editorDX;
         // TODO: move the screen
         if (this.keys[Utils.KEY_CODE.UP as keyof Keys]) {
             this.cameraInst.setCoords(
