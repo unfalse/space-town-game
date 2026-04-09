@@ -183,24 +183,17 @@ class Game {
     }
 
     gameCycle(timestamp: number) {
-        // this.BTankInst.debugDrawContext.clearRect(
-        //     0,
-        //     0,
-        //     document.body.clientWidth,
-        //     document.body.clientHeight,
-        // );
-
         if (this.player1.life > 0) {
             this.detectMovement(timestamp);
-            // this.processCollisions();
             this.player1.update(timestamp);
+            // this.cameraInst.setCoords(this.player1.x, this.player1.y);
         }
 
         this.BTankInst.getAllShips().forEach(ship => {
             if (ship.iam !== 1) ship.update(timestamp);
         });
 
-        this.processCollisions();
+        // this.processCollisions();
 
         this.BTankInst.getAllShips().forEach(ship => {
             ship.updateEnd();
@@ -225,8 +218,6 @@ class Game {
             ghost.draw();
         });
 
-        // BTankInst.displayLifeBar(player1);
-
         if (!this.gameOver && (this.win || this.player1.life <= 0)) {
             if (this.win) {
                 Utils.text('YOU WIN');
@@ -237,199 +228,6 @@ class Game {
             }
 
             this.gameOver = true;
-        }
-        //console.log('cswArr = ', BTank.cswArr.length);
-    }
-
-    collisionFixX(result: number[]) {
-        const resultMask = result.join(',').replace(/,/g, '');
-        if (CONST.COLLISION_MASKS.RIGHT.includes(resultMask)) {
-            return -40;
-        }
-        if (CONST.COLLISION_MASKS.LEFT.includes(resultMask)) {
-            return 40;
-        }
-        return 0;
-    }
-
-    collisionFixY(result: number[]) {
-        const resultMask = result.join(',').replace(/,/g, '');
-        if (CONST.COLLISION_MASKS.DOWN.includes(resultMask)) {
-            return -40;
-        }
-        if (CONST.COLLISION_MASKS.UP.includes(resultMask)) {
-            return 40;
-        }
-        return 0;
-    }
-
-    // checkCollisionsByGrid(gameObject: BaseCSW, updatedCoords: PointXY): any {
-    //     const btank = this.BTankInst;
-    //     const dynamicGrid = btank.dynamicCollisionGrid;
-    //     const staticGrid = btank.staticCollisionGrid;
-    //     const rows = Object.keys(dynamicGrid);
-    //     const collisions = [];
-
-    //     for (const rowNum of rows) {
-    //         const row = dynamicGrid[Number(rowNum)];
-    //         const columns = Object.keys(row);
-    //         const staticRow = staticGrid[Number(rowNum)];
-
-    //         for (const columnNum of columns) {
-    //             const ships = row[Number(columnNum)];
-    //             const column = staticRow ? staticRow[Number(columnNum)] : [];
-    //             const obstacles = column || [];
-    //             const objectsToCheck = ships.concat(obstacles);
-    //             if (objectsToCheck.length > 1) {
-    //                 const collision = this.BTankInst.checkIfTwoObjectsCrossInsideACell(
-    //                     gameObject,
-    //                     objectsToCheck,
-    //                     updatedCoords,
-    //                 );
-    //                 if (collision !== null) collisions.push(collision);
-    //             }
-    //         }
-    //     }
-
-    //     return collisions;
-    // }
-
-    debugDrawCollisionsGrid() {
-        const btank = this.BTankInst;
-        const dynamicGrid = btank.dynamicCollisionGrid;
-        const staticGrid = btank.staticCollisionGrid;
-        const rows = Object.keys(dynamicGrid);
-
-        for (const rowNum of rows) {
-            const row = dynamicGrid[Number(rowNum)];
-            const columns = Object.keys(row);
-            const staticRow = staticGrid[Number(rowNum)];
-
-            for (const columnNum of columns) {
-                const ships = row[Number(columnNum)];
-                const column = staticRow ? staticRow[Number(columnNum)] : [];
-                const obstacles = column || [];
-                const objectsToCheck = ships.concat(obstacles);
-                if (objectsToCheck.length > 1) {
-                    objectsToCheck.forEach(obs => {
-                        if ((obs as Obstacle).drawDebug)
-                            (obs as Obstacle).drawDebug();
-                    });
-                    // for (const gameObject of ships) {
-                    //     console.log(gameObject);
-                    // }
-                }
-            }
-        }
-    }
-
-    fixMovingObjectsVelocity(gameObject: BaseCSW, objectsToCheck: BaseCSW[]) {
-        // const gameObjectCollisions = [];
-
-        if (
-            // !gameObject.processed &&
-            // gameObject.checkHorizontal === 'OK' &&
-            // gameObject.checkVertical === 'OK' &&
-            gameObject.horizontalUXY.ux !== 0 ||
-            gameObject.verticalUXY.uy !== 0 ||
-            gameObject.horizontalUXY.uy !== 0 ||
-            gameObject.verticalUXY.ux !== 0
-        ) {
-            const dx = gameObject.horizontalUXY.ux + gameObject.verticalUXY.ux;
-            const dy = gameObject.horizontalUXY.uy + gameObject.verticalUXY.uy;
-            const updatedXY: PointXY = {
-                x: gameObject.x + dx,
-                y: gameObject.y + dy,
-            };
-
-            const moreObjectsToCheck = this.getObjectsToCheck(
-                Math.floor(updatedXY.x / CONST.COLLISION_GRID.WIDTH),
-                Math.floor(updatedXY.y / CONST.COLLISION_GRID.HEIGHT),
-                this.BTankInst,
-            );
-
-            const allObjectsToCheck = moreObjectsToCheck; // objectsToCheck.concat(moreObjectsToCheck);
-
-            const collisions = this.BTankInst.checkIfTwoObjectsCrossInsideACell(
-                gameObject,
-                allObjectsToCheck,
-                updatedXY,
-                [ObjectType.INGAMEBORDER],
-            );
-
-            // const collisions = this.BTankInst.getVectorsOfCollidedObjectsByCenter(
-            //     gameObject,
-            //     objectsToCheck,
-            //     updatedXY,
-            //     [ObjectType.INGAMEBORDER],
-            // );
-
-            // if (collisions !== null)
-            //     gameObjectCollisions.push(collisions);
-
-            if (collisions !== null && collisions.length) {
-                const dirs = collisions.map((c: any) =>
-                    gameObject.getDirectionByCollisions(c.result),
-                );
-                collisions.forEach((cl: any) => {
-
-                    const dirInfo = gameObject.getDirectionByCollisions(
-                        cl.result,
-                    );
-
-                    if (dirInfo.right) {
-                        gameObject.horizontalUXY.ux =
-                            cl.collidedObject.centerx - gameObject.centerx + 40;
-                        // gameObject.checkHorizontal = 'X';
-                    }
-
-                    if (dirInfo.left) {
-                        // gameObject.horizontalUXY.ux =
-                        //     gameObject.centerx -
-                        //     cl.collidedObject.centerx +
-                        //     40;
-                        gameObject.horizontalUXY.ux =
-                            cl.collidedObject.centerx - gameObject.centerx - 40;
-                    }
-
-                    if (dirInfo.down) {
-                        gameObject.verticalUXY.uy =
-                            cl.collidedObject.centery - gameObject.centery + 40;
-                    }
-
-                    if (dirInfo.up) {
-                        gameObject.verticalUXY.uy =
-                            cl.collidedObject.centery - gameObject.centery - 40;
-                    }
-
-                    if (dirInfo.upleft) {
-                        // console.log('upleft!');
-                    }
-
-                    if (dirInfo.upright) {
-                        // console.log('upright!');
-                    }
-
-                    if (dirInfo.downright) {
-                        gameObject.verticalUXY.uy =
-                            cl.collidedObject.centery - gameObject.centery + 40;
-                        gameObject.horizontalUXY.ux =
-                            cl.collidedObject.centerx - gameObject.centerx + 40;
-                    }
-
-                    if (gameObject.horizontalUXY.ux === 0)
-                        gameObject.checkHorizontal = 'X';
-                    if (gameObject.verticalUXY.uy === 0)
-                        gameObject.checkVertical = 'Y';
-                });
-            }
-        }
-
-        gameObject.setInertiaDirections(gameObject.checkHorizontal);
-        gameObject.setInertiaDirections(gameObject.checkVertical);
-
-        if (gameObject.iam === 1) {
-            gameObject.processed = true;
         }
     }
 
@@ -444,22 +242,6 @@ class Game {
             const staticRow = staticGrid[xy.y];
             return staticRow ? staticRow[xy.x] : null;
         };
-        // const cell: PointXY[] = [
-        //     { x: staticGridCol - 1, y: staticGridRow - 1 },
-        //     { x: staticGridCol, y: staticGridRow - 1 },
-        //     { x: staticGridCol + 1, y: staticGridRow - 1 },
-        //     { x: staticGridCol - 1, y: staticGridRow },
-        //     { x: staticGridCol, y: row },
-        //     { x: staticGridCol + 1, y: row },
-        //     { x: staticGridCol - 1, y: row + 1 },
-        //     { x: staticGridCol, y: row + 1 },
-        //     { x: staticGridCol + 1, y: row + 1 },
-        // ];
-        // const objects = cell.reduce((prev, curr) => {
-        //     const obj = getObjectOnXY(curr);
-        //     if (obj !== null && obj !== undefined) return prev.concat(obj);
-        //     return prev;
-        // }, []);
         const object = getObjectOnXY({
             x: staticGridCol,
             y: staticGridRow,
@@ -467,41 +249,41 @@ class Game {
         return object || [];
     }
 
-    processCollisions() {
-        const btank = this.BTankInst;
-        const dynamicGrid = btank.dynamicCollisionGrid;
-        const staticGrid = btank.staticCollisionGrid;
-        const rows = Object.keys(dynamicGrid);
+    // processCollisions() {
+    //     const btank = this.BTankInst;
+    //     const dynamicGrid = btank.dynamicCollisionGrid;
+    //     const staticGrid = btank.staticCollisionGrid;
+    //     const rows = Object.keys(dynamicGrid);
 
-        for (const rowNum of rows) {
-            const row = dynamicGrid[Number(rowNum)];
-            const columns = Object.keys(row);
-            const staticRow = staticGrid[Number(rowNum)];
+    //     for (const rowNum of rows) {
+    //         const row = dynamicGrid[Number(rowNum)];
+    //         const columns = Object.keys(row);
+    //         const staticRow = staticGrid[Number(rowNum)];
 
-            for (const columnNum of columns) {
-                const ships = row[Number(columnNum)];
-                // const objectsToCheck = this.getObjectsToCheck(
-                //     Number(rowNum),
-                //     Number(columnNum),
-                //     btank,
-                // );
-                const column = staticRow ? staticRow[Number(columnNum)] : [];
-                const obstacles = column || [];
-                const objectsToCheck = ships.concat(obstacles);
-                if (objectsToCheck.length > 1) {
-                    for (const gameObject of ships) {
-                        this.fixMovingObjectsVelocity(
-                            gameObject,
-                            objectsToCheck,
-                        );
-                    }
-                }
-            }
-        }
+    //         for (const columnNum of columns) {
+    //             const ships = row[Number(columnNum)];
+    //             // const objectsToCheck = this.getObjectsToCheck(
+    //             //     Number(rowNum),
+    //             //     Number(columnNum),
+    //             //     btank,
+    //             // );
+    //             const column = staticRow ? staticRow[Number(columnNum)] : [];
+    //             const obstacles = column || [];
+    //             const objectsToCheck = ships.concat(obstacles);
+    //             if (objectsToCheck.length > 1) {
+    //                 for (const gameObject of ships) {
+    //                     this.fixMovingObjectsVelocity(
+    //                         gameObject,
+    //                         objectsToCheck,
+    //                     );
+    //                 }
+    //             }
+    //         }
+    //     }
 
-        // clear dynamic grid
-        this.BTankInst.dynamicCollisionGrid = [];
-    }
+    //     // clear dynamic grid
+    //     this.BTankInst.dynamicCollisionGrid = [];
+    // }
 
     editorMouseDownHandler(event: MouseEvent) {
         if (this.EditorInst.editorMode && event.buttons === 1) {
