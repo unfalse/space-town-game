@@ -1,5 +1,5 @@
 # ---- Build stage ----
-FROM node:16.19.0-alpine AS builder
+FROM node:24.10.0-alpine AS builder
 
 WORKDIR /app
 
@@ -11,7 +11,7 @@ COPY . .
 RUN yarn build && yarn compile
 
 # ---- Run stage ----
-FROM node:16.19.0-alpine
+FROM node:24.10.0-alpine
 
 # Install nginx
 RUN apk add --no-cache nginx
