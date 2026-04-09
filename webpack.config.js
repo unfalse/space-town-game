@@ -12,6 +12,7 @@ module.exports = {
     output: {
         path: path.resolve(__dirname, 'dist'),
         filename: 'space-town-bundle.js',
+        hashFunction: 'xxhash64',
     },
     // optimization: {
     //   runtimeChunk: true
@@ -38,9 +39,13 @@ module.exports = {
         ],
     },
     devServer: {
-        contentBase: path.join(__dirname, 'dist'),
+        static: {
+            directory: path.join(__dirname, 'dist'),
+        },
         port: 3666,
         open: true,
-        publicPath: '/',
+        devMiddleware: {
+            publicPath: '/',
+        },
     },
 };
