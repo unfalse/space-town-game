@@ -17,7 +17,7 @@ console.log(process.env.NODE_ENV);
 const EDITOR_SERVER_ADDRESS = `${window.location.protocol}//${window.location.hostname}:${PORT}`;
 
 type LevelObject = {
-    id: number;
+    id: number|null;
     name: string;
     data: string;
 };
@@ -29,17 +29,17 @@ type ObjectBrush = {
 
 export class Editor {
     currentLevelObj: LevelObject;
-    BTankInst: BTankManager;
-    editorBlock: HTMLDivElement;
-    editorCurrentObject: HTMLDivElement;
-    editorCurrentObjectBrush: ObjectBrush;
-    editorMode: boolean;
-    editorUnits: BaseCSW[];
-    editorGhosts: Ghosts;
-    currentShipWithWaypoints: CSWAI_customPaths;
-    playerCell: Point;
+    BTankInst!: BTankManager;
+    editorBlock!: HTMLDivElement;
+    editorCurrentObject!: HTMLDivElement;
+    editorCurrentObjectBrush!: ObjectBrush;
+    editorMode!: boolean;
+    editorUnits!: BaseCSW[];
+    editorGhosts!: Ghosts;
+    currentShipWithWaypoints!: CSWAI_customPaths|null;
+    playerCell!: Point;
     objFactoryInst: ObjectsFactory;
-    editorUI: EditorUI;
+    editorUI!: EditorUI;
 
     constructor(objFactoryInst: ObjectsFactory) {
         this.currentLevelObj = {
@@ -71,8 +71,8 @@ export class Editor {
         this.prepareLevelForSaving();
     }
 
-    uploadNewLevel(): void {
-        fetch(`${EDITOR_SERVER_ADDRESS}/new`, {
+    async uploadNewLevel(): Promise<void> {
+        await fetch(`${EDITOR_SERVER_ADDRESS}/new`, {
             method: 'post',
             headers: {
                 Accept: 'application/json',
@@ -81,9 +81,8 @@ export class Editor {
             body: JSON.stringify({
                 ...this.currentLevelObj,
             }),
-        }).then(() => {
-            alert('Level has been added!');
-        });
+        })
+        alert('Level has been added!');
     }
 
     playEditorLevel(): void {
@@ -128,7 +127,7 @@ export class Editor {
     prepareLevelForSaving(): void {
         let levelData = [this.playerCell.x, this.playerCell.y].join(';') + '|';
         levelData += this.editorUnits.reduce(
-            function (prev: string, curr: BaseCSW) {
+            (prev: string, curr: BaseCSW) => {
                 let wayPoints = '';
                 if (curr.type === CONST.TYPES.SHIP) {
                     wayPoints = JSON.stringify(
@@ -148,14 +147,14 @@ export class Editor {
                     curr.x +
                     '|'
                 );
-            }.bind(this),
+            },
             '',
         );
         this.currentLevelObj.data = levelData;
     }
 
-    uploadLevel(): void {
-        fetch(`${EDITOR_SERVER_ADDRESS}/save`, {
+    async uploadLevel(): Promise<void> {
+        await fetch(`${EDITOR_SERVER_ADDRESS}/save`, {
             method: 'post',
             headers: {
                 Accept: 'application/json',
@@ -164,9 +163,8 @@ export class Editor {
             body: JSON.stringify({
                 ...this.currentLevelObj,
             }),
-        }).then(() => {
-            alert('Level has been saved!');
         });
+        alert('Level has been saved!');
     }
 
     saveEditorLevel(): void {
@@ -174,50 +172,53 @@ export class Editor {
         this.uploadLevel();
     }
 
-    saveAsEditorLevel(): void {
+    saveAsEditorLevel() {
         // TODO: show an input to enter the new name and ok and cancel buttons
-        return null;
     }
 
-    setCurrentShipWithWaypoints(ship: CSWAI_customPaths): void {
-        this.currentShipWithWaypoints = ship;
+    setCurrentShipWithWaypoints(ship: CSWAI_customPaths|null): void {
+        this.currentShipWithWaypoints = ship as CSWAI_customPaths;
     }
 
-    showLevelChooseDialog(editorFileListContainer: HTMLDivElement): void {
+    async showLevelChooseDialog(editorFileListContainer: HTMLDivElement): Promise<void> {
         // this.editorGhosts = [];
-        fetch(`${EDITOR_SERVER_ADDRESS}/list`)
-            .then(r => r.json())
-            .then(r => {
-                editorFileListContainer.style.display = 'block';
-                const ul = document.createElement('ul');
-                const title = document.createElement('span');
-                title.innerText = 'Which level to open?';
-                editorFileListContainer.append(title);
-                r.forEach((level: LevelObject) => {
-                    const li = document.createElement('li');
-                    li.innerText = level.name;
-                    li.addEventListener(
-                        'click',
-                        function () {
-                            this.currentLevelObj = {
-                                ...level,
-                            };
-                            this.loadTheEditorLevel(level.id);
-                            editorFileListContainer.style.display = 'none';
-                            title.innerText = '';
-                            editorFileListContainer.removeChild(ul);
-                        }.bind(this),
-                    );
-                    ul.append(li);
-                });
-                editorFileListContainer.append(ul);
-            })
-            .catch(e => {
-                console.log(e);
+        try {
+            const result = await fetch(`${EDITOR_SERVER_ADDRESS}/list`)
+            const r = await result.json();
+
+            editorFileListContainer.style.display = 'block';
+
+            const ul = document.createElement('ul');
+            const title = document.createElement('span');
+            title.innerText = 'Which level to open?';
+
+            editorFileListContainer.append(title);
+
+            r.forEach((level: LevelObject) => {
+                const li = document.createElement('li');
+                li.innerText = level.name;
+                li.addEventListener(
+                    'click',
+                    () => {
+                        this.currentLevelObj = {
+                            ...level,
+                        };
+                        this.loadTheEditorLevel(level.id as number);
+                        editorFileListContainer.style.display = 'none';
+                        title.innerText = '';
+                        editorFileListContainer.removeChild(ul);
+                    },
+                );
+                ul.append(li);
             });
+        
+            editorFileListContainer.append(ul);
+        } catch (e) {
+            console.log(e);
+        }
     }
 
-    loadTheEditorLevel(id: string): void {
+    loadTheEditorLevel(id: number): void {
         const DATA_SEPARATOR = '|';
         fetch(`${EDITOR_SERVER_ADDRESS}/level?id=${id}`)
             .then(r => r.json())

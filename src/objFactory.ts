@@ -51,7 +51,7 @@ export class ObjectsFactory {
             c1 = new Player();
             // this.playerInstance = c1;
             this.initBaseCSW(c1, x, y, who, type);
-            c1.setGhost(ghost);
+            c1.setGhost(ghost ?? false);
             return c1;
         } else if (who === CONST.COMPUTER) {
             // TODO: make delayed parameter as a field in class so BTankManager should decide from this field how to create new instance
@@ -61,52 +61,57 @@ export class ObjectsFactory {
                 c1 = new CSWAI_customPaths();
                 this.initBaseCSW(c1, x, y, who, type);
                 c1.setWaypoints(wayPoints);
-                c1.setGhost(ghost);
+                c1.setGhost(ghost ?? false);
                 return c1;
             }
 
             if (type === ObjectType.STATICSHIP) {
                 c1 = new StaticShip();
                 this.initBaseCSW(c1, x, y, who, type);
-                c1.setGhost(ghost);
+                c1.setGhost(ghost ?? false);
                 return c1;
             }
 
             if (type === ObjectType.OBSTACLE) {
                 c1 = new Obstacle();
                 this.initBaseCSW(c1, x, y, who, type);
-                c1.setGhost(ghost);
+                c1.setGhost(ghost ?? false);
                 return c1;
             }
 
             if (type === ObjectType.SPACEBRICK) {
                 c1 = new SpaceBrick();
                 this.initBaseCSW(c1, x, y, who, type);
-                c1.setGhost(ghost);
+                c1.setGhost(ghost ?? false);
                 return c1;
             }
 
             if (type === ObjectType.COUNTER) {
                 c1 = new Counter();
                 this.initBaseCSW(c1, x, y, who, type);
-                c1.setGhost(ghost);
+                c1.setGhost(ghost ?? false);
                 return c1;
             }
 
             if (type == ObjectType.BORDER) {
                 c1 = new Border();
                 this.initBaseCSW(c1, x, y, who, type);
-                c1.setGhost(ghost);
+                c1.setGhost(ghost ?? false);
                 return c1;
             }
 
             if (type == ObjectType.DELAYED_PIC) {
                 c1 = new DelayedPic();
                 this.initBaseCSW(c1, x, y, who, type);
-                c1.setGhost(ghost);
+                c1.setGhost(ghost ?? false);
                 return c1;
             }
+
+            // Add this to handle unsupported types
+            throw new Error(`Unsupported object type: ${type}`);
         }
+        // Add this to handle unsupported 'who' values
+        throw new Error(`Unsupported 'who' value: ${who}`);
     }
 
     createBaseObj(

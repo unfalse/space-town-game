@@ -9,6 +9,8 @@ export const Utils = {
         a_KEY: 'a',
         h_KEY: 'h',
         s_KEY: 's',
+        t_KEY: 't',
+        w_KEY: 'w',
         F1_KEY: 'F1',
         N1_KEY: '1',
         N2_KEY: '2',

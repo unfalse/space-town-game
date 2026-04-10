@@ -70,6 +70,20 @@ class EditorUI {
             this.editorBlock.style.display = 'none';
         }
     }
+
+    toggleEditorHint(): void {
+        const editorHint: HTMLDivElement | null = document.querySelector('.editor-hint');
+        if (editorHint) {
+            editorHint.style.display = editorHint.style.display === 'none' ? 'block' : 'none';
+        }
+    }
+
+    toggleVideoHint(): void {
+        const videoHint: HTMLDivElement | null = document.querySelector('.video-hint');
+        if (videoHint) {
+            videoHint.style.display = videoHint.style.display === 'none' ? 'block' : 'none';
+        }
+    }
 }
 
 export { EditorUI };

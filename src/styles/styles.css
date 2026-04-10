@@ -76,3 +76,13 @@ canvas {
     justify-content: center;
     top: 10px;
 }
+
+.editor-hint {
+    z-index: 10000;
+    color: white;
+    background-color: black;
+    position: absolute;
+    left: 30px;
+    font-size: 20px;
+    padding: 10px;
+}
