@@ -79,7 +79,7 @@ class EditorUI {
     }
 
     toggleVideoHint(): void {
-        const videoHint: HTMLDivElement | null = document.querySelector('.video-hint');
+        const videoHint: HTMLDivElement | null = document.querySelector('.waypoints-hint');
         if (videoHint) {
             videoHint.style.display = videoHint.style.display === 'none' ? 'block' : 'none';
         }

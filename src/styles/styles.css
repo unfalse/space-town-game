@@ -86,3 +86,13 @@ canvas {
     font-size: 20px;
     padding: 10px;
 }
+
+.waypoints-hint {
+    z-index: 10000;
+    color: white;
+    background-color: black;
+    position: absolute;
+    left: 300px;
+    font-size: 20px;
+    padding: 10px;
+}
