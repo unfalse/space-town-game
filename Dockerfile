@@ -37,7 +37,7 @@ COPY --from=builder /app/dist /usr/share/nginx/html
 # Copy nginx config
 COPY nginx.conf /etc/nginx/http.d/default.conf
 
-# Expose only port 80 (nginx serves client + proxies API to Express on 8666)
+# Expose only port 80
 EXPOSE 80
 
 # Start both nginx and the Express server

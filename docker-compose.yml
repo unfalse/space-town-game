@@ -2,7 +2,7 @@ services:
   game:
     build: .
     ports:
-      - "8666:8666"
+      - "80:80"
     volumes:
       - levels-data:/app/src/server
     restart: unless-stopped

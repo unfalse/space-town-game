@@ -157,20 +157,13 @@ class Game {
             this.cameraInst.setCoords(this.player1.x, this.player1.y);
         }
 
-        // temporarily disabled bullets
-        // I will deal with their collisions later
-        // when collisions with ships will be finished
-        /*
-        this.BTankInst.getAllBullets().forEach(bullet => {
-            bullet.fly();
-        });
-        */
-
         this.BTankInst.getAllShips().forEach(ship => {
             if (ship.iam !== 1) ship.update(timestamp);
         });
 
-        // this.processCollisions();
+        [...this.BTankInst.getAllBullets()].forEach(bullet => {
+            bullet.fly();
+        });
 
         this.BTankInst.getAllShips().forEach(ship => {
             ship.draw();
@@ -178,6 +171,10 @@ class Game {
 
         this.BTankInst.getAllObstacles().forEach(ship => {
             ship.draw();
+        });
+
+        this.BTankInst.getAllBullets().forEach(bullet => {
+            bullet.draw();
         });
 
         this.BTankInst.getAllDelayedPics().forEach(pic => {

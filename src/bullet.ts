@@ -102,59 +102,60 @@ export class Bullet extends BaseGameObject {
 
     fly(): void {
         const nvxy = typeof this.d === 'number' ? this.getVXY(this.d) : this.d;
-        const vx = nvxy.vx * this.BULLETSPEED;
-        const vy = nvxy.vy * this.BULLETSPEED;
+        const totalVx = nvxy.vx * this.BULLETSPEED;
+        const totalVy = nvxy.vy * this.BULLETSPEED;
 
-        this.draw();
+        const maxStep = 10;
+        const travel = Math.hypot(totalVx, totalVy);
+        const numSteps = Math.max(1, Math.ceil(travel / maxStep));
+        const stepX = totalVx / numSteps;
+        const stepY = totalVy / numSteps;
 
-        const collidedShips = this.BTankInst.getCSWWithPixelPrecision(
-            this.x,
-            this.y,
-            this.parentShip,
-        ) as BaseCSW;
-        const collidedBullet = this.BTankInst.getBulletWithPixelPrecision(
-            this.x,
-            this.y,
-            this.parentShip,
-            this,
-        );
-        if (collidedBullet) {
-            // console.log('bullets collided!');
-            this.BTankInst.removeBullet(this);
-            this.BTankInst.removeBullet(collidedBullet);
-            return;
-        }
+        for (let s = 0; s < numSteps; s++) {
+            const nx = this.x + stepX;
+            const ny = this.y + stepY;
 
-        // a bullet can't hurt its master!
-        if (collidedShips) {
-            if (collidedShips.hitByBullet) {
-                collidedShips.hitByBullet(this);
-                // this.BTankInst.createDelayedPic(this.x - 20, this.y - 20);
+            if (
+                nx > CONST.MAXX * CONST.CELLSIZES.MAXX ||
+                nx < 0 ||
+                ny > CONST.MAXY * CONST.CELLSIZES.MAXY ||
+                ny < 0
+            ) {
+                this.BTankInst.removeBullet(this);
                 this.addCrash();
+                return;
             }
-            this.BTankInst.removeBullet(this);
-            return;
+
+            const collidedBullet = this.BTankInst.getBulletWithPixelPrecision(
+                nx,
+                ny,
+                this.parentShip,
+                this,
+            );
+            if (collidedBullet) {
+                this.BTankInst.removeBullet(this);
+                this.BTankInst.removeBullet(collidedBullet);
+                return;
+            }
+
+            const collidedShips = this.BTankInst.getCSWWithPixelPrecision(
+                nx,
+                ny,
+                this.parentShip,
+            ) as BaseCSW;
+            if (collidedShips) {
+                this.x = nx;
+                this.y = ny;
+                if (collidedShips.hitByBullet) {
+                    collidedShips.hitByBullet(this);
+                    this.addCrash();
+                }
+                this.BTankInst.removeBullet(this);
+                return;
+            }
+
+            this.x = nx;
+            this.y = ny;
         }
-
-        // TODO: добавить поле MaxSpeed в класс bullet и использовать
-        // вместо MAXSPEED. Переименовать в StepsToGo
-        // Поле speed переименовать в steps
-
-        if (this.x > CONST.MAXX * CONST.CELLSIZES.MAXX || this.x < 0) {
-            this.BTankInst.removeBullet(this);
-            this.addCrash();
-            // this.BTankInst.createDelayedPic(this.x - 10, this.y - 10);
-            return;
-        }
-
-        if (this.y > CONST.MAXY * CONST.CELLSIZES.MAXY || this.y < 0) {
-            this.BTankInst.removeBullet(this);
-            this.addCrash();
-            // this.BTankInst.createDelayedPic(this.x - 10, this.y - 10);
-            return;
-        }
-
-        this.x = this.x + vx;
-        this.y = this.y + vy;
     }
 }

@@ -644,6 +644,22 @@ export class BaseCSW extends BaseGameObject {
         this.addThisObjectToGrid(x, y, this.BTankInst.staticCollisionGrid);
     }
 
+    removeSelfFromStaticGrid(): void {
+        const grid = this.BTankInst.staticCollisionGrid;
+        for (const rowKey of Object.keys(grid)) {
+            const row = grid[Number(rowKey)];
+            if (!row) continue;
+            for (const colKey of Object.keys(row)) {
+                const cell = row[Number(colKey)] as BaseCSW[];
+                if (!cell?.length) continue;
+                const idx = cell.indexOf(this);
+                if (idx !== -1) {
+                    cell.splice(idx, 1);
+                }
+            }
+        }
+    }
+
     hitByBullet(_bulletInstance: Bullet): void {
         return null;
     }
