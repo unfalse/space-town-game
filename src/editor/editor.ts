@@ -1,7 +1,7 @@
 import { BaseCSW } from '../base/baseCsw';
 import { BTankManager } from '../btank';
 import { CONST } from '../const';
-import { port } from '../server/server.json';
+import { port as PORT } from '../shared/config.json';
 import { ObjectType, Point, WayPoints } from '../types';
 import { CSWAI_customPaths } from '../cswai';
 import { ObjectsFactory } from '../objFactory';
@@ -10,7 +10,7 @@ import { EditorUI } from './editorUI';
 import { Ghosts } from '../ghosts';
 import { Player } from '../player';
 
-const PORT = process.env.NODE_ENV === 'production' ? 80 : port;
+// const PORT = process.env.NODE_ENV === 'production' ? 8666 : port;
 
 console.log(process.env.NODE_ENV);
 

@@ -29,7 +29,7 @@ COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/src/server/levels.json ./src/server/levels.json
 
 # Copy server config
-COPY --from=builder /app/src/server/server.json ./src/server/server.json
+COPY --from=builder /app/src/shared/config.json ./src/shared/config.json
 
 # Copy built client to nginx html root
 COPY --from=builder /app/dist /usr/share/nginx/html

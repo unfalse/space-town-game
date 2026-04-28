@@ -3,7 +3,7 @@ import express from 'express';
 import fs from 'fs';
 import path from 'path';
 
-import { port as PORT } from './server.json';
+import { port as PORT } from '../shared/config.json';
 
 type Level = {
     id: string;
