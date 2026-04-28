@@ -425,23 +425,65 @@ export class BaseCSW extends BaseGameObject {
             height,
         });
 
-        if (
-            checkHorizontal === 'OK' &&
-            checkVertical === 'OK' &&
-            (horizontalUXY.ux !== 0 ||
-                verticalUXY.uy !== 0 ||
-                horizontalUXY.uy !== 0 ||
-                verticalUXY.ux !== 0)
-        ) {
-            const dx = horizontalUXY.ux + verticalUXY.ux;
-            const dy = horizontalUXY.uy + verticalUXY.uy;
-            const updatedXY: PointXY = {
-                x: this.centerx + dx,
-                y: this.centery + dy,
-            };
-            const collisions = this.checkCollisionsByGrid(this, updatedXY);
-            if (collisions.length) {
+        let dx = horizontalUXY.ux + verticalUXY.ux;
+        let dy = horizontalUXY.uy + verticalUXY.uy;
 
+        // Ship / obstacle collision: if the proposed full move would overlap
+        // another ship, obstacle, or space brick, try axis-only moves so we
+        // slide along it. If both axes are blocked, stay put and zero inertia
+        // on the blocked axes.
+        if (
+            (dx !== 0 || dy !== 0) &&
+            this.BTankInst.checkShipCollisionAt(
+                this.x + dx,
+                this.y + dy,
+                this,
+            )
+        ) {
+            const blockedX =
+                dx !== 0 &&
+                !!this.BTankInst.checkShipCollisionAt(
+                    this.x + dx,
+                    this.y,
+                    this,
+                );
+            const blockedY =
+                dy !== 0 &&
+                !!this.BTankInst.checkShipCollisionAt(
+                    this.x,
+                    this.y + dy,
+                    this,
+                );
+
+            // Special case: pure-diagonal collision where neither single axis
+            // hits anything but the combined move does. Treat both axes as
+            // blocked so we don't squeeze through corners.
+            if (!blockedX && !blockedY) {
+                dx = 0;
+                dy = 0;
+                this.inertiaDirections[CONST.DIRECTIONS.RIGHT as Direction] = 0;
+                this.inertiaDirections[CONST.DIRECTIONS.LEFT as Direction] = 0;
+                this.inertiaDirections[CONST.DIRECTIONS.DOWN as Direction] = 0;
+                this.inertiaDirections[CONST.DIRECTIONS.UP as Direction] = 0;
+            } else {
+                if (blockedX) {
+                    dx = 0;
+                    this.inertiaDirections[
+                        CONST.DIRECTIONS.RIGHT as Direction
+                    ] = 0;
+                    this.inertiaDirections[
+                        CONST.DIRECTIONS.LEFT as Direction
+                    ] = 0;
+                }
+                if (blockedY) {
+                    dy = 0;
+                    this.inertiaDirections[
+                        CONST.DIRECTIONS.DOWN as Direction
+                    ] = 0;
+                    this.inertiaDirections[
+                        CONST.DIRECTIONS.UP as Direction
+                    ] = 0;
+                }
             }
         }
 
@@ -463,8 +505,8 @@ export class BaseCSW extends BaseGameObject {
             direction: CONST.DIRECTIONS.DOWN as Direction,
         });
 
-        this.x = this.x + horizontalUXY.ux + verticalUXY.ux;
-        this.y = this.y + horizontalUXY.uy + verticalUXY.uy;
+        this.x = this.x + dx;
+        this.y = this.y + dy;
 
         this.centerx = this.x + (CONST.CELLSIZES.MAXX * CONST.SCALE.X) / 2;
         this.centery = this.y + (CONST.CELLSIZES.MAXY * CONST.SCALE.Y) / 2;

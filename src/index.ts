@@ -1,4 +1,3 @@
-// TODO: make a new project so everything is clean: git init from the start
 import { CONST } from './const';
 import { BTankManager } from './btank';
 import { ImagesStore, DrawingManager } from './drawingMan';

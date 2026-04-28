@@ -129,6 +129,41 @@ export class BTankManager {
         return result.length > 0;
     }
 
+    // Precise AABB check between `whoAsks` placed at (newX, newY) and any
+    // blocking object: ships (PLAYER, SHIP, STATICSHIP), OBSTACLE, SPACEBRICK.
+    checkShipCollisionAt(
+        newX: number,
+        newY: number,
+        whoAsks: BaseCSW,
+    ): BaseCSW | null {
+        const blockingTypes: ObjectType[] = [
+            CONST.TYPES.PLAYER as ObjectType,
+            CONST.TYPES.SHIP as ObjectType,
+            CONST.TYPES.STATICSHIP as ObjectType,
+            CONST.TYPES.OBSTACLE as ObjectType,
+            CONST.TYPES.SPACEBRICK as ObjectType,
+        ];
+
+        const { width: aw, height: ah } = whoAsks.dimensions[whoAsks.d];
+
+        for (const csw of this.cswArr) {
+            if (csw === whoAsks || !blockingTypes.includes(csw.type)) {
+                continue;
+            }
+            const { width: bw, height: bh } = csw.dimensions[csw.d];
+            // Standard AABB intersection test
+            if (
+                newX < csw.x + bw &&
+                newX + aw > csw.x &&
+                newY < csw.y + bh &&
+                newY + ah > csw.y
+            ) {
+                return csw;
+            }
+        }
+        return null;
+    }
+
     checkIfTwoShipsCross(
         nx: number,
         ny: number,
