@@ -245,19 +245,15 @@ class CSWAI_customPaths extends BaseCPU {
             const y = Math.floor(this.y);
             if (x === currentWp[0] && y < currentWp[1]) {
                 // to make corrections if player moved thip ship (not working!)
-                // accel = Math.abs(y - currentWp[1]) <= accel ? 1 : accel;
                 d = CONST.DIRECTIONS.DOWN;
             }
             if (x > currentWp[0] && y === currentWp[1]) {
-                // accel = Math.abs(x - currentWp[0]) <= accel ? 1 : accel;
                 d = CONST.DIRECTIONS.LEFT;
             }
             if (x === currentWp[0] && y > currentWp[1]) {
-                // accel = Math.abs(y - currentWp[1]) <= accel ? 1 : accel;
                 d = CONST.DIRECTIONS.UP;
             }
             if (x < currentWp[0] && y === currentWp[1]) {
-                // accel = Math.abs(x - currentWp[0]) <= accel ? 1 : accel;
                 d = CONST.DIRECTIONS.RIGHT;
             }
         }

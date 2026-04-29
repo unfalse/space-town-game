@@ -18,6 +18,9 @@ type Keys = {
     ArrowDown: boolean;
     a: boolean;
     s: boolean;
+    w: boolean;
+    d: boolean;
+    SpaceKey: boolean;
 };
 
 type ControlsMap = {
@@ -26,6 +29,10 @@ type ControlsMap = {
     ArrowUp: number;
     ArrowDown: number;
     a: number;
+    w: number;
+    d: number;
+    s: number;
+    SpaceKey: number;
 };
 
 // -----------------------------
@@ -42,7 +49,11 @@ class Game {
         ArrowLeft: 2,
         ArrowRight: 0,
         ArrowDown: 1,
-        a: 4,
+        SpaceKey: 4,
+        w: 3,
+        a: 2,
+        d: 0,
+        s: 1,
     };
 
     // TODO: move player1 into BTankManager
@@ -286,7 +297,7 @@ class Game {
         if (kc === Utils.KEY_CODE.t_KEY) {
             this.EditorInst.editorUI.toggleEditorHint();
         }
-        if (kc === Utils.KEY_CODE.w_KEY) {
+        if (kc === Utils.KEY_CODE.p_KEY) {
             this.EditorInst.editorUI.toggleVideoHint();
         }
     }
@@ -300,6 +311,7 @@ class Game {
             event.returnValue = false;
         }
         const kc = event.key as keyof Keys;
+        console.log(kc);
         this.keys[kc] = event.type == 'keydown';
 
         if (event.type === 'keyup') {
@@ -377,47 +389,47 @@ class Game {
         // code here must change ONLY DIRECTION
         const ACCEL = 0.5; // 0.7; // 0.3;
 
-        if (this.keys[Utils.KEY_CODE.UP as keyof Keys]) {
+        if (this.keys[Utils.KEY_CODE.w_KEY as keyof Keys]) {
             player.setDirectionAndAddAccel(
                 this.controlsMap[
-                    Utils.KEY_CODE.UP as keyof ControlsMap
-                ] as Direction,
-                ACCEL,
-            );
-        }
-        if (this.keys[Utils.KEY_CODE.LEFT as keyof Keys]) {
-            player.setDirectionAndAddAccel(
-                this.controlsMap[
-                    Utils.KEY_CODE.LEFT as keyof ControlsMap
-                ] as Direction,
-                ACCEL,
-            );
-        }
-        if (this.keys[Utils.KEY_CODE.RIGHT as keyof Keys]) {
-            player.setDirectionAndAddAccel(
-                this.controlsMap[
-                    Utils.KEY_CODE.RIGHT as keyof ControlsMap
-                ] as Direction,
-                ACCEL,
-            );
-        }
-        if (this.keys[Utils.KEY_CODE.DOWN as keyof Keys]) {
-            player.setDirectionAndAddAccel(
-                this.controlsMap[
-                    Utils.KEY_CODE.DOWN as keyof ControlsMap
+                    Utils.KEY_CODE.w_KEY as keyof ControlsMap
                 ] as Direction,
                 ACCEL,
             );
         }
         if (this.keys[Utils.KEY_CODE.a_KEY as keyof Keys]) {
-            player.fire(timestamp);
+            player.setDirectionAndAddAccel(
+                this.controlsMap[
+                    Utils.KEY_CODE.a_KEY as keyof ControlsMap
+                ] as Direction,
+                ACCEL,
+            );
+        }
+        if (this.keys[Utils.KEY_CODE.d_KEY as keyof Keys]) {
+            player.setDirectionAndAddAccel(
+                this.controlsMap[
+                    Utils.KEY_CODE.d_KEY as keyof ControlsMap
+                ] as Direction,
+                ACCEL,
+            );
         }
         if (this.keys[Utils.KEY_CODE.s_KEY as keyof Keys]) {
-            player.stop();
+            player.setDirectionAndAddAccel(
+                this.controlsMap[
+                    Utils.KEY_CODE.s_KEY as keyof ControlsMap
+                ] as Direction,
+                ACCEL,
+            );
+        }
+        if (this.keys[Utils.KEY_CODE.SPACE as keyof Keys]) {
+            player.fire(timestamp);
         }
         if (this.keys[Utils.KEY_CODE.h_KEY as keyof Keys]) {
-            player.isHidden = !player.isHidden;
+            player.stop();
         }
+        // if (this.keys[Utils.KEY_CODE.h_KEY as keyof Keys]) {
+        //     player.isHidden = !player.isHidden;
+        // }
     }
 }
 

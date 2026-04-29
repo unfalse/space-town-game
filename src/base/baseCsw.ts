@@ -59,7 +59,7 @@ export class BaseCSW extends BaseGameObject {
         this.d = 0; // direction
         this.stopAccel = true;
         // this.PLAYER_BULLETS_INTERVAL = 600;
-        this.MAXIMUM_ACCELERATION = 2;
+        this.MAXIMUM_ACCELERATION = 5;
         this.dimensions = null;
         this.BTankInst = null;
     }

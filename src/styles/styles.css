@@ -83,7 +83,8 @@ canvas {
     background-color: black;
     position: absolute;
     left: 30px;
-    font-size: 20px;
+    font-size: 12pt;
+    font-family: monospace;
     padding: 10px;
 }
 
@@ -93,6 +94,7 @@ canvas {
     background-color: black;
     position: absolute;
     left: 300px;
-    font-size: 20px;
+    font-size: 12pt;
+    font-family: monospace;
     padding: 10px;
 }
