@@ -1,4 +1,3 @@
-// TODO: make a new project so everything is clean: git init from the start
 import { CONST } from './const';
 import { BTankManager } from './btank';
 import { ImagesStore, DrawingManager } from './drawingMan';
@@ -11,8 +10,6 @@ import { Direction } from './types';
 import { ObjectsFactory } from './objFactory';
 import { placeBorders } from './drawUtils';
 import { EditorUI } from './editor/editorUI';
-// import { IPlayer } from './interfaces';
-// import { addDemoCounters } from './demoUtils';
 
 type Keys = {
     ArrowRight: boolean;
@@ -21,6 +18,9 @@ type Keys = {
     ArrowDown: boolean;
     a: boolean;
     s: boolean;
+    w: boolean;
+    d: boolean;
+    SpaceKey: boolean;
 };
 
 type ControlsMap = {
@@ -29,13 +29,17 @@ type ControlsMap = {
     ArrowUp: number;
     ArrowDown: number;
     a: number;
+    w: number;
+    d: number;
+    s: number;
+    SpaceKey: number;
 };
 
 // -----------------------------
 //        Основная логика
 // -----------------------------
 class Game {
-    mainIntervalId: number = null;
+    mainIntervalId: number|null = null;
     gameOver = false;
     win = false;
     keys: Keys = {} as Keys;
@@ -45,11 +49,15 @@ class Game {
         ArrowLeft: 2,
         ArrowRight: 0,
         ArrowDown: 1,
-        a: 4,
+        SpaceKey: 4,
+        w: 3,
+        a: 2,
+        d: 0,
+        s: 1,
     };
 
     // TODO: move player1 into BTankManager
-    player1: Player = null;
+    player1: Player|null = null;
     cameraInst: Camera;
     imagesStoreInst: ImagesStore;
     drawingManagerInst: DrawingManager;
@@ -59,15 +67,13 @@ class Game {
     EditorUIInst: EditorUI;
 
     constructor() {
-        // const gameField = document.getElementById("gameField");
-
         this.cameraInst = new Camera();
         this.imagesStoreInst = new ImagesStore();
         this.drawingManagerInst = new DrawingManager(
             this.imagesStoreInst,
             this.cameraInst,
         );
-        this.BTankInst = new BTankManager(this.player1);
+        this.BTankInst = new BTankManager(this.player1 as Player);
         this.BTankInst.init();
 
         this.objFactoryGameInst = new ObjectsFactory(
@@ -80,7 +86,7 @@ class Game {
 
     start() {
         this.drawingManagerInst.init().then(
-            function () {
+            () => {
                 this.EditorInst.init(this.BTankInst, this.EditorUIInst);
 
                 this.player1 = this.objFactoryGameInst.createCSW(
@@ -90,13 +96,7 @@ class Game {
                 ) as Player;
                 this.BTankInst.pushNewObjects([this.player1]);
 
-                // addDemoCounters(objFactoryGameInst, BTankInst);
-
                 placeBorders(this.objFactoryGameInst, this.BTankInst);
-
-                // for (let i = 0; i < 100; i++) {
-                //     BTank.createCSW(940, 480, CONST.COMPUTER, 0);
-                // }
 
                 this.gameOver = false;
                 this.win = false;
@@ -119,12 +119,11 @@ class Game {
                 this.mainIntervalId = window.requestAnimationFrame(
                     this.mainCycle.bind(this),
                 );
-            }.bind(this),
+            },
         );
     }
 
     mainCycle(timestamp: number) {
-        // console.log(timestamp);
         this.drawingManagerInst.drawBackground();
 
         if (this.EditorInst.editorMode) {
@@ -140,11 +139,8 @@ class Game {
 
     editorCycle(_timestamp: number) {
         this.detectEditorMovement();
-        // player1.update();
-        // gameCam.setCoords(player1.x, player1.y);
 
         this.EditorInst.editorUnits.forEach(unit => {
-            // unit.update(timestamp);
             unit.draw();
         });
 
@@ -166,18 +162,30 @@ class Game {
     }
 
     gameCycle(timestamp: number) {
-        if (this.player1.life > 0) {
+        if (this.player1 && this.player1.life > 0) {
             this.detectMovement(timestamp);
             this.player1.update(timestamp);
             this.cameraInst.setCoords(this.player1.x, this.player1.y);
         }
 
-        this.BTankInst.getAllBullets().forEach(bullet => {
+        this.BTankInst.getAllShips().forEach(ship => {
+            if (ship.iam !== 1) ship.update(timestamp);
+        });
+
+        [...this.BTankInst.getAllBullets()].forEach(bullet => {
             bullet.fly();
         });
 
         this.BTankInst.getAllShips().forEach(ship => {
-            ship.update(timestamp);
+            ship.draw();
+        });
+
+        this.BTankInst.getAllObstacles().forEach(ship => {
+            ship.draw();
+        });
+
+        this.BTankInst.getAllBullets().forEach(bullet => {
+            bullet.draw();
         });
 
         this.BTankInst.getAllDelayedPics().forEach(pic => {
@@ -188,9 +196,8 @@ class Game {
             ghost.draw();
         });
 
-        // BTankInst.displayLifeBar(player1);
 
-        if (!this.gameOver && (this.win || this.player1.life <= 0)) {
+        if (!this.gameOver && (this.win || (this.player1 && this.player1.life <= 0))) {
             if (this.win) {
                 Utils.text('YOU WIN');
                 this.BTankInst.showWin();
@@ -201,7 +208,6 @@ class Game {
 
             this.gameOver = true;
         }
-        //console.log('cswArr = ', BTank.cswArr.length);
     }
 
     editorMouseDownHandler(event: MouseEvent) {
@@ -213,7 +219,6 @@ class Game {
             const x = event.offsetX + leftTop.x,
                 y = event.offsetY + leftTop.y;
 
-            // const relXY = BTank.gameCam.getRelCoords(x, y);
             const cellx =
                 Math.floor(x / CONST.CELLSIZES.MAXX) * CONST.CELLSIZES.MAXX;
             const celly =
@@ -255,7 +260,7 @@ class Game {
                 if (!this.EditorInst.currentShipWithWaypoints) {
                     const unit = this.EditorInst.getEditorUnitAt(cellx, celly);
                     this.EditorInst.setCurrentShipWithWaypoints(
-                        unit as CSWAI_customPaths,
+                        unit as unknown as CSWAI_customPaths,
                     );
                 } else {
                     if (!this.EditorInst.getEditorWaypointAt(cellx, celly)) {
@@ -284,10 +289,16 @@ class Game {
 
     keyUpHandler(kc: string) {
         // TODO: keysUp array for keys that are up to know which direction isn't getting acceleration
-        this.player1.stopAccel = true;
+        (this.player1 as Player).stopAccel = true;
 
         if (kc === Utils.KEY_CODE.F1_KEY) {
             this.EditorInst.editorUI.toggleEditorControls();
+        }
+        if (kc === Utils.KEY_CODE.t_KEY) {
+            this.EditorInst.editorUI.toggleEditorHint();
+        }
+        if (kc === Utils.KEY_CODE.p_KEY) {
+            this.EditorInst.editorUI.toggleVideoHint();
         }
     }
 
@@ -300,6 +311,7 @@ class Game {
             event.returnValue = false;
         }
         const kc = event.key as keyof Keys;
+        console.log(kc);
         this.keys[kc] = event.type == 'keydown';
 
         if (event.type === 'keyup') {
@@ -371,58 +383,55 @@ class Game {
         }
     }
 
+    // TODO: move to keyboard.js or something like controls.js
     detectMovement(timestamp: number) {
+        const player = this.player1 as Player;
         // code here must change ONLY DIRECTION
-        const ACCEL = 0.7; // 0.7; // 0.3;
+        const ACCEL = 0.5; // 0.7; // 0.3;
 
-        if (this.keys[Utils.KEY_CODE.UP as keyof Keys]) {
-            this.player1.setDirectionAndAddAccel(
+        if (this.keys[Utils.KEY_CODE.w_KEY as keyof Keys]) {
+            player.setDirectionAndAddAccel(
                 this.controlsMap[
-                    Utils.KEY_CODE.UP as keyof ControlsMap
-                ] as Direction,
-                ACCEL,
-            );
-        }
-        if (this.keys[Utils.KEY_CODE.LEFT as keyof Keys]) {
-            this.player1.setDirectionAndAddAccel(
-                this.controlsMap[
-                    Utils.KEY_CODE.LEFT as keyof ControlsMap
-                ] as Direction,
-                ACCEL,
-            );
-        }
-        if (this.keys[Utils.KEY_CODE.RIGHT as keyof Keys]) {
-            this.player1.setDirectionAndAddAccel(
-                this.controlsMap[
-                    Utils.KEY_CODE.RIGHT as keyof ControlsMap
-                ] as Direction,
-                ACCEL,
-            );
-        }
-        if (this.keys[Utils.KEY_CODE.DOWN as keyof Keys]) {
-            this.player1.setDirectionAndAddAccel(
-                this.controlsMap[
-                    Utils.KEY_CODE.DOWN as keyof ControlsMap
+                    Utils.KEY_CODE.w_KEY as keyof ControlsMap
                 ] as Direction,
                 ACCEL,
             );
         }
         if (this.keys[Utils.KEY_CODE.a_KEY as keyof Keys]) {
-            this.player1.fire(timestamp);
+            player.setDirectionAndAddAccel(
+                this.controlsMap[
+                    Utils.KEY_CODE.a_KEY as keyof ControlsMap
+                ] as Direction,
+                ACCEL,
+            );
+        }
+        if (this.keys[Utils.KEY_CODE.d_KEY as keyof Keys]) {
+            player.setDirectionAndAddAccel(
+                this.controlsMap[
+                    Utils.KEY_CODE.d_KEY as keyof ControlsMap
+                ] as Direction,
+                ACCEL,
+            );
         }
         if (this.keys[Utils.KEY_CODE.s_KEY as keyof Keys]) {
-            this.player1.stop();
+            player.setDirectionAndAddAccel(
+                this.controlsMap[
+                    Utils.KEY_CODE.s_KEY as keyof ControlsMap
+                ] as Direction,
+                ACCEL,
+            );
+        }
+        if (this.keys[Utils.KEY_CODE.SPACE as keyof Keys]) {
+            player.fire(timestamp);
         }
         if (this.keys[Utils.KEY_CODE.h_KEY as keyof Keys]) {
-            this.BTankInst.playerInstance.isHidden =
-                !this.BTankInst.playerInstance.isHidden;
+            player.stop();
         }
+        // if (this.keys[Utils.KEY_CODE.h_KEY as keyof Keys]) {
+        //     player.isHidden = !player.isHidden;
+        // }
     }
 }
-
-// const dpTest = new DelayedPic(1);
-// debugger;
-// dpTest.init();
 
 const gameInstance = new Game();
 

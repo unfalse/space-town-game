@@ -1,17 +1,30 @@
 import { CONST } from '../const';
-import { Dimensions, Direction, ObjectType, Who } from '../types';
+import { CollisionDirections, CollisionInfo, CollisionMatrix, Dimensions, Direction, ObjectType, Who } from '../types';
 import { DrawingManager } from '../drawingMan';
-import { BTankManager } from '../btank';
+import {
+    BTankManager,
+    CollisionGridColumns,
+    CollisionGridRows,
+} from '../btank';
 import { ObjectsFactory } from '../objFactory';
 import { BaseGameObject } from './baseGameObj';
 import { Bullet } from '../bullet';
-// import { Player } from '../player';
+import { PointXY } from './baseCoord';
 
 type InertiaDirections = { [key in Direction]: number };
 
+type CheckBoundsParameters = {
+    ux: number;
+    uy: number;
+    width: number;
+    height: number;
+    direction?: Direction;
+};
+
+type BordersCheckResult = 'X' | 'Y' | 'OK';
+
 // TODO: csw: cosmo ship war, the old title
 // TODO: rename csw to something more understandable - tank? SpaceShip ?
-// TODO: maybe the CPU and player should have separate classes? And several base classes.
 export class BaseCSW extends BaseGameObject {
     lastBulletTimeStamp: number;
     CSWSPEED: number;
@@ -28,17 +41,13 @@ export class BaseCSW extends BaseGameObject {
     maxlife: number;
     life: number;
     bulletsAmountOnFire: number;
-    // x: number;
-    // y: number;
     type: ObjectType;
     ghost: boolean;
 
     constructor() {
         super();
         this.lastBulletTimeStamp = 0;
-        // this.CSWSPEED = 4;
         this.CSWSPEED = 0;
-        // this.accel = 0;
         this.inertiaDirections = {
             0: 0,
             1: 0,
@@ -50,11 +59,8 @@ export class BaseCSW extends BaseGameObject {
         this.d = 0; // direction
         this.stopAccel = true;
         // this.PLAYER_BULLETS_INTERVAL = 600;
-        this.MAXIMUM_ACCELERATION = 50; //100; //30; //20;
+        this.MAXIMUM_ACCELERATION = 5;
         this.dimensions = null;
-
-        // this.CONST = CONST;
-        // this.bullet = Bullet;
         this.BTankInst = null;
     }
 
@@ -67,7 +73,6 @@ export class BaseCSW extends BaseGameObject {
         BTankInst: BTankManager,
         objectsFactoryInst: ObjectsFactory,
     ): void {
-        // super.initCoords(mx, my, 0);
         super.init(
             mx,
             my,
@@ -80,20 +85,25 @@ export class BaseCSW extends BaseGameObject {
         this.maxlife = 5;
         this.life = this.maxlife;
         this.bulletsAmountOnFire = CONST.MAXBULLETS;
-        // this.BTankInst = BTankInst;
-        // this.drawingManagerInst = drawingManagerInst;
-        // this.objectsFactoryInst = objectsFactoryInst;
         this.dimensions = this.drawingManagerInst.initDimensions(who);
         //this.ghost = !!ghost; // only display this object
+        const { width, height } = this.dimensions[
+            CONST.DIRECTIONS.RIGHT as Direction
+        ];
+        this.centerx = this.x + width / 2;
+        this.centery = this.y + height / 2;
         this.childInit();
     }
 
     childInit(): void {
-        return null;
     }
 
     setGhost(ghost: boolean): void {
         this.ghost = ghost;
+    }
+
+    setType(type: ObjectType): void {
+        this.type = type;
     }
 
     draw(): void {
@@ -114,7 +124,6 @@ export class BaseCSW extends BaseGameObject {
             ).length === this.bulletsAmountOnFire
         )
             return;
-        // const newBullet = new Bullet(this.BTankInst, this.drawingManagerInst, whoFires);
         const newBullet = <Bullet>(
             this.objectsFactoryInst.createBaseObj(
                 startX,
@@ -128,19 +137,6 @@ export class BaseCSW extends BaseGameObject {
     }
 
     setDirectionAndAccel(d: Direction, accel: number): void {
-        // const humanDir = (d: Direction) => {
-        //     switch (d) {
-        //         case 0:
-        //             return "right";
-        //         case 1:
-        //             return "down";
-        //         case 2:
-        //             return "left";
-        //         case 3:
-        //             return "up";
-        //     }
-        // };
-        // console.log(humanDir(d), ', ', accel, ', ', ms);
         this.d = d;
         this.inertiaDirections[d] = accel;
     }
@@ -152,36 +148,6 @@ export class BaseCSW extends BaseGameObject {
             this.inertiaDirections[2] +
             this.inertiaDirections[3]
         );
-    }
-
-    // TODO: move all this inertia in a separate class
-    // There should be ability to make a lot of movement types
-    inertia(): void {
-        if (
-            this.getDirSum() > 0 &&
-            this.stopAccel &&
-            this.inertiaTimerIsRunning
-        ) {
-            // TODO: WHERE TO PUT DECREASING AND INCREASING OF ACCELERATION ?
-            // maybe use stopAccel from the main.js !!!
-            // this way the momentum will be the same every time till zero acceleration
-            // stopAccel should be for every direction!
-            // Then inertia will stop fade only for directions which are not accelerated at the moment
-            for (let d: Direction = 0; d < 4; d++) {
-                if (this.inertiaDirections[d as Direction] > 0) {
-                    // this.inertiaDirections[d] -= 0.1;
-                } else {
-                    this.inertiaDirections[d as Direction] = 0;
-                }
-                this.move(d as Direction);
-            }
-            // this.draw();
-            // setTimeout(this.inertia.bind(this), 10);
-
-            this.waitAndCall(this.inertia.bind(this), 10); // TODO: need investigation wtf is this
-        } else {
-            this.inertiaTimerIsRunning = false;
-        }
     }
 
     waitAndCall(callback: () => void, ms: number): void {
@@ -201,24 +167,54 @@ export class BaseCSW extends BaseGameObject {
         window.requestAnimationFrame(doThings.bind(this));
     }
 
-    inertiaStartAttempt(): void {
-        if (
-            this.getDirSum() > 0 &&
-            !this.inertiaTimerIsRunning &&
-            this.stopAccel
-        ) {
-            this.inertiaTimerIsRunning = true;
-            // setTimeout(this.inertia.bind(this), 10);
-            this.waitAndCall(this.inertia.bind(this), 10);
-        }
-    }
-
     stop(): void {
         this.stopAccel = false;
-        this.inertiaTimerIsRunning = false;
         for (let d = 0; d < 4; d++) {
             this.inertiaDirections[d as Direction] = 0;
         }
+    }
+
+    canItMove({
+        ux,
+        uy,
+        width,
+        height,
+    }: CheckBoundsParameters): BordersCheckResult {
+        if (
+            this.x + ux + width > CONST.MAXX * CONST.CELLSIZES.MAXX ||
+            this.x + ux < 0
+        ) {
+            if (this.x + ux < 0) this.x = 0;
+            if (this.x + ux + width > CONST.MAXX * CONST.CELLSIZES.MAXX) {
+                this.x = CONST.MAXX * CONST.CELLSIZES.MAXX - width;
+            }
+
+            return 'X';
+        }
+
+        if (
+            this.y + uy + height > CONST.MAXY * CONST.CELLSIZES.MAXY ||
+            this.y + uy < 0
+        ) {
+            if (this.y + uy < 0) {
+                this.y = 0;
+            }
+            if (this.y + uy + height > CONST.MAXY * CONST.CELLSIZES.MAXY) {
+                this.y = CONST.MAXY * CONST.CELLSIZES.MAXY - height;
+            }
+
+            return 'Y';
+        }
+        return 'OK';
+    }
+
+    getNewCoordinatesDelta(direction: Direction): any {
+        const nvxy = super.getVXY(direction);
+        const acceleration = this.CSWSPEED + this.inertiaDirections[direction];
+        return {
+            ux: nvxy.vx * acceleration,
+            uy: nvxy.vy * acceleration,
+        };
     }
 
     /*
@@ -233,66 +229,160 @@ export class BaseCSW extends BaseGameObject {
     |
     
     */
-    move(direction: Direction): void {
-        const nvxy = super.getVXY(direction);
-        const acceleration = this.CSWSPEED + this.inertiaDirections[direction];
+    move(): void {
+        const { ux: uxR, uy: uyR } = this.getNewCoordinatesDelta(
+            CONST.DIRECTIONS.RIGHT as Direction,
+        );
+        const { ux: uxD, uy: uyD } = this.getNewCoordinatesDelta(
+            CONST.DIRECTIONS.DOWN as Direction,
+        );
+        const { ux: uxL, uy: uyL } = this.getNewCoordinatesDelta(
+            CONST.DIRECTIONS.LEFT as Direction,
+        );
+        const { ux: uxU, uy: uyU } = this.getNewCoordinatesDelta(
+            CONST.DIRECTIONS.UP as Direction,
+        );
+        let { width, height } = this.dimensions[
+            CONST.DIRECTIONS.RIGHT as Direction
+        ];
 
-        let ux = nvxy.vx * acceleration;
-        let uy = nvxy.vy * acceleration;
+        const horizontalUXY = {
+            ux: uxR + uxL,
+            uy: uyR + uyL,
+        };
 
-        // get ship dimensions by current direction and 'iam' flag
-        let { width, height } = this.dimensions[direction];
-        width--;
-        height--;
+        const verticalUXY = {
+            ux: uxD + uxU,
+            uy: uyD + uyU,
+        };
 
+        let checkHorizontal = this.canItMove({
+            ux: horizontalUXY.ux,
+            uy: horizontalUXY.uy,
+            width,
+            height,
+        });
+        let checkVertical = this.canItMove({
+            ux: verticalUXY.ux,
+            uy: verticalUXY.uy,
+            width,
+            height,
+        });
+
+        let dx = horizontalUXY.ux + verticalUXY.ux;
+        let dy = horizontalUXY.uy + verticalUXY.uy;
+
+        // Ship / obstacle collision: if the proposed full move would overlap
+        // another ship, obstacle, or space brick, try axis-only moves so we
+        // slide along it. If both axes are blocked, stay put and zero inertia
+        // on the blocked axes.
         if (
-            this.x + ux + width > CONST.MAXX * CONST.CELLSIZES.MAXX ||
-            this.x + ux < 0
+            (dx !== 0 || dy !== 0) &&
+            this.BTankInst.checkShipCollisionAt(
+                this.x + dx,
+                this.y + dy,
+                this,
+            )
         ) {
-            if (this.x + ux < 0) this.x = 0;
-            if (this.x + ux + width > CONST.MAXX * CONST.CELLSIZES.MAXX) {
-                this.x = CONST.MAXX * CONST.CELLSIZES.MAXX - width;
-            }
-            ux = 0;
-            this.inertiaDirections[direction] = 0;
-            return;
-        }
-
-        if (
-            this.y + uy + height > CONST.MAXY * CONST.CELLSIZES.MAXY ||
-            this.y + uy < 0
-        ) {
-            if (this.y + uy < 0) {
-                this.y = 0;
-            }
-            if (this.y + uy + height > CONST.MAXY * CONST.CELLSIZES.MAXY) {
-                this.y = CONST.MAXY * CONST.CELLSIZES.MAXY - height;
-            }
-            uy = 0;
-            this.inertiaDirections[direction] = 0;
-            return;
-        }
-
-        const disableCollisionChecks = false;
-        const disableCollisionsWithShips = false;
-        if (!disableCollisionChecks) {
-            if (ux != 0 || uy != 0) {
-                const found = this.BTankInst.checkIfTwoShipsCross(
-                    this.x + ux, //Math.floor(ux), //Math.ceil(ux),
-                    this.y + uy, //Math.floor(uy),//Math.ceil(uy),
+            const blockedX =
+                dx !== 0 &&
+                !!this.BTankInst.checkShipCollisionAt(
+                    this.x + dx,
+                    this.y,
                     this,
-                    disableCollisionsWithShips ? null : [ObjectType.SHIP],
                 );
-                if (found) {
-                    ux = 0;
-                    uy = 0;
-                    this.inertiaDirections[direction] = 0;
-                    return;
+            const blockedY =
+                dy !== 0 &&
+                !!this.BTankInst.checkShipCollisionAt(
+                    this.x,
+                    this.y + dy,
+                    this,
+                );
+
+            // Special case: pure-diagonal collision where neither single axis
+            // hits anything but the combined move does. Treat both axes as
+            // blocked so we don't squeeze through corners.
+            if (!blockedX && !blockedY) {
+                dx = 0;
+                dy = 0;
+                this.inertiaDirections[CONST.DIRECTIONS.RIGHT as Direction] = 0;
+                this.inertiaDirections[CONST.DIRECTIONS.LEFT as Direction] = 0;
+                this.inertiaDirections[CONST.DIRECTIONS.DOWN as Direction] = 0;
+                this.inertiaDirections[CONST.DIRECTIONS.UP as Direction] = 0;
+            } else {
+                if (blockedX) {
+                    dx = 0;
+                    this.inertiaDirections[
+                        CONST.DIRECTIONS.RIGHT as Direction
+                    ] = 0;
+                    this.inertiaDirections[
+                        CONST.DIRECTIONS.LEFT as Direction
+                    ] = 0;
+                }
+                if (blockedY) {
+                    dy = 0;
+                    this.inertiaDirections[
+                        CONST.DIRECTIONS.DOWN as Direction
+                    ] = 0;
+                    this.inertiaDirections[
+                        CONST.DIRECTIONS.UP as Direction
+                    ] = 0;
                 }
             }
         }
-        this.x = this.x + ux;
-        this.y = this.y + uy;
+
+        this.setInertiaDirections(checkHorizontal);
+        this.setInertiaDirections(checkVertical);
+
+        this.x = this.x + dx;
+        this.y = this.y + dy;
+
+        this.centerx = this.x + (CONST.CELLSIZES.MAXX * CONST.SCALE.X) / 2;
+        this.centery = this.y + (CONST.CELLSIZES.MAXY * CONST.SCALE.Y) / 2;
+
+        this.updateCollisionGrid(CONST.DIRECTIONS.RIGHT as Direction);
+    }
+
+    checkCollisionsByGrid(gameObject: BaseCSW, updatedCoords: PointXY): any {
+        const btank = this.BTankInst;
+        const dynamicGrid = btank.dynamicCollisionGrid;
+        const staticGrid = btank.staticCollisionGrid;
+        const rows = Object.keys(dynamicGrid);
+        const collisions = [];
+
+        for (const rowNum of rows) {
+            const row = dynamicGrid[Number(rowNum)];
+            const columns = Object.keys(row);
+            const staticRow = staticGrid[Number(rowNum)];
+
+            for (const columnNum of columns) {
+                const ships = row[Number(columnNum)];
+                const column = staticRow ? staticRow[Number(columnNum)] : [];
+                const obstacles = column || [];
+                const objectsToCheck = ships.concat(obstacles);
+                if (objectsToCheck.length > 1) {
+                    const collision = this.BTankInst.getVectorsOfCollidedObjectsByCenter(
+                        gameObject,
+                        objectsToCheck,
+                        updatedCoords,
+                    );
+                    if (collision.length) collisions.push(collision);
+                }
+            }
+        }
+
+        return collisions;
+    }
+
+    setInertiaDirections(result: BordersCheckResult): void {
+        if (result === 'X') {
+            this.inertiaDirections[CONST.DIRECTIONS.RIGHT as Direction] = 0;
+            this.inertiaDirections[CONST.DIRECTIONS.LEFT as Direction] = 0;
+        }
+        if (result === 'Y') {
+            this.inertiaDirections[CONST.DIRECTIONS.DOWN as Direction] = 0;
+            this.inertiaDirections[CONST.DIRECTIONS.UP as Direction] = 0;
+        }
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -301,15 +391,86 @@ export class BaseCSW extends BaseGameObject {
             this.BTankInst.removeShip(this);
         }
 
-        this.inertiaStartAttempt();
+        this.move();
+    }
 
-        if (!this.stopAccel) {
-            for (let d = 0; d < 4; d++) {
-                this.move(d as Direction);
-            }
+    // collision detection: broad phase
+    updateCollisionGrid(direction: Direction): void {
+        const { width, height } = this.dimensions[direction];
+        // TODO: check if object is already in grid's cell so there's no need to add it
+        // pass only direction ?
+        this.addFourPointsToDynamicGrid(this.x, this.y, width, height);
+    }
+
+    addFourPointsToDynamicGrid(
+        x: number,
+        y: number,
+        width: number,
+        height: number,
+    ): void {
+        this.addThisObjectToDynamicGrid(this.x, this.y);
+        this.addThisObjectToDynamicGrid(this.x + width, this.y);
+        this.addThisObjectToDynamicGrid(this.x, this.y + height);
+        this.addThisObjectToDynamicGrid(this.x + width, this.y + height);
+    }
+
+    addFourPointsToStaticGrid(
+        x: number,
+        y: number,
+        width: number,
+        height: number,
+    ): void {
+        this.addThisObjectToStaticGrid(this.x, this.y);
+        this.addThisObjectToStaticGrid(this.x + width, this.y);
+        this.addThisObjectToStaticGrid(this.x, this.y + height);
+        this.addThisObjectToStaticGrid(this.x + width, this.y + height);
+    }
+
+    addThisObjectToGrid(x: number, y: number, grid: CollisionGridRows): void {
+        const gridPoint: PointXY = {
+            x: Math.floor(x / CONST.COLLISION_GRID.WIDTH),
+            y: Math.floor(y / CONST.COLLISION_GRID.HEIGHT),
+        };
+
+        let gridRow = grid[gridPoint.y] as CollisionGridColumns;
+        if (!gridRow) {
+            grid[gridPoint.y] = {};
+            gridRow = grid[gridPoint.y] as CollisionGridColumns;
         }
 
-        this.draw();
+        let gridCell = gridRow[gridPoint.x] as BaseCSW[];
+        if (!gridCell) {
+            gridRow[gridPoint.x] = [];
+            gridCell = gridRow[gridPoint.x] as BaseCSW[];
+        }
+
+        if (!gridCell.includes(this)) {
+            gridCell.push(this);
+        }
+    }
+
+    addThisObjectToDynamicGrid(x: number, y: number): void {
+        this.addThisObjectToGrid(x, y, this.BTankInst.dynamicCollisionGrid);
+    }
+
+    addThisObjectToStaticGrid(x: number, y: number): void {
+        this.addThisObjectToGrid(x, y, this.BTankInst.staticCollisionGrid);
+    }
+
+    removeSelfFromStaticGrid(): void {
+        const grid = this.BTankInst.staticCollisionGrid;
+        for (const rowKey of Object.keys(grid)) {
+            const row = grid[Number(rowKey)];
+            if (!row) continue;
+            for (const colKey of Object.keys(row)) {
+                const cell = row[Number(colKey)] as BaseCSW[];
+                if (!cell?.length) continue;
+                const idx = cell.indexOf(this);
+                if (idx !== -1) {
+                    cell.splice(idx, 1);
+                }
+            }
+        }
     }
 
     hitByBullet(_bulletInstance: Bullet): void {

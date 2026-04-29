@@ -2,11 +2,27 @@ import { CONST } from './const';
 import { Bullet } from './bullet';
 import { Images } from './images';
 import { DelayedPic } from './delayedPic';
-import { ObjectType } from './types';
+import { CollisionDistance, ObjectType } from './types';
 import { BaseCSW } from './base/baseCsw';
 import { Player } from './player';
 import { Ghosts } from './ghosts';
+import { PointXY } from './base/baseCoord';
 // import { IPlayer } from './interfaces';
+
+export type CollisionGridColumns = {
+    [key in number]: BaseCSW[];
+};
+
+export type CollisionGridRows = {
+    [key in number]: CollisionGridColumns;
+};
+
+// type CollisionMap = Array<number>[8];
+
+// type CheckObjectsCrossResult = {
+//     result: CollisionMap;
+//     collidedObject: BaseCSW;
+// } | false;
 
 // -------------------------------------
 //    TOFIX! bullet dep propagation
@@ -31,6 +47,9 @@ export class BTankManager {
     // gameCam: Camera;
     playerInstance: Player;
 
+    dynamicCollisionGrid: CollisionGridRows;
+    staticCollisionGrid: CollisionGridRows;
+
     constructor(player: Player) {
         // TODO: write the full paths to classes
         this.cswArr = [];
@@ -41,6 +60,8 @@ export class BTankManager {
         this.againBtn = null;
         this.gameOverBlock = null;
         this.playerInstance = player;
+        this.dynamicCollisionGrid = [];
+        this.staticCollisionGrid = [];
     }
 
     init(): void {
@@ -108,6 +129,41 @@ export class BTankManager {
         return result.length > 0;
     }
 
+    // Precise AABB check between `whoAsks` placed at (newX, newY) and any
+    // blocking object: ships (PLAYER, SHIP, STATICSHIP), OBSTACLE, SPACEBRICK.
+    checkShipCollisionAt(
+        newX: number,
+        newY: number,
+        whoAsks: BaseCSW,
+    ): BaseCSW | null {
+        const blockingTypes: ObjectType[] = [
+            CONST.TYPES.PLAYER as ObjectType,
+            CONST.TYPES.SHIP as ObjectType,
+            CONST.TYPES.STATICSHIP as ObjectType,
+            CONST.TYPES.OBSTACLE as ObjectType,
+            CONST.TYPES.SPACEBRICK as ObjectType,
+        ];
+
+        const { width: aw, height: ah } = whoAsks.dimensions[whoAsks.d];
+
+        for (const csw of this.cswArr) {
+            if (csw === whoAsks || !blockingTypes.includes(csw.type)) {
+                continue;
+            }
+            const { width: bw, height: bh } = csw.dimensions[csw.d];
+            // Standard AABB intersection test
+            if (
+                newX < csw.x + bw &&
+                newX + aw > csw.x &&
+                newY < csw.y + bh &&
+                newY + ah > csw.y
+            ) {
+                return csw;
+            }
+        }
+        return null;
+    }
+
     checkIfTwoShipsCross(
         nx: number,
         ny: number,
@@ -158,6 +214,126 @@ export class BTankManager {
         return tArr.length > 0 ? tArr[0] : null;
     }
 
+    checkIfTwoObjectsCrossInsideACell(
+        whoAsks: BaseCSW,
+        objects: BaseCSW[],
+        newCoords?: PointXY,
+        typesToIgnore?: ObjectType[],
+    ): any {
+        // ): CheckObjectsCrossResult {
+        // const debugDraw = (function(x,y,w,h) {
+        //     this.drawContext.strokeStyle = "#0f0";
+        //     this.drawContext.strokeRect(x, y, w, h);
+        // }).bind(this);
+        // const typeToCheck = typeToCheckParam || CONST.TYPES.SHIP;
+
+        const checkSquare = (csw: BaseCSW, x: number, y: number) => {
+            let { width, height } = csw.dimensions[csw.d];
+            // width--;
+            // height--;
+            // debugDraw(csw.x, csw.y, width, height);
+
+            return (
+                x >= csw.x &&
+                x <= csw.x + width &&
+                y >= csw.y &&
+                y <= csw.y + height
+            );
+        };
+
+        let { width, height } = whoAsks.dimensions[whoAsks.d];
+        const { x, y } = newCoords || whoAsks;
+        // width--;
+        // height--;
+
+        const tArr = objects
+            .map((csw: BaseCSW) => {
+                if (whoAsks === csw || typesToIgnore?.indexOf(csw.type) >= 0) {
+                    return false;
+                }
+
+                const result = [
+                    // left top
+                    +checkSquare(csw, x, y),
+                    // center top
+                    +checkSquare(csw, x + width / 2, y),
+                    // right top
+                    +checkSquare(csw, x + width, y),
+                    // left center
+                    +checkSquare(csw, x, y + height / 2),
+                    // center center (index = 4)
+                    +checkSquare(csw, x + width / 2, y + height / 2),
+                    // right center
+                    +checkSquare(csw, x + width, y + height / 2),
+                    // left bottom
+                    +checkSquare(csw, x, y + height),
+                    // center bottom
+                    +checkSquare(csw, x + width / 2, y + height),
+                    // right bottom
+                    +checkSquare(csw, x + width, y + height),
+                ];
+                return result.some(r => r !== 0)
+                    ? { result, collidedObject: csw }
+                    : undefined;
+            }, this)
+            .filter(obj => !!obj === true);
+
+        if (tArr.length > 0) {
+            return tArr;
+            // return tArr[0];
+        }
+        return null;
+    }
+
+    getVectorsOfCollidedObjectsByCenter(
+        whoAsks: BaseCSW,
+        objects: BaseCSW[],
+        newCoords?: PointXY, // x and y coordinates of object's center
+        typesToIgnore?: ObjectType[],
+    ): CollisionDistance[] {
+        const { x, y } = newCoords || whoAsks;
+
+        const collidedObjects = objects
+            // .filter(
+            //     obj => whoAsks !== obj || typesToIgnore?.indexOf(obj.type) < 0,
+            // )
+            .reduce((prevValue: CollisionDistance[], currentCSW: BaseCSW) => {
+                if (
+                    whoAsks === currentCSW ||
+                    typesToIgnore?.indexOf(currentCSW.type) >= 0
+                ) {
+                    return prevValue;
+                }
+
+                const objToCheck: PointXY = {
+                    x: currentCSW.centerx,
+                    y: currentCSW.centery,
+                };
+
+                const distance = Math.sqrt(
+                    (objToCheck.x - x) * (objToCheck.x - x) +
+                        (objToCheck.y - y) * (objToCheck.y - y),
+                );
+
+                if (distance < CONST.CELLSIZES.MAXX) {
+                    const distanceX = objToCheck.x - x;
+
+                    const distanceY = objToCheck.y - y;
+
+                    return prevValue.concat({
+                        distance,
+                        distanceX,
+                        distanceY,
+                        collidedObject: currentCSW,
+                    });
+                }
+
+                return prevValue;
+            }, []);
+
+        return collidedObjects;
+    }
+
     getBulletWithPixelPrecision(
         x: number,
         y: number,
@@ -200,7 +376,17 @@ export class BTankManager {
     }
 
     getAllShips(): BaseCSW[] {
-        return this.cswArr;
+        const filtered = this.cswArr.filter(ship =>
+            [CONST.TYPES.PLAYER, CONST.TYPES.SHIP].includes(ship.type),
+        );
+        return filtered;
+    }
+
+    getAllObstacles(): BaseCSW[] {
+        const filtered = this.cswArr.filter(ship => {
+            return ![CONST.TYPES.PLAYER, CONST.TYPES.SHIP].includes(ship.type);
+        });
+        return filtered;
     }
 
     getAllBullets(): Bullet[] {
@@ -243,6 +429,8 @@ export class BTankManager {
 
     destroyAll(): void {
         this.cswArr = [];
+        this.dynamicCollisionGrid = [];
+        this.staticCollisionGrid = [];
     }
 
     showGameOver(): void {

@@ -76,3 +76,25 @@ canvas {
     justify-content: center;
     top: 10px;
 }
+
+.editor-hint {
+    z-index: 10000;
+    color: white;
+    background-color: black;
+    position: absolute;
+    left: 30px;
+    font-size: 12pt;
+    font-family: monospace;
+    padding: 10px;
+}
+
+.waypoints-hint {
+    z-index: 10000;
+    color: white;
+    background-color: black;
+    position: absolute;
+    left: 300px;
+    font-size: 12pt;
+    font-family: monospace;
+    padding: 10px;
+}

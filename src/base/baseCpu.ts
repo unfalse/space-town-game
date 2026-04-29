@@ -16,7 +16,6 @@ export class BaseCPU extends BaseCSW {
         this.fireStartTime = -1;
         this.pathUnit = null;
         this.pathStartTime = -1;
-        // this.d = 0;
     }
 
     fire(timestamp: number): void {
@@ -34,11 +33,7 @@ export class BaseCPU extends BaseCSW {
     }
 
     hitByBullet(): void {
-        //if (bulletInstance.parentShip.iam === this.CONST.USER) {
-        //    if (this.iam === this.CONST.COMPUTER) {
         this.life--;
-        //    }
-        // }
     }
 
     // distance is an amount of cells in 4 directions from the ship which is scanning
@@ -53,28 +48,28 @@ export class BaseCPU extends BaseCSW {
             player.y >= this.y &&
             player.y <= this.y + height
         )
-            return CONST.LEFT as Direction;
+            return CONST.DIRECTIONS.LEFT as Direction;
         if (
             player.x >= this.x + width &&
             player.x <= this.x + width + distance &&
             player.y >= this.y &&
             player.y <= this.y + height
         )
-            return CONST.RIGHT as Direction;
+            return CONST.DIRECTIONS.RIGHT as Direction;
         if (
             player.y >= this.y - distance &&
             player.y <= this.y &&
             player.x >= this.x &&
             player.x <= this.x + width
         )
-            return CONST.UP as Direction;
+            return CONST.DIRECTIONS.UP as Direction;
         if (
             player.y >= this.y + height &&
             player.y <= this.y + height + distance &&
             player.x >= this.x &&
             player.x <= this.x + width
         )
-            return CONST.DOWN as Direction;
+            return CONST.DIRECTIONS.DOWN as Direction;
         return -1;
     }
 }

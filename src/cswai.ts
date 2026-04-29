@@ -10,7 +10,7 @@ class CSWAI_0 extends BaseCPU {
 
     constructor() {
         super();
-        this.pathUnit = null; // { d: 0, accel: 0, ms: 0 };
+        this.pathUnit = null;
         this.pathStartTime = -1;
         this.fireStartTime = -1;
 
@@ -37,13 +37,6 @@ class CSWAI_0 extends BaseCPU {
             go(up, 0, STOP),
             go(down, 0, STOP),
         ];
-        // const goLeftAndRight: Array<PathUnit> = [
-        //     go(left, 1, 2000),
-        //     ...gpStop(),
-
-        //     go(right, 1, 2000),
-        //     ...gpStop(),
-        // ];
 
         this.pathsPresets = [
             go(left, 1, 1000),
@@ -85,11 +78,6 @@ class CSWAI_0 extends BaseCPU {
         const pathUnit = this.pathsPresets[this.pathPresetCount];
         this.pathPresetCount++;
         return pathUnit;
-        // return {
-        //     d: this.Utils.getRandomInt(0, 3),
-        //     accel: this.Utils.getRandomInt(0, 5) / 10,
-        //     ms: this.Utils.getRandomInt(0, 200),
-        // };
     }
 
     AI_update(timestamp: number): void {
@@ -237,16 +225,9 @@ class CSWAI_customPaths extends BaseCPU {
         this.wayPoints = wayPoints || [];
     }
 
-    // stop() {
-    //     this.setDirectionAndAccel(0, 0);
-    //     this.setDirectionAndAccel(1, 0);
-    //     this.setDirectionAndAccel(2, 0);
-    //     this.setDirectionAndAccel(3, 0);
-    // }
-
     update(timestamp: number): void {
         let currentWp = this.currentWp;
-        const accel = 8;
+        const accel = 2;
         let d = -1;
 
         if (this.wayPoints.length !== 0) {
@@ -264,20 +245,16 @@ class CSWAI_customPaths extends BaseCPU {
             const y = Math.floor(this.y);
             if (x === currentWp[0] && y < currentWp[1]) {
                 // to make corrections if player moved thip ship (not working!)
-                // accel = Math.abs(y - currentWp[1]) <= accel ? 1 : accel;
-                d = CONST.DOWN;
+                d = CONST.DIRECTIONS.DOWN;
             }
             if (x > currentWp[0] && y === currentWp[1]) {
-                // accel = Math.abs(x - currentWp[0]) <= accel ? 1 : accel;
-                d = CONST.LEFT;
+                d = CONST.DIRECTIONS.LEFT;
             }
             if (x === currentWp[0] && y > currentWp[1]) {
-                // accel = Math.abs(y - currentWp[1]) <= accel ? 1 : accel;
-                d = CONST.UP;
+                d = CONST.DIRECTIONS.UP;
             }
             if (x < currentWp[0] && y === currentWp[1]) {
-                // accel = Math.abs(x - currentWp[0]) <= accel ? 1 : accel;
-                d = CONST.RIGHT;
+                d = CONST.DIRECTIONS.RIGHT;
             }
         }
 
@@ -306,6 +283,10 @@ class Obstacle extends BaseCSW {
         this.type = CONST.TYPES.OBSTACLE;
     }
 
+    childInit(): void {
+        this.addThisObjectToStaticGrid(this.x, this.y);
+    }
+
     draw(): void {
         this.drawingManagerInst.drawObstacle(this.x, this.y);
     }
@@ -326,12 +307,15 @@ class StaticShip extends BaseCSW {
     constructor() {
         super();
         this.type = CONST.TYPES.SHIP;
+        // this.BTankInst.staticCollisionGrid
     }
 
     draw(): void {
         this.drawingManagerInst.drawStaticShip(this.x, this.y);
     }
 }
+
+const SPACEBRICK_MAX_HITS = 10;
 
 class SpaceBrick extends BaseCSW {
     constructor() {
@@ -340,20 +324,24 @@ class SpaceBrick extends BaseCSW {
     }
 
     childInit(): void {
-        this.life = 9;
+        this.maxlife = SPACEBRICK_MAX_HITS;
+        this.life = SPACEBRICK_MAX_HITS;
+        this.addThisObjectToStaticGrid(this.x, this.y);
     }
 
     draw(): void {
-        this.drawingManagerInst.drawSpaceBrick(
-            this.x,
-            this.y,
-            Math.floor((this.life > 0 ? this.life : 0) / 2),
-        );
+        const rawFrame = Math.floor((this.life > 0 ? this.life : 0) / 2);
+        const frame = Math.min(4, rawFrame);
+        this.drawingManagerInst.drawSpaceBrick(this.x, this.y, frame);
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    hitByBullet(bulletInstance: Bullet): void {
+    hitByBullet(_bulletInstance: Bullet): void {
         this.life--;
+        if (this.life <= 0) {
+            this.removeSelfFromStaticGrid();
+            this.BTankInst.removeShip(this);
+        }
     }
 }
 

@@ -29,8 +29,8 @@ const CONST = {
         Y: 1,
     },
 
-    MAXX: 500,
-    MAXY: 500,
+    MAXX: 1000,
+    MAXY: 1000,
     SCREENMAXX: 25,
     SCREENMAXY: 18,
 
@@ -39,10 +39,12 @@ const CONST = {
         CENTERY: 360,
     },
 
-    RIGHT: 0,
-    DOWN: 1,
-    LEFT: 2,
-    UP: 3,
+    DIRECTIONS: {
+        RIGHT: 0,
+        DOWN: 1,
+        LEFT: 2,
+        UP: 3,
+    },
 
     DIR_OPPOSITES: {
         0: 2,
@@ -50,6 +52,18 @@ const CONST = {
         2: 0,
         3: 1,
         '-1': -1,
+    },
+
+    COLLISION_GRID: {
+        WIDTH: 200,
+        HEIGHT: 200,
+    },
+
+    COLLISION_MASKS: {
+        RIGHT: ['001001001', '001001000', '000001001'],
+        LEFT: ['100100100', '100100000', '000100100'],
+        DOWN: ['000000111', '000000011', '000000110'],
+        UP: ['111000000', '110000000', '011000000'],
     },
 };
 

@@ -1,0 +1,11 @@
+services:
+  game:
+    build: .
+    ports:
+      - "80:80"
+    volumes:
+      - levels-data:/app/src/server
+    restart: unless-stopped
+
+volumes:
+  levels-data:
