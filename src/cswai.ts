@@ -10,7 +10,7 @@ class CSWAI_0 extends BaseCPU {
 
     constructor() {
         super();
-        this.pathUnit = null; // { d: 0, accel: 0, ms: 0 };
+        this.pathUnit = null;
         this.pathStartTime = -1;
         this.fireStartTime = -1;
 
@@ -37,13 +37,6 @@ class CSWAI_0 extends BaseCPU {
             go(up, 0, STOP),
             go(down, 0, STOP),
         ];
-        // const goLeftAndRight: Array<PathUnit> = [
-        //     go(left, 1, 2000),
-        //     ...gpStop(),
-
-        //     go(right, 1, 2000),
-        //     ...gpStop(),
-        // ];
 
         this.pathsPresets = [
             go(left, 1, 1000),
@@ -85,11 +78,6 @@ class CSWAI_0 extends BaseCPU {
         const pathUnit = this.pathsPresets[this.pathPresetCount];
         this.pathPresetCount++;
         return pathUnit;
-        // return {
-        //     d: this.Utils.getRandomInt(0, 3),
-        //     accel: this.Utils.getRandomInt(0, 5) / 10,
-        //     ms: this.Utils.getRandomInt(0, 200),
-        // };
     }
 
     AI_update(timestamp: number): void {
@@ -237,16 +225,9 @@ class CSWAI_customPaths extends BaseCPU {
         this.wayPoints = wayPoints || [];
     }
 
-    // stop() {
-    //     this.setDirectionAndAccel(0, 0);
-    //     this.setDirectionAndAccel(1, 0);
-    //     this.setDirectionAndAccel(2, 0);
-    //     this.setDirectionAndAccel(3, 0);
-    // }
-
     update(timestamp: number): void {
         let currentWp = this.currentWp;
-        const accel = 8;
+        const accel = 2;
         let d = -1;
 
         if (this.wayPoints.length !== 0) {

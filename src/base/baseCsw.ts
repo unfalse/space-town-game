@@ -10,7 +10,6 @@ import { ObjectsFactory } from '../objFactory';
 import { BaseGameObject } from './baseGameObj';
 import { Bullet } from '../bullet';
 import { PointXY } from './baseCoord';
-// import { Player } from '../player';
 
 type InertiaDirections = { [key in Direction]: number };
 
@@ -22,21 +21,10 @@ type CheckBoundsParameters = {
     direction?: Direction;
 };
 
-type StepsHistory = {
-    x: number;
-    y: number;
-    ux: number;
-    uy: number;
-    direction: Direction;
-};
-
 type BordersCheckResult = 'X' | 'Y' | 'OK';
-
-
 
 // TODO: csw: cosmo ship war, the old title
 // TODO: rename csw to something more understandable - tank? SpaceShip ?
-// TODO: maybe the CPU and player should have separate classes? And several base classes.
 export class BaseCSW extends BaseGameObject {
     lastBulletTimeStamp: number;
     CSWSPEED: number;
@@ -55,14 +43,11 @@ export class BaseCSW extends BaseGameObject {
     bulletsAmountOnFire: number;
     type: ObjectType;
     ghost: boolean;
-    stepsHistory: StepsHistory[];
 
     constructor() {
         super();
         this.lastBulletTimeStamp = 0;
-        // this.CSWSPEED = 4;
         this.CSWSPEED = 0;
-        // this.accel = 0;
         this.inertiaDirections = {
             0: 0,
             1: 0,
@@ -74,11 +59,8 @@ export class BaseCSW extends BaseGameObject {
         this.d = 0; // direction
         this.stopAccel = true;
         // this.PLAYER_BULLETS_INTERVAL = 600;
-        this.MAXIMUM_ACCELERATION = 50; //100; //30; //20;
+        this.MAXIMUM_ACCELERATION = 2;
         this.dimensions = null;
-
-        // this.CONST = CONST;
-        // this.bullet = Bullet;
         this.BTankInst = null;
     }
 
@@ -91,7 +73,6 @@ export class BaseCSW extends BaseGameObject {
         BTankInst: BTankManager,
         objectsFactoryInst: ObjectsFactory,
     ): void {
-        // super.initCoords(mx, my, 0);
         super.init(
             mx,
             my,
@@ -104,9 +85,6 @@ export class BaseCSW extends BaseGameObject {
         this.maxlife = 5;
         this.life = this.maxlife;
         this.bulletsAmountOnFire = CONST.MAXBULLETS;
-        // this.BTankInst = BTankInst;
-        // this.drawingManagerInst = drawingManagerInst;
-        // this.objectsFactoryInst = objectsFactoryInst;
         this.dimensions = this.drawingManagerInst.initDimensions(who);
         //this.ghost = !!ghost; // only display this object
         const { width, height } = this.dimensions[
@@ -132,23 +110,6 @@ export class BaseCSW extends BaseGameObject {
         this.drawingManagerInst.drawcswmt5(this.x, this.y, this.d);
     }
 
-    getDirectionByCollisions(collisions: CollisionMatrix): CollisionDirections {
-        const up = collisions[0] + collisions[1] + collisions[2] > 1;
-        const down = collisions[6] + collisions[7] + collisions[8] > 1;
-        const right = collisions[2] + collisions[5] + collisions[8] > 1;
-        const left = collisions[0] + collisions[3] + collisions[6] > 1;
-        return {
-            down,
-            up,
-            left,
-            right,
-            upleft: collisions[0] === 1 && !up && !left,
-            upright: collisions[2] === 1 && !up && !right,
-            downleft: collisions[6] === 1 && !down && !left,
-            downright: collisions[8] === 1 && !down && !right,
-        };
-    }
-
     createNewBullet(
         startX: number,
         startY: number,
@@ -163,7 +124,6 @@ export class BaseCSW extends BaseGameObject {
             ).length === this.bulletsAmountOnFire
         )
             return;
-        // const newBullet = new Bullet(this.BTankInst, this.drawingManagerInst, whoFires);
         const newBullet = <Bullet>(
             this.objectsFactoryInst.createBaseObj(
                 startX,
@@ -190,37 +150,6 @@ export class BaseCSW extends BaseGameObject {
         );
     }
 
-    // TODO: move all this inertia in a separate class
-    // There should be ability to make a lot of movement types
-    inertia(): void {
-        if (
-            this.getDirSum() > 0 &&
-            this.stopAccel &&
-            this.inertiaTimerIsRunning
-        ) {
-            // TODO: WHERE TO PUT DECREASING AND INCREASING OF ACCELERATION ?
-            // maybe use stopAccel from the main.js !!!
-            // this way the momentum will be the same every time till zero acceleration
-            // stopAccel should be for every direction!
-            // Then inertia will stop fade only for directions which are not accelerated at the moment
-            this.stepsHistory = [];
-            for (let d: Direction = 0; d < 4; d++) {
-                if (this.inertiaDirections[d as Direction] > 0) {
-                    // this.inertiaDirections[d] -= 0.1;
-                } else {
-                    this.inertiaDirections[d as Direction] = 0;
-                }
-                this.move(d as Direction);
-            }
-            // this.draw();
-            // setTimeout(this.inertia.bind(this), 10);
-
-            this.waitAndCall(this.inertia.bind(this), 10); // TODO: need investigation wtf is this
-        } else {
-            this.inertiaTimerIsRunning = false;
-        }
-    }
-
     waitAndCall(callback: () => void, ms: number): void {
         let waitStart: number = null;
         const doThings = function (timestamp: number) {
@@ -238,62 +167,14 @@ export class BaseCSW extends BaseGameObject {
         window.requestAnimationFrame(doThings.bind(this));
     }
 
-    inertiaStartAttempt(): void {
-        if (
-            this.getDirSum() > 0 &&
-            !this.inertiaTimerIsRunning &&
-            this.stopAccel
-        ) {
-            this.inertiaTimerIsRunning = true;
-            // setTimeout(this.inertia.bind(this), 10);
-            this.waitAndCall(this.inertia.bind(this), 10);
-        }
-    }
-
     stop(): void {
         this.stopAccel = false;
-        this.inertiaTimerIsRunning = false;
         for (let d = 0; d < 4; d++) {
             this.inertiaDirections[d as Direction] = 0;
         }
     }
 
     canItMove({
-        ux,
-        uy,
-        width,
-        height,
-        direction,
-    }: CheckBoundsParameters): unknown {
-        if (
-            this.x + ux + width > CONST.MAXX * CONST.CELLSIZES.MAXX ||
-            this.x + ux < 0
-        ) {
-            if (this.x + ux < 0) this.x = 0;
-            if (this.x + ux + width > CONST.MAXX * CONST.CELLSIZES.MAXX) {
-                this.x = CONST.MAXX * CONST.CELLSIZES.MAXX - width;
-            }
-            this.inertiaDirections[direction] = 0;
-            return false;
-        }
-
-        if (
-            this.y + uy + height > CONST.MAXY * CONST.CELLSIZES.MAXY ||
-            this.y + uy < 0
-        ) {
-            if (this.y + uy < 0) {
-                this.y = 0;
-            }
-            if (this.y + uy + height > CONST.MAXY * CONST.CELLSIZES.MAXY) {
-                this.y = CONST.MAXY * CONST.CELLSIZES.MAXY - height;
-            }
-            this.inertiaDirections[direction] = 0;
-            return false;
-        }
-        return true;
-    }
-
-    canItMove2({
         ux,
         uy,
         width,
@@ -330,7 +211,6 @@ export class BaseCSW extends BaseGameObject {
     getNewCoordinatesDelta(direction: Direction): any {
         const nvxy = super.getVXY(direction);
         const acceleration = this.CSWSPEED + this.inertiaDirections[direction];
-
         return {
             ux: nvxy.vx * acceleration,
             uy: nvxy.vy * acceleration,
@@ -349,41 +229,7 @@ export class BaseCSW extends BaseGameObject {
     |
     
     */
-    move(direction: Direction): void {
-        const { ux, uy } = this.getNewCoordinatesDelta(direction);
-
-        // get ship dimensions by current direction and 'iam' flag
-        let { width, height } = this.dimensions[direction];
-        width--;
-        height--;
-
-        // TODO: these checks should be moved to processCollisions function
-        if (!this.canItMove({ ux, uy, width, height, direction })) {
-            this.stepsHistory.push({
-                x: this.x,
-                y: this.y,
-                ux,
-                uy,
-                direction,
-            });
-            return;
-        }
-
-        this.stepsHistory.push({
-            x: this.x,
-            y: this.y,
-            ux,
-            uy,
-            direction,
-        });
-
-        this.x = this.x + ux;
-        this.y = this.y + uy;
-
-        this.updateCollisionGrid(direction);
-    }
-
-    move2(): void {
+    move(): void {
         const { ux: uxR, uy: uyR } = this.getNewCoordinatesDelta(
             CONST.DIRECTIONS.RIGHT as Direction,
         );
@@ -399,8 +245,6 @@ export class BaseCSW extends BaseGameObject {
         let { width, height } = this.dimensions[
             CONST.DIRECTIONS.RIGHT as Direction
         ];
-        // width--;
-        // height--;
 
         const horizontalUXY = {
             ux: uxR + uxL,
@@ -412,13 +256,13 @@ export class BaseCSW extends BaseGameObject {
             uy: uyD + uyU,
         };
 
-        let checkHorizontal = this.canItMove2({
+        let checkHorizontal = this.canItMove({
             ux: horizontalUXY.ux,
             uy: horizontalUXY.uy,
             width,
             height,
         });
-        let checkVertical = this.canItMove2({
+        let checkVertical = this.canItMove({
             ux: verticalUXY.ux,
             uy: verticalUXY.uy,
             width,
@@ -490,21 +334,6 @@ export class BaseCSW extends BaseGameObject {
         this.setInertiaDirections(checkHorizontal);
         this.setInertiaDirections(checkVertical);
 
-        this.stepsHistory.push({
-            x: this.x,
-            y: this.y,
-            ux: horizontalUXY.ux,
-            uy: horizontalUXY.uy,
-            direction: CONST.DIRECTIONS.RIGHT as Direction,
-        });
-        this.stepsHistory.push({
-            x: this.x,
-            y: this.y,
-            ux: verticalUXY.ux,
-            uy: verticalUXY.uy,
-            direction: CONST.DIRECTIONS.DOWN as Direction,
-        });
-
         this.x = this.x + dx;
         this.y = this.y + dy;
 
@@ -537,11 +366,6 @@ export class BaseCSW extends BaseGameObject {
                         objectsToCheck,
                         updatedCoords,
                     );
-                    // const collision = this.BTankInst.checkIfTwoObjectsCrossInsideACell(
-                    //     gameObject,
-                    //     objectsToCheck,
-                    //     updatedCoords,
-                    // );
                     if (collision.length) collisions.push(collision);
                 }
             }
@@ -567,17 +391,7 @@ export class BaseCSW extends BaseGameObject {
             this.BTankInst.removeShip(this);
         }
 
-        // this.inertiaStartAttempt();
-
-        // cpu ships cannot use inertia!
-        // if (!this.stopAccel && this.iam === CONST.COMPUTER) {
-        this.stepsHistory = [];
-        // for (let d = 0; d < 4; d++) {
-        //     this.move(d as Direction);
-        // }
-        this.move2();
-
-        // this.draw();
+        this.move();
     }
 
     // collision detection: broad phase
@@ -635,7 +449,6 @@ export class BaseCSW extends BaseGameObject {
         }
     }
 
-    // TODO: check memory usage on cleanup
     addThisObjectToDynamicGrid(x: number, y: number): void {
         this.addThisObjectToGrid(x, y, this.BTankInst.dynamicCollisionGrid);
     }

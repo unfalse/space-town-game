@@ -21,65 +21,19 @@ export class BaseCoordinates {
         this.centery = 0;
     }
 
+    // returns direction where to go in x and y coordinates
     getVXY(d: Direction): { vx: number; vy: number } {
-        // returns direction where to go
-        // let updatedVx = 0,
-        //     updatedVy = 0;
-
-        // switch (d) {
-        //     case 0: {
-        //         updatedVx = 1;
-        //         break;
-        //     }
-        //     case 1: {
-        //         updatedVx = 1;
-        //         break;
-        //     }
-        //     case 2: {
-        //         updatedVx = -1;
-        //         break;
-        //     }
-        //     case 3: {
-        //         updatedVy = -1;
-        //     }
-        //     default:
-        //         break;
-        // }
-
-        // return {
-        //     vx: updatedVx,
-        //     vy: updatedVy,
-        // };
-
         return {
             vx: (-(d >> 1) | 1) * ((d & 1) ^ 1),
             vy: (-(d >> 1) | 1) * (d & 1 & 1),
         };
     }
 
-    //   >  0 - right
-    //   v  1 - down
-    //   <  2 - left
-    //   ^  3 - up
-    // getVXYAndAngle(d: Direction) {
-    //   const mapDirections = {
-    //     0: { vx: 1, vy: 0, angle: 90 },
-    //     1: { vx: 0, vy: 1, angle: 180 },
-    //     2: { vx: -1, vy: 0, angle: 270 },
-    //     3: { vx: 0, vy: -1, angle: 0 },
-    //     '-1': { vx: 0, vy: 0, angle: 0 },
-    //   };
-    //   return mapDirections[d];
-    // }
-
     initCoords(
         nx: number,
         ny: number,
         nd = CONST.DIRECTIONS.UP as Direction,
     ): void {
-        //x: 0, // x coordinate
-        //y: 0, // y coordinate
-        //d: 0,  // direction { 0 - right > , 1 - down v, 2 - left <, 3 - up ^ }
         this.x = nx;
         this.y = ny;
         this.d = nd;
