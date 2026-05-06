@@ -30,6 +30,7 @@ class MainMenu {
 }
 
 const mainMenuInstance = new MainMenu();
+
 mainMenuInstance.init();
 
 // const gameInstance = new Game();

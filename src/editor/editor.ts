@@ -63,7 +63,7 @@ export class Editor {
     }
 
     newEditorLevel(): void {
-        this.prepareLevelForSaving();
+        const levelData = this.prepareLevelForSaving();
     }
 
     async uploadNewLevel(): Promise<void> {
@@ -115,8 +115,9 @@ export class Editor {
         });
     }
 
-    prepareLevelForSaving(): void {
+    prepareLevelForSaving(): string {
         let levelData = [this.playerCell.x, this.playerCell.y].join(';') + '|';
+
         levelData += this.editorUnits.reduce(
             (prev: string, curr: BaseCSW) => {
                 let wayPoints = '';
@@ -141,7 +142,8 @@ export class Editor {
             },
             '',
         );
-        this.currentLevelObj.data = levelData;
+
+        return levelData;
     }
 
     async uploadLevel(): Promise<void> {
@@ -152,9 +154,7 @@ export class Editor {
                     Accept: 'application/json',
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({
-                    ...this.currentLevelObj,
-                }),
+                body: JSON.stringify(this.currentLevelObj),
             });
         }
         catch (error) {
@@ -165,7 +165,8 @@ export class Editor {
     }
 
     saveEditorLevel(): void {
-        this.prepareLevelForSaving();
+        const levelString = this.prepareLevelForSaving();
+        this.updateLevelData(levelString)
         this.uploadLevel();
     }
 
@@ -175,6 +176,14 @@ export class Editor {
 
     setCurrentShipWithWaypoints(ship: CSWAI_customPaths|null): void {
         this.currentShipWithWaypoints = ship as CSWAI_customPaths;
+    }
+
+    setCurrentLevel(levelObj: LevelObject): void {
+        this.currentLevelObj = levelObj;
+    }
+
+    updateLevelData(levelData: string): void {
+        this.currentLevelObj.data = levelData;
     }
 
     async showLevelChooseDialog(editorFileListContainer: HTMLDivElement): Promise<void> {
@@ -197,9 +206,6 @@ export class Editor {
                 li.addEventListener(
                     'click',
                     async () => {
-                        this.currentLevelObj = {
-                            ...level,
-                        };
                         await this.loadTheEditorLevel(level.id as number);
                         editorFileListContainer.style.display = 'none';
                         title.innerText = '';
@@ -218,12 +224,16 @@ export class Editor {
     async loadTheEditorLevel(id: number): Promise<void> {
         const DATA_SEPARATOR = '|';
         const response = await fetch(`${EDITOR_SERVER_ADDRESS}/level?id=${id}`);
-        const r = await response.json();
-        r.data.split(DATA_SEPARATOR)
+        const levelObj = await response.json() as LevelObject;
+        this.setCurrentLevel(levelObj);
+
+        levelObj.data.split(DATA_SEPARATOR)
             .forEach((objStr: string, strIndex: number) => {
                 const fields = objStr.split(';');
+
                 if (strIndex === 0) {
                     const playerStartPosition = { x: fields[0], y: fields[1] };
+
                     this.createEditorUnit(
                         +playerStartPosition.x,
                         +playerStartPosition.y,
@@ -236,6 +246,7 @@ export class Editor {
                         if (fields.length === 1) {
                             const splitted = fields[0].split(',');
                             const [type, x, y] = splitted;
+
                             this.createEditorUnit(
                                 +x,
                                 +y,
@@ -243,6 +254,7 @@ export class Editor {
                             );
                         } else {
                             const [waypoints, , type, y, x] = fields;
+
                             this.createEditorUnit(
                                 +x,
                                 +y,

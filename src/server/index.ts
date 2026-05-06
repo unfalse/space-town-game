@@ -90,7 +90,7 @@ app.get('/new', function (request: Request, response: Response) {
     response.sendStatus(200);
 });
 
-app.get('/level', function (request: any, response: any) {
+app.get('/level', function (request: Request, response: Response) {
     const contents = getFileContents();
     const id = request.query.id;
     const level = contents.levels.find(level => level.id === id);
