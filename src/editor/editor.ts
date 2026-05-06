@@ -1,4 +1,4 @@
-import { BaseCSW } from '../base/baseCsw';
+import { BaseCSW } from '../base/baseCsw.js';
 import { BTankManager } from '../btank';
 import { CONST } from '../const';
 import { ObjectType, Point, WayPoints } from '../types';
@@ -73,9 +73,7 @@ export class Editor {
                 Accept: 'application/json',
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({
-                ...this.currentLevelObj,
-            }),
+            body: undefined,
         })
         alert('Level has been added!');
     }
@@ -93,7 +91,7 @@ export class Editor {
         placeBorders(this.objFactoryInst, this.BTankInst);
 
         this.editorUnits.forEach(unit => {
-            if (unit.type === CONST.TYPES.SHIP /*&& unit.iam !== CONST.USER*/) {
+            if (unit.type === CONST.TYPES.SHIP) {
                 this.BTankInst.addShip(
                     this.objFactoryInst.createCSW(
                         unit.x,
@@ -115,8 +113,6 @@ export class Editor {
                 );
             }
         });
-
-        this.editorUI.toggleEditorControls();
     }
 
     prepareLevelForSaving(): void {
@@ -149,17 +145,23 @@ export class Editor {
     }
 
     async uploadLevel(): Promise<void> {
-        await fetch(`${EDITOR_SERVER_ADDRESS}/save`, {
-            method: 'post',
-            headers: {
-                Accept: 'application/json',
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                ...this.currentLevelObj,
-            }),
-        });
-        alert('Level has been saved!');
+        try {
+            await fetch(`${EDITOR_SERVER_ADDRESS}/save`, {
+                method: 'post',
+                headers: {
+                    Accept: 'application/json',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    ...this.currentLevelObj,
+                }),
+            });
+        }
+        catch (error) {
+            console.log('Error while saving: ', JSON.stringify(error));
+        } finally {
+            alert('Done');
+        }
     }
 
     saveEditorLevel(): void {
@@ -194,11 +196,11 @@ export class Editor {
                 li.innerText = level.name;
                 li.addEventListener(
                     'click',
-                    () => {
+                    async () => {
                         this.currentLevelObj = {
                             ...level,
                         };
-                        this.loadTheEditorLevel(level.id as number);
+                        await this.loadTheEditorLevel(level.id as number);
                         editorFileListContainer.style.display = 'none';
                         title.innerText = '';
                         editorFileListContainer.removeChild(ul);
@@ -213,17 +215,64 @@ export class Editor {
         }
     }
 
-    loadTheEditorLevel(id: number): void {
+    async loadTheEditorLevel(id: number): Promise<void> {
         const DATA_SEPARATOR = '|';
-        fetch(`${EDITOR_SERVER_ADDRESS}/level?id=${id}`)
-            .then(r => r.json())
-            .then(r => {
-                r.data
-                    .split(DATA_SEPARATOR)
-                    .forEach((objStr: string, strIndex: number) => {
-                        const fields = objStr.split(';');
-                        if (strIndex === 0) {
-                            //this.playerCell = { x: fields[0], y: fields[1] };
+        const response = await fetch(`${EDITOR_SERVER_ADDRESS}/level?id=${id}`);
+        const r = await response.json();
+        r.data.split(DATA_SEPARATOR)
+            .forEach((objStr: string, strIndex: number) => {
+                const fields = objStr.split(';');
+                if (strIndex === 0) {
+                    const playerStartPosition = { x: fields[0], y: fields[1] };
+                    this.createEditorUnit(
+                        +playerStartPosition.x,
+                        +playerStartPosition.y,
+                        CONST.TYPES.PLAYER,
+                        true,
+                    );
+                }
+                if (strIndex > 0 && objStr !== '') {
+                    if (objStr !== '') {
+                        if (fields.length === 1) {
+                            const splitted = fields[0].split(',');
+                            const [type, x, y] = splitted;
+                            this.createEditorUnit(
+                                +x,
+                                +y,
+                                +type,
+                            );
+                        } else {
+                            const [waypoints, , type, y, x] = fields;
+                            this.createEditorUnit(
+                                +x,
+                                +y,
+                                +type,
+                                false,
+                                waypoints ? JSON.parse(waypoints) : [],
+                            );
+                        }
+                    }
+                }
+            });
+    }
+
+    async loadTheGameLevel(id: number): Promise<void> {
+        const DATA_SEPARATOR = '|';
+        const response = await fetch(`${EDITOR_SERVER_ADDRESS}/level?id=${id}`);
+        const r = await response.json();
+        r.data.split(DATA_SEPARATOR)
+            .forEach((objStr: string, strIndex: number) => {
+                const fields = objStr.split(';');
+                if (strIndex === 0) {
+                    if (objStr !== '') {
+                        if (fields.length === 1) {
+                            const splitted = fields[0].split(',');
+                            this.createEditorUnit(
+                                +splitted[1], // x
+                                +splitted[2], // y
+                                +splitted[0], // type
+                            );
+                        } else {
                             this.createEditorUnit(
                                 +fields[0],
                                 +fields[1],
@@ -252,7 +301,8 @@ export class Editor {
                                 }
                             }
                         }
-                    });
+                    }
+                }
             });
     }
 
@@ -264,15 +314,15 @@ export class Editor {
         }
     }
 
-    getEditorUnitAt(x: number, y: number): BaseCSW {
-        return this.editorUnits.find(unit => {
+    getEditorUnitAt(x: number, y: number): BaseCSW | undefined {
+        return this.editorUnits.find((unit: BaseCSW) => {
             return unit.x === x && unit.y === y;
         });
     }
 
-    getEditorWaypointAt(x: number, y: number): WayPoints {
-        if (!this.currentShipWithWaypoints) return null;
-        return this.currentShipWithWaypoints.wayPoints.find(wp => {
+    getEditorWaypointAt(x: number, y: number): WayPoints | undefined {
+        if (!this.currentShipWithWaypoints) return undefined;
+        return this.currentShipWithWaypoints.wayPoints.find((wp: number[]) => {
             return wp[0] === x && wp[1] === y;
         });
     }
@@ -320,7 +370,7 @@ export class Editor {
             wayPoints,
         );
         if (!newCSW) debugger;
-        this.pushNewObjects([newCSW], ghost);
+        this.pushNewObjects([newCSW], ghost ?? false);
     }
 
     addEditorWaypoint(x: number, y: number): void {

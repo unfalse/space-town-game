@@ -69,5 +69,7 @@ export type CollisionDistance = {
     collidedObject: BaseCSW;
 };
 
+export type InertiaDirections = { [key in Direction]: number };
+
 // export { Who, ObjectType };
 // export type { Direction, Dimensions, RectSize, PathUnit, Point, WayPoints };

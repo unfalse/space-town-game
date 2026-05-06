@@ -25,7 +25,7 @@ export const Utils = {
     },
 
     // event.type должен быть keypress
-    getChar(event: KeyboardEvent): string {
+    getChar(event: KeyboardEvent): string | null {
         if (event.which == null) {
             // IE
             if (event.keyCode < 32) return null; // special symbol

@@ -1,7 +1,7 @@
-import { BaseCSW } from './base/baseCsw';
-import { Bullet } from './bullet';
-import { CONST } from './const';
-import { Direction, Who } from './types';
+import { BaseCSW } from './base/baseCsw.js';
+import { Bullet } from './bullet.js';
+import { CONST } from './const.js';
+import { Direction, InertiaDirections, Who } from './types.js';
 
 const MAX_LIFE = 1;
 
@@ -12,10 +12,10 @@ type InertiaBuffer = {
 
 class Player extends BaseCSW {
     PLAYER_BULLETS_INTERVAL: number;
-    stopAccel: boolean;
     isHidden: boolean;
     isImmortal: boolean;
     inertiaBuffer: InertiaBuffer[];
+    declare inertiaDirections: InertiaDirections;
 
     constructor() {
         super();

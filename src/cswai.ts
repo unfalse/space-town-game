@@ -120,6 +120,10 @@ class CSWAI_1 extends BaseCPU {
         this.fireLastTime = -1;
         this.newFireTime = -1;
         this.disableAI = false;
+        this.msCount = 0;
+        this.msArray = [];
+        this.accels = [];
+        this.dirs = [];
         this.type = CONST.TYPES.SHIP;
         // d: 0...3, a: 0...1, ms: (0...1) *1000
     }
@@ -198,7 +202,7 @@ class CSWAI_1 extends BaseCPU {
 class CSWAI_customPaths extends BaseCPU {
     wpCounter: number;
     wpStartTime: number;
-    currentWp: WayPoints;
+    currentWp: WayPoints | null;
     wayPoints: WayPoints[];
 
     constructor() {
@@ -212,13 +216,6 @@ class CSWAI_customPaths extends BaseCPU {
     }
 
     childInit(): void {
-        // const FIRST_PATH = [
-        //     [80, 0],
-        //     [80, 80],
-        //     [0, 80],
-        //     [0, 0],
-        // ];
-        return null;
     }
 
     setWaypoints(wayPoints?: WayPoints[]): void {
@@ -258,7 +255,7 @@ class CSWAI_customPaths extends BaseCPU {
             }
         }
 
-        const scanResult: Direction = this.BTankInst.playerInstance.isHidden
+        const scanResult: Direction | null = this.BTankInst.playerInstance.isHidden
             ? -1
             : this.plusShapedScan(10);
         if (scanResult !== null && scanResult > -1) {

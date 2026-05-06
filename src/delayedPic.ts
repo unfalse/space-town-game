@@ -39,25 +39,22 @@ export class DelayedPic extends BaseCSW {
     draw(): void {
         this.drawingManagerInst.DrawCrash(this.x, this.y, this.frameCounter);
 
-        function setDelay() {
-            setTimeout(
-                function () {
-                    if (this.frameCounter + 1 === this.framesLength) {
-                        this.show = false;
-                        this.timerStarted = false;
-                        this.BTankInst.removeDelayedPic(this);
-                    } else {
-                        this.frameCounter++;
-                        setDelay.call(this);
-                    }
-                }.bind(this),
-                180,
-            );
-        }
+        const setDelay = (): void => {
+            setTimeout(() => {
+                if (this.frameCounter + 1 === this.framesLength) {
+                    this.show = false;
+                    this.timerStarted = false;
+                    this.BTankInst.removeDelayedPic(this);
+                } else {
+                    this.frameCounter++;
+                    setDelay();
+                }
+            }, 180);
+        };
 
         if (!this.timerStarted && this.show) {
             this.timerStarted = true;
-            setDelay.call(this);
+            setDelay();
         }
     }
 }

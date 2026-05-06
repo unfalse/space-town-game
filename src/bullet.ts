@@ -1,7 +1,6 @@
 // Bullet that is flying every step per pixel
 import { BaseCSW } from './base/baseCsw';
 import { BaseGameObject } from './base/baseGameObj';
-import { BTankManager } from './btank';
 import { CONST } from './const';
 import { DelayedPic } from './delayedPic';
 import { Direction, Who } from './types';
@@ -17,8 +16,7 @@ type DirectionObject = {
 
 export class Bullet extends BaseGameObject {
     BULLETSPEED: number;
-    BTankInst: BTankManager;
-    parentShip: BaseCSW;
+    parentShip!: BaseCSW;
     // drawingManagerInst: DrawingManager;
 
     constructor() {
@@ -39,9 +37,12 @@ export class Bullet extends BaseGameObject {
     }
 
     setCoords(nx: number, ny: number, nd: Direction | DirectionObject): Bullet {
-        const { width, height } = this.parentShip.dimensions[
-            typeof nd === 'number' ? nd : 0
-        ];
+        const dims = this.parentShip.dimensions;
+        const key = typeof nd === 'number' ? nd : 0;
+        if (!dims) {
+            return this;
+        }
+        const { width, height } = dims[key];
         let x = 0,
             y = 0;
         if (typeof nd === 'number') {
@@ -142,7 +143,7 @@ export class Bullet extends BaseGameObject {
                 nx,
                 ny,
                 this.parentShip,
-            ) as BaseCSW;
+            );
             if (collidedShips) {
                 this.x = nx;
                 this.y = ny;

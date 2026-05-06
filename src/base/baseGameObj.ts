@@ -1,16 +1,15 @@
-import { BTankManager } from '../btank';
-import { DrawingManager } from '../drawingMan';
-import { ObjectsFactory } from '../objFactory';
-// import { IObjectsFactory } from "../interfaces";
-import { Direction } from '../types';
-import { BaseCoordinates } from './baseCoord';
+import { BTankManager } from '../btank.js';
+import { DrawingManager } from '../drawingMan.js';
+import { ObjectsFactory } from '../objFactory.js';
+import { Direction } from '../types.js';
+import { BaseCoordinates } from './baseCoord.js';
 
 console.log('BaseGameObject!');
 
 export class BaseGameObject extends BaseCoordinates {
-    BTankInst: BTankManager;
-    drawingManagerInst: DrawingManager;
-    objectsFactoryInst: ObjectsFactory;
+    BTankInst!: BTankManager;
+    drawingManagerInst!: DrawingManager;
+    objectsFactoryInst!: ObjectsFactory;
 
     constructor() {
         super();

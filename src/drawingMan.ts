@@ -5,27 +5,22 @@ import { Dimensions, Who, Direction, RectSize } from './types';
 
 export class ImagesStore {
     crashImages: Images[];
-    backgroundImage: Images;
+    backgroundImage!: Images;
     counterImages: Images[];
     cpuImages: Images[];
-    blackbackgroundImage: Images;
-    obstacleImage: Images;
-    borderImage: Images;
-    bulletImage: Images;
+    blackbackgroundImage!: Images;
+    obstacleImage!: Images;
+    borderImage!: Images;
+    bulletImage!: Images;
     spaceBrickImages: Images[];
     playerImages: Images[];
 
     constructor() {
         this.crashImages = [];
-        this.backgroundImage = null;
         this.counterImages = [];
         this.cpuImages = [];
-        this.blackbackgroundImage = null;
-        this.obstacleImage = null;
-        this.borderImage = null;
         this.spaceBrickImages = [];
         this.playerImages = [];
-        this.bulletImage = null;
     }
 
     init(): Promise<unknown[]> {
@@ -126,7 +121,6 @@ export class ImagesStore {
 export class DrawingManager {
     imagesStore: ImagesStore;
     gameCam: Camera;
-    dimensions: Dimensions;
 
     constructor(imagesStoreInstance: ImagesStore, cameraInstance: Camera) {
         this.imagesStore = imagesStoreInstance;

@@ -128,6 +128,7 @@ export class ObjectsFactory {
             this.initBaseGameObject(c1, x, y);
             return c1;
         }
+        throw new Error(`Unsupported object type for base object: ${type}`);
     }
 
     initBaseCSW(
@@ -154,6 +155,13 @@ export class ObjectsFactory {
         y: number,
         d?: Direction,
     ): void {
-        obj.init(x, y, d, this.drawingManagerInst, this.bTankManagerInst, this);
+        obj.init(
+            x,
+            y,
+            d ?? (CONST.DIRECTIONS.RIGHT as Direction),
+            this.drawingManagerInst,
+            this.bTankManagerInst,
+            this,
+        );
     }
 }

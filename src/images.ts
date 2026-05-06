@@ -8,11 +8,11 @@ export class Images {
     static loadImage: (
         imagePath: string,
         onLoad: OnLoadHandler,
-    ) => Promise<unknown>;
+    ) => Promise<void>;
     static loadManyImages: (
         imagePaths: Array<string>,
         targetImages: Array<Images>,
-    ) => Promise<unknown>;
+    ) => Promise<void>;
     static drawContext: CanvasRenderingContext2D;
 
     constructor(src: string, onLoadHandler: InternalOnLoadHandler) {
@@ -25,11 +25,11 @@ export class Images {
     init(src: string, onLoadHandler: InternalOnLoadHandler): void {
         this.image.addEventListener(
             'load',
-            function () {
+            () => {
                 this.loaded = true;
                 console.log(src + ' has loaded!');
                 onLoadHandler();
-            }.bind(this),
+            },
             false,
         );
 
@@ -47,9 +47,12 @@ export class Images {
         dh?: number,
     ): void {
         if (this.loaded) {
-            if (!dx && !dy && !dw && !dh) {
-                Images.drawContext.drawImage(this.image, sx, sy, sw, sh);
-            } else {
+            if (
+                dx !== undefined &&
+                dy !== undefined &&
+                dw !== undefined &&
+                dh !== undefined
+            ) {
                 Images.drawContext.drawImage(
                     this.image,
                     sx,
@@ -61,6 +64,8 @@ export class Images {
                     dw,
                     dh,
                 );
+            } else {
+                Images.drawContext.drawImage(this.image, sx, sy, sw, sh);
             }
         }
     }
@@ -68,38 +73,35 @@ export class Images {
 
 Images.loadImage = function (
     imagePath: string,
-    onLoad: (image: Images) => void,
-) {
-    return new Promise(
-        function (resolve: () => void) {
-            onLoad.call(
-                this,
-                new Images(imagePath, function () {
-                    resolve();
-                }),
-            );
-        }.bind(this),
-    );
+    onLoad: OnLoadHandler,
+): Promise<void> {
+    return new Promise((resolve) => {
+        onLoad(
+            new Images(imagePath, () => {
+                resolve();
+            }),
+        );
+    });
 };
 
 Images.loadManyImages = function (
     imagePaths: Array<string>,
     targetImages: Array<Images>,
-) {
-    return new Promise((allResolved: (value?: unknown) => void) => {
-        const ps: Array<Promise<unknown>> = imagePaths.map(
+): Promise<void> {
+    return new Promise((resolve) => {
+        const ps: Array<Promise<Images>> = imagePaths.map(
             (ip: string) =>
-                new Promise((resolve: (value?: unknown) => void) => {
-                    const newImage = new Images(ip, function () {
-                        resolve(newImage);
+                new Promise<Images>((resolveImg) => {
+                    const newImage = new Images(ip, () => {
+                        resolveImg(newImage);
                     });
                 }),
         );
-        Promise.all(ps).then((images: Array<Images>) => {
+        Promise.all(ps).then((images: Images[]) => {
             images.forEach((im: Images, i: number) => {
                 targetImages[i] = im;
             });
-            allResolved();
+            resolve();
         });
     });
 };
