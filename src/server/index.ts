@@ -97,7 +97,7 @@ app.get('/level', function (request: Request, response: Response) {
     response.send(level);
 });
 
-app.post('/save', function (request: any, response: any) {
+app.post('/save', function (request: Request, response: Response) {
     const newLevel = request.body;
     const contents = getFileContents();
     const newLevels = contents.levels.map(level => {

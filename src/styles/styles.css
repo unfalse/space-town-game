@@ -132,3 +132,7 @@ canvas {
     background-color: #0000007d;
     color: white;
 }
+
+.level-name-input {
+    display: none;
+}

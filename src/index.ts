@@ -6,26 +6,64 @@ class MainMenu {
     constructor() {
     }
 
+    newGameBtn!: HTMLButtonElement|null;
+    createLevelBtn!: HTMLButtonElement|null;
+    loadLevelBtn!: HTMLButtonElement|null;
+    mainMenuItems!: HTMLDivElement|null;
+    mainMenuBlock!: HTMLDivElement|null;
+    levelNameInput!: HTMLInputElement|null;
+    okBtn!: HTMLButtonElement|null;
+    cancelBtn!: HTMLButtonElement|null;
+ 
     init(): void {
-        const newGameBtn = document.querySelector('#newGameBtn');
-        const createLevelBtn = document.querySelector('#createLevelBtn');
+        this.newGameBtn = document.querySelector('#newGameBtn');
+        this.createLevelBtn = document.querySelector('#createLevelBtn');
+        this.loadLevelBtn = document.querySelector('#loadLevelBtn');
+        this.mainMenuItems = document.querySelector('.main-menu-items');
+        this.mainMenuBlock = document.querySelector('.main-menu');
+        this.levelNameInput = document.querySelector('.level-name-input');
+        this.okBtn = document.querySelector('#okBtn');
+        this.cancelBtn = document.querySelector('#cancelBtn');
 
-        if (newGameBtn==null || createLevelBtn==null) throw new Error('Buttons were not found in index.html');
+        if (
+            this.newGameBtn==null ||
+            this.createLevelBtn==null ||
+            this.loadLevelBtn==null ||
+            this.mainMenuItems==null ||
+            this.mainMenuBlock==null ||
+            this.levelNameInput==null ||
+            this.okBtn==null ||
+            this.cancelBtn==null
+        ) throw new Error('Buttons were not found in index.html');
 
-        newGameBtn.addEventListener('click', this.startNewGame.bind(this));
-        createLevelBtn.addEventListener('click', this.createALevel.bind(this));
+        this.newGameBtn.addEventListener('click', this.startNewGame.bind(this));
+        this.createLevelBtn.addEventListener('click', this.createALevel.bind(this));
+        this.loadLevelBtn.addEventListener('click', this.loadALevel.bind(this))
     }
 
     startNewGame(): void {
-        const mainMenuBlock: HTMLDivElement = document.querySelector('.main-menu') as HTMLDivElement;
-        mainMenuBlock.style.display = 'none';
+        if (this.mainMenuBlock==null) return;
+
+        this.mainMenuBlock.style.display = 'none';
 
         const gameInstance = new Game();
+
         gameInstance.start(7);
     }
 
     createALevel(): void {
-        console.log('create a level');
+        if (this.mainMenuItems==null || this.levelNameInput==null || this.okBtn==null) return;
+
+        this.mainMenuItems.style.display = 'none';
+        this.levelNameInput.style.display = 'block';
+
+        this.okBtn.addEventListener('click', () => {
+            // const levelName = this.levelNameInput.value;
+        });
+    }
+
+    loadALevel(): void {
+
     }
 }
 
