@@ -58,7 +58,7 @@ export class BaseCSW extends BaseGameObject {
         this.inertiaTimerIsRunning = false;
         this.d = 0; // direction
         this.stopAccel = true;
-        this.MAXIMUM_ACCELERATION = 5;
+        this.MAXIMUM_ACCELERATION = 2;
     }
 
     // TODO: place code from init above!

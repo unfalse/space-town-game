@@ -11,7 +11,7 @@ import { Player } from '../player';
 
 const EDITOR_SERVER_ADDRESS = `${window.location.protocol}//${window.location.hostname}`;
 
-type LevelObject = {
+export type LevelObject = {
     id: number|null;
     name: string;
     data: string;
@@ -186,39 +186,9 @@ export class Editor {
         this.currentLevelObj.data = levelData;
     }
 
-    async showLevelChooseDialog(editorFileListContainer: HTMLDivElement): Promise<void> {
-        // this.editorGhosts = [];
-        try {
-            const result = await fetch(`${EDITOR_SERVER_ADDRESS}/list`)
-            const r = await result.json();
-
-            editorFileListContainer.style.display = 'block';
-
-            const ul = document.createElement('ul');
-            const title = document.createElement('span');
-            title.innerText = 'Which level to open?';
-
-            editorFileListContainer.append(title);
-
-            r.forEach((level: LevelObject) => {
-                const li = document.createElement('li');
-                li.innerText = level.name;
-                li.addEventListener(
-                    'click',
-                    async () => {
-                        await this.loadTheEditorLevel(level.id as number);
-                        editorFileListContainer.style.display = 'none';
-                        title.innerText = '';
-                        editorFileListContainer.removeChild(ul);
-                    },
-                );
-                ul.append(li);
-            });
-        
-            editorFileListContainer.append(ul);
-        } catch (e) {
-            console.log(e);
-        }
+    async getAvailableLevels(): Promise<LevelObject[]> {
+        const result = await fetch(`${EDITOR_SERVER_ADDRESS}/list`);
+        return await result.json() as LevelObject[];
     }
 
     async loadTheEditorLevel(id: number): Promise<void> {

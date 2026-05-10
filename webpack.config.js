@@ -12,7 +12,7 @@ const __dirname = path.dirname(__filename);
 const config = {
     mode: 'source-map',
     // devtool: 'inline-source-map',
-    entry: './src/index.ts',
+    entry: './src/index.tsx',
     output: {
         path: path.resolve(__dirname, 'dist'),
         filename: 'space-town-bundle.js',
@@ -31,7 +31,7 @@ const config = {
         })
     ],
     resolve: {
-        extensions: ['.ts', '.js'],
+        extensions: ['.tsx', '.ts', '.js'],
         extensionAlias: {
             '.js': ['.ts', '.js'],
         },
@@ -39,7 +39,7 @@ const config = {
     module: {
         rules: [
             {
-                test: /\.ts$/,
+                test: /\.tsx?$/,
                 use: 'ts-loader',
                 exclude: /node_modules/,
             },
@@ -50,7 +50,7 @@ const config = {
             directory: path.join(__dirname, 'dist'),
         },
         port: 3666,
-        open: true,
+        open: false,
         devMiddleware: {
             publicPath: '/',
         },

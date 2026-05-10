@@ -6,6 +6,7 @@
         "noImplicitAny": true,
         "skipLibCheck": true,
         "sourceMap": true,
+        "jsx": "react-jsx",
         "resolveJsonModule": true,
         "outDir": "dist",
         "rootDir": "src",

@@ -3,6 +3,10 @@ body {
     margin: 0px;
 }
 
+#root {
+    height: 100vh;
+}
+
 #titleBlock {
     text-align: center;
 }
@@ -29,6 +33,11 @@ body {
 }
 
 #editorCurrentBlock {
+    width: 40px;
+    height: 40px;
+}
+
+#editorCurrentObject {
     width: 40px;
     height: 40px;
 }
@@ -78,6 +87,10 @@ canvas {
     top: 10px;
 }
 
+.editor-block--visible {
+    display: flex !important;
+}
+
 .editor-hint {
     z-index: 10000;
     color: white;
@@ -90,6 +103,10 @@ canvas {
     display: none;
 }
 
+.editor-hint--visible {
+    display: block;
+}
+
 .waypoints-hint {
     z-index: 10000;
     color: white;
@@ -99,6 +116,15 @@ canvas {
     font-size: 12pt;
     font-family: monospace;
     padding: 10px;
+    display: none;
+}
+
+.waypoints-hint--visible {
+    display: block;
+}
+
+.editor-file-list--visible {
+    display: block !important;
 }
 
 .game-logo {
@@ -135,4 +161,9 @@ canvas {
 
 .level-name-input {
     display: none;
+}
+
+.level-name-input--visible {
+    display: flex;
+    gap: 8px;
 }
