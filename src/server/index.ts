@@ -66,11 +66,11 @@ app.get('/list', function (_request: Request, response: Response) {
     response.send(names);
 });
 
-app.get('/new', function (request: Request, response: Response) {
-    const levelName = request.body;
+app.post('/new', function (request: Request, response: Response) {
+    const levelName = request.body?.name ?? '';
     const contents = getFileContents();
     const lastId = contents.levels.slice(-1)[0];
-    const newId = lastId === undefined ? 0 : +lastId + 1;
+    const newId = lastId === undefined ? 0 : Number(lastId.id) + 1;
     const levelData: Level = {
         id: newId.toString(),
         name: levelName,
@@ -79,13 +79,11 @@ app.get('/new', function (request: Request, response: Response) {
     const newContents = { levels: contents.levels.concat([levelData]) };
 
     try {
-        fs.writeFileSync(
-            LEVELS_FILENAME,
-            JSON.stringify(newContents),
-        );
+        fs.writeFileSync(LEVELS_PATH, JSON.stringify(newContents));
     } catch(error) {
         console.error('Error on creating a new level: ', JSON.stringify(error));
         response.sendStatus(500);
+        return;
     }
     response.sendStatus(200);
 });
@@ -111,13 +109,11 @@ app.post('/save', function (request: Request, response: Response) {
     const levelsPath = LEVELS_PATH;
     
     try {
-        fs.writeFileSync(
-            levelsPath,
-            JSON.stringify(newContents),
-        );
+        fs.writeFileSync(levelsPath, JSON.stringify(newContents));
     } catch(error) {
         console.error('Error on saving a level: ', JSON.stringify(error));
         response.sendStatus(500);
+        return;
     }
     response.sendStatus(200);
 });

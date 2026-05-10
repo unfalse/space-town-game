@@ -81,28 +81,11 @@ class CSWAI_0 extends BaseCPU {
     }
 
     AI_update(timestamp: number): void {
-        if (
-            this.pathUnit &&
-            timestamp - this.pathStartTime <= this.pathUnit.ms
-        ) {
-            super.setDirectionAndAccel(this.pathUnit.d, this.pathUnit.accel);
-        } else {
-            do {
-                this.pathUnit = this.AI_generateNewPath();
-                if (this.pathUnit.ms === 0) {
-                    super.setDirectionAndAccel(
-                        this.pathUnit.d,
-                        this.pathUnit.accel,
-                    );
-                }
-            } while (this.pathUnit.ms === 0);
-            this.pathStartTime = timestamp;
-        }
+        super.followPath(timestamp);
         super.fire(timestamp);
     }
 }
 
-// TODO: make class BaseAI with fields path, pathStartTime etc.
 class CSWAI_1 extends BaseCPU {
     fireLastTime: number;
     newFireTime: number;
@@ -135,18 +118,11 @@ class CSWAI_1 extends BaseCPU {
         this.dirs = [3, 0, 2, 1];
     }
 
-    AI_generateNewPath(): { d: Direction; accel: number; ms: number } {
-        // TODO: get numbers for ms from array [1000, 2500, 1200, 900, 2300, 5450, 3567, 4444]
-        // this.msCount = this.msCount === this.msArray.length-1 ? 0 : (this.msCount + 1);
+    AI_generateNewPath(): PathUnit {
         return {
-            // d: this.Utils.getRandomInt(0, 3),
-            // accel: this.Utils.getRandomInt(0, 3),
-            d: this.dirs[
-                Utils.getRandomInt(0, this.dirs.length - 1)
-            ] as Direction,
+            d: this.dirs[Utils.getRandomInt(0, this.dirs.length - 1)] as Direction,
             accel: this.accels[Utils.getRandomInt(0, this.accels.length - 1)],
             ms: this.msArray[Utils.getRandomInt(0, this.msArray.length - 1)],
-            // ms: this.Utils.getRandomInt(0, 6) * 1000
         };
     }
 
@@ -156,34 +132,13 @@ class CSWAI_1 extends BaseCPU {
 
     update(timestamp: number): void {
         if (this.life > 0 && !this.disableAI) {
-            if (
-                this.pathUnit &&
-                timestamp - this.pathStartTime <= this.pathUnit.ms
-            ) {
-                this.setDirectionAndAccel(this.pathUnit.d, this.pathUnit.accel);
-            } else {
-                do {
-                    this.pathUnit = this.AI_generateNewPath();
-                    if (this.pathUnit.ms === 0) {
-                        this.setDirectionAndAccel(
-                            this.pathUnit.d,
-                            this.pathUnit.accel,
-                        );
-                    }
-                } while (this.pathUnit.ms === 0);
-                this.pathStartTime = timestamp;
-            }
-        }
+            this.followPath(timestamp);
 
-        if (this.life > 0 && !this.disableAI) {
             if (this.newFireTime < 0) {
                 this.newFireTime = this.AI_generateNewFireTime();
                 this.fireLastTime = timestamp;
             }
-            if (
-                this.newFireTime > 0 &&
-                timestamp - this.fireLastTime >= this.newFireTime
-            ) {
+            if (this.newFireTime > 0 && timestamp - this.fireLastTime >= this.newFireTime) {
                 this.fire(timestamp);
                 this.newFireTime = this.AI_generateNewFireTime();
                 this.fireLastTime = timestamp;
@@ -191,11 +146,6 @@ class CSWAI_1 extends BaseCPU {
         }
 
         super.update(timestamp);
-
-        // TODO: try to call the update of the parent prototype (CSW !)
-        // this way i don't need to check if this.iam equals CONST.COMPUTER in csw.update anymore!!
-        // this.__proto__.update.call(this, timestamp);
-        // this.baseUpdate(timestamp);
     }
 }
 

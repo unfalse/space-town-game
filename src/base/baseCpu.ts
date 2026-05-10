@@ -20,6 +20,24 @@ export class BaseCPU extends BaseCSW {
         this.pathsPresets = [];
     }
 
+    followPath(timestamp: number): void {
+        if (this.pathUnit && timestamp - this.pathStartTime <= this.pathUnit.ms) {
+            this.setDirectionAndAccel(this.pathUnit.d, this.pathUnit.accel);
+        } else {
+            do {
+                this.pathUnit = this.AI_generateNewPath();
+                if (this.pathUnit.ms === 0) {
+                    this.setDirectionAndAccel(this.pathUnit.d, this.pathUnit.accel);
+                }
+            } while (this.pathUnit.ms === 0);
+            this.pathStartTime = timestamp;
+        }
+    }
+
+    AI_generateNewPath(): PathUnit {
+        return this.pathsPresets[0] ?? { d: 0 as Direction, accel: 0, ms: 0 };
+    }
+
     fire(timestamp: number): void {
         if (this.fireStartTime === -1 || this.fireStartTime === undefined) {
             this.fireStartTime = timestamp;

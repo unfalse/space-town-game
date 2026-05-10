@@ -398,27 +398,17 @@ export class BaseCSW extends BaseGameObject {
         const { width, height } = this.dimensions[direction];
         // TODO: check if object is already in grid's cell so there's no need to add it
         // pass only direction ?
-        this.addFourPointsToDynamicGrid(this.x, this.y, width, height);
+        this.addFourPointsToDynamicGrid(width, height);
     }
 
-    addFourPointsToDynamicGrid(
-        x: number,
-        y: number,
-        width: number,
-        height: number,
-    ): void {
+    addFourPointsToDynamicGrid(width: number, height: number): void {
         this.addThisObjectToDynamicGrid(this.x, this.y);
         this.addThisObjectToDynamicGrid(this.x + width, this.y);
         this.addThisObjectToDynamicGrid(this.x, this.y + height);
         this.addThisObjectToDynamicGrid(this.x + width, this.y + height);
     }
 
-    addFourPointsToStaticGrid(
-        x: number,
-        y: number,
-        width: number,
-        height: number,
-    ): void {
+    addFourPointsToStaticGrid(width: number, height: number): void {
         this.addThisObjectToStaticGrid(this.x, this.y);
         this.addThisObjectToStaticGrid(this.x + width, this.y);
         this.addThisObjectToStaticGrid(this.x, this.y + height);
