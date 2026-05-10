@@ -90,6 +90,15 @@ class EditorUI {
     toggleVideoHint(): void {
         const videoHint: HTMLDivElement | null = document.querySelector('.waypoints-hint');
         if (videoHint) {
+            // Load video source on first hint open to save bandwidth and speed up initial load time
+            const source = document.querySelector('.waypoints-hint video source') as HTMLSourceElement;
+            if (source.src === '') {
+                source.src = source.dataset.src || '';
+                const videoElement: HTMLVideoElement | null = document.querySelector('.waypoints-hint video');
+                if (videoElement) {                    
+                    videoElement.load();
+                }   
+            }
             videoHint.style.display = videoHint.style.display === 'none' ? 'block' : 'none';
         }
     }

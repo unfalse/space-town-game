@@ -8,10 +8,12 @@ export class Images {
     static loadImage: (
         imagePath: string,
         onLoad: OnLoadHandler,
+        onGetLoadingStatus?: OnGetLoadingStatusHandler,
     ) => Promise<void>;
     static loadManyImages: (
         imagePaths: Array<string>,
         targetImages: Array<Images>,
+        onGetLoadingStatus?: OnGetLoadingStatusHandler,
     ) => Promise<void>;
     static drawContext: CanvasRenderingContext2D;
 
@@ -71,13 +73,31 @@ export class Images {
     }
 }
 
+export type OnGetLoadingStatusHandler = (total: number, resolved: number) => void;
+
+let promisesTotal = 0;
+let resolvedPromises = 0;
+
 Images.loadImage = function (
     imagePath: string,
     onLoad: OnLoadHandler,
+    onGetLoadingStatus: OnGetLoadingStatusHandler = () => {},
 ): Promise<void> {
     return new Promise((resolve) => {
+
+        promisesTotal += 1;
+        onGetLoadingStatus(promisesTotal, resolvedPromises);
+
         onLoad(
             new Images(imagePath, () => {
+
+                resolvedPromises += 1;
+                onGetLoadingStatus(promisesTotal, resolvedPromises);
+                if (promisesTotal === resolvedPromises) {
+                    promisesTotal = 0;
+                    resolvedPromises = 0;
+                }
+
                 resolve();
             }),
         );
@@ -87,12 +107,25 @@ Images.loadImage = function (
 Images.loadManyImages = function (
     imagePaths: Array<string>,
     targetImages: Array<Images>,
+    onGetLoadingStatus: OnGetLoadingStatusHandler = () => {},
 ): Promise<void> {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
         const ps: Array<Promise<Images>> = imagePaths.map(
             (ip: string) =>
-                new Promise<Images>((resolveImg) => {
+                new Promise<Images>(resolveImg => {
+
+                    promisesTotal += 1;
+                    onGetLoadingStatus(promisesTotal, resolvedPromises);
+
                     const newImage = new Images(ip, () => {
+
+                        resolvedPromises += 1;
+                        onGetLoadingStatus(promisesTotal, resolvedPromises);
+                        if (promisesTotal === resolvedPromises) {
+                            promisesTotal = 0;
+                            resolvedPromises = 0;
+                        }
+
                         resolveImg(newImage);
                     });
                 }),

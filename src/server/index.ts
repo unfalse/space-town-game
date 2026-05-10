@@ -1,10 +1,13 @@
 import cors from 'cors';
+import dotenv from 'dotenv';
 import express, { Request, Response } from 'express';
 import fs from 'fs';
+import os from 'os';
 import { fileURLToPath } from 'url';
 import path from 'path';
 
-// import { port as PORT } from '../shared/config.json';
+dotenv.config();
+
 const PORT = 80;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -19,8 +22,8 @@ type Contents = {
     levels: Array<Level>;
 };
 
-const LEVELS_FILENAME = 'levels.json';
-const LEVELS_PATH = path.join(__dirname, LEVELS_FILENAME);
+const resolvePath = (p: string) => p.replace(/^~/, os.homedir());
+const LEVELS_PATH = resolvePath(process.env.LEVELS_PATH ?? path.join(__dirname, 'levels.json'));
 
 const gameApp = (file?: string) => path.join(__dirname, '../', file || '');
 
@@ -38,10 +41,8 @@ console.log(
 );
 
 const getFileContents = (): Contents => {
-    const levelsPath = LEVELS_PATH;
-
     try {
-        const levelsContents = fs.readFileSync(levelsPath).toString();
+        const levelsContents = fs.readFileSync(LEVELS_PATH).toString();
         return JSON.parse(levelsContents);
     } catch(error) {
         console.error('Loading levels.json error: ', JSON.stringify(error));
@@ -106,10 +107,8 @@ app.post('/save', function (request: Request, response: Response) {
     });
     const newContents = { levels: newLevels };
 
-    const levelsPath = LEVELS_PATH;
-    
     try {
-        fs.writeFileSync(levelsPath, JSON.stringify(newContents));
+        fs.writeFileSync(LEVELS_PATH, JSON.stringify(newContents));
     } catch(error) {
         console.error('Error on saving a level: ', JSON.stringify(error));
         response.sendStatus(500);

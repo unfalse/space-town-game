@@ -136,3 +136,19 @@ canvas {
 .level-name-input {
     display: none;
 }
+
+.loading-status-container {
+    height: 20px;
+    width: 0px;
+    border: 1px solid white;
+    position: relative;
+    display: none;
+}
+
+.loading-status {
+    background-color: silver;
+    height: 18px;
+    width: 0px;
+    border: 1px solid silver;
+    position: absolute;
+}
