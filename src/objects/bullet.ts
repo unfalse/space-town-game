@@ -1,9 +1,9 @@
 // Bullet that is flying every step per pixel
 import { BaseCSW } from './base/baseCsw';
 import { BaseGameObject } from './base/baseGameObj';
-import { CONST } from './const';
+import { CONST } from '../const';
 import { DelayedPic } from './delayedPic';
-import { Direction, Who } from './types';
+import { Direction, Who } from '../types';
 
 type NewXY = {
     [key in number]: number;

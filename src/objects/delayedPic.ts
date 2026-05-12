@@ -1,7 +1,5 @@
-// import { BaseCoordinates } from './base/baseCoord';
 import { BaseCSW } from './base/baseCsw';
 
-// export class DelayedPic extends BaseCoordinates {
 // TODO: extend from BaseGameObject !!!
 export class DelayedPic extends BaseCSW {
     show: boolean;
@@ -17,18 +15,6 @@ export class DelayedPic extends BaseCSW {
         this.show = true;
         this.timerStarted = false;
     }
-
-    // init(nx: number, ny: number, BTankInst: BTankManager) {
-    // init() {
-    // this.initCoords(nx, ny, 0);
-    // this.BTankInst = BTankInst;
-    // }
-
-    // delayedPicInit() {
-    //     this.initCoords(this.x, this.y, 0);
-    //     this.show = true;
-    //     this.timerStarted = false;
-    // }
 
     setCoords(x: number, y: number): void {
         this.x = x;

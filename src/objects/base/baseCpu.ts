@@ -1,6 +1,6 @@
 import { BaseCSW } from './baseCsw.js';
-import { CONST } from '../const.js';
-import { Direction, PathUnit } from '../types.js';
+import { CONST } from '../../const.js';
+import { Direction, PathUnit } from '../../types.js';
 
 export class BaseCPU extends BaseCSW {
     CPU_BULLETS_INTERVAL: number;

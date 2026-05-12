@@ -1,7 +1,7 @@
-import { BTankManager } from '../btank.js';
-import { DrawingManager } from '../drawingMan.js';
-import { ObjectsFactory } from '../objFactory.js';
-import { Direction } from '../types.js';
+import { BTankManager } from '../../btank.js';
+import { DrawingManager } from '../../drawingMan.js';
+import { ObjectsFactory } from '../../objFactory.js';
+import { Direction } from '../../types.js';
 import { BaseCoordinates } from './baseCoord.js';
 
 console.log('BaseGameObject!');

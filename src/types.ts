@@ -1,4 +1,4 @@
-import { BaseCSW } from './base/baseCsw';
+import { BaseCSW } from './objects/base/baseCsw';
 import { CONST } from './const';
 
 export enum Who {

@@ -1,13 +1,13 @@
-import { BaseCSW } from '../base/baseCsw.js';
+import { BaseCSW } from '../objects/base/baseCsw.js';
 import { BTankManager } from '../btank';
 import { CONST } from '../const';
 import { ObjectType, Point, WayPoints } from '../types';
-import { CSWAI_customPaths } from '../cswai';
+import { CSWAI_customPaths } from '../objects/cswai.js';
 import { ObjectsFactory } from '../objFactory';
 import { placeBorders } from '../drawUtils';
 import { EditorUI } from './editorUI';
-import { Ghosts } from '../ghosts';
-import { Player } from '../player';
+import { Ghosts } from '../objects/ghosts.js';
+import { Player } from '../objects/player.js';
 
 const EDITOR_SERVER_ADDRESS = `${window.location.protocol}//${window.location.hostname}`;
 

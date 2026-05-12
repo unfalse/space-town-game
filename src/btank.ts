@@ -1,12 +1,12 @@
 import { CONST } from './const';
-import { Bullet } from './bullet';
+import { Bullet } from './objects/bullet';
 import { Images } from './images';
-import { DelayedPic } from './delayedPic';
+import { DelayedPic } from './objects/delayedPic';
 import { CollisionDistance, ObjectType } from './types';
-import { BaseCSW } from './base/baseCsw';
-import { Player } from './player';
-import { Ghosts } from './ghosts';
-import { PointXY } from './base/baseCoord';
+import { BaseCSW } from './objects/base/baseCsw';
+import { Player } from './objects/player';
+import { Ghosts } from './objects/ghosts';
+import { PointXY } from './objects/base/baseCoord';
 // import { IPlayer } from './interfaces';
 
 export type CollisionGridColumns = {

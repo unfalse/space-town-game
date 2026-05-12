@@ -1,12 +1,12 @@
-import { CONST } from '../const.js';
-import { InertiaDirections, Dimensions, Direction, ObjectType, Who } from '../types.js';
-import { DrawingManager } from '../drawingMan.js';
+import { CONST } from '../../const.js';
+import { InertiaDirections, Dimensions, Direction, ObjectType, Who } from '../../types.js';
+import { DrawingManager } from '../../drawingMan.js';
 import {
     BTankManager,
     CollisionGridColumns,
     CollisionGridRows,
-} from '../btank.js';
-import { ObjectsFactory } from '../objFactory.js';
+} from '../../btank.js';
+import { ObjectsFactory } from '../../objFactory.js';
 import { BaseGameObject } from './baseGameObj.js';
 import { Bullet } from '../bullet.js';
 import { PointXY } from './baseCoord.js';

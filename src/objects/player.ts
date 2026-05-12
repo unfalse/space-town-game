@@ -1,7 +1,7 @@
 import { BaseCSW } from './base/baseCsw.js';
 import { Bullet } from './bullet.js';
-import { CONST } from './const.js';
-import { Direction, InertiaDirections, Who } from './types.js';
+import { CONST } from '../const.js';
+import { Direction, InertiaDirections, Who } from '../types.js';
 
 const MAX_LIFE = 1;
 
