@@ -1,6 +1,6 @@
 import { BaseCSW } from './base/baseCsw';
 // import { BaseGameObject } from './base/baseGameObj';
-import { CONST } from './const';
+import { CONST } from '../const';
 
 export class Counter extends BaseCSW {
     counter: number;

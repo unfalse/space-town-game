@@ -58,7 +58,8 @@ body {
     height: 100vh;
 }
 
-#container canvas, #editorBlock {
+#container canvas,
+#editorBlock {
     position: absolute;
 }
 
@@ -86,6 +87,7 @@ canvas {
     font-size: 12pt;
     font-family: monospace;
     padding: 10px;
+    display: none;
 }
 
 .waypoints-hint {
@@ -97,4 +99,56 @@ canvas {
     font-size: 12pt;
     font-family: monospace;
     padding: 10px;
+}
+
+.game-logo {
+    font-size: 24pt;
+    font-family: monospace;
+    color: white;
+    height: 100px;
+}
+
+.main-menu {
+    z-index: 10000;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 14pt;
+    font-family: monospace;
+    color: white;
+}
+
+.main-menu-items {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    font-size: 14pt;
+    font-family: monospace;
+    color: white;
+}
+
+.main-menu-items button {
+    background-color: #0000007d;
+    color: white;
+}
+
+.level-name-input {
+    display: none;
+}
+
+.loading-status-container {
+    height: 20px;
+    width: 0px;
+    border: 1px solid white;
+    position: relative;
+    display: none;
+}
+
+.loading-status {
+    background-color: silver;
+    height: 18px;
+    width: 0px;
+    border: 1px solid silver;
+    position: absolute;
 }

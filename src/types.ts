@@ -1,4 +1,4 @@
-import { BaseCSW } from './base/baseCsw';
+import { BaseCSW } from './objects/base/baseCsw';
 import { CONST } from './const';
 
 export enum Who {
@@ -68,6 +68,8 @@ export type CollisionDistance = {
     distanceY: number;
     collidedObject: BaseCSW;
 };
+
+export type InertiaDirections = { [key in Direction]: number };
 
 // export { Who, ObjectType };
 // export type { Direction, Dimensions, RectSize, PathUnit, Point, WayPoints };

@@ -11,6 +11,36 @@
 
     <div id="container">
 
+      <div class="main-menu">
+        <div class="game-logo">
+          <span>S</span>
+          <span>P</span>
+          <span>A</span>
+          <span>C</span>
+          <span>E</span>
+          <span>T</span>
+          <span>O</span>
+          <span>W</span>
+          <span>N</span>
+        </div>
+        
+        <div class="main-menu-items">
+          <button id="newGameBtn">Start New Game</button>
+          <button id="createLevelBtn">Create A Level</button>
+          <button id="loadLevelBtn">Load A Level</button>
+        </div>
+
+        <div class="level-name-input">
+          <input type="text" id="levelNameInput" placeholder="Enter level name" />
+          <button id="okBtn">OK</button>
+          <button id="cancelBtn">Cancel</button>
+        </div>
+      </div>
+
+      <div class="loading-status-container">
+        <div class="loading-status"></div>
+      </div>
+
       <div id="gameOverBlock"></div>
       <button id="playAgainBtn" onclick="location.reload();">
         Play again
@@ -68,12 +98,12 @@
 
       <div class="waypoints-hint" style="display: none;">
         <video width="660" height="660" autoplay loop muted>
-          <source src="video/waypoints-hint.mp4" type="video/mp4">
+          <source data-src="video/waypoints-hint.mp4" type="video/mp4">
           Your browser does not support the video tag.
         </video>
         <p>Place a bot (a green ship) on the game field. To do it press 3 and click on any place on the game field.</p>
         <p>Press 5 to choose the waypoint mode. Click on the ship to choose it. Click on a desired cell to set the first waypoint and so on.</p>
-        <p>To remove a waypoint press 6 and click on the waypoint you want to remove. Press "w" to toggle this window.</p>
+        <p>To remove a waypoint press 6 and click on the waypoint you want to remove. Press "p" to toggle this window.</p>
       </div>
 
     </div>

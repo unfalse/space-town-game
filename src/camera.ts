@@ -1,4 +1,4 @@
-import { BaseCoordinates } from './base/baseCoord';
+import { BaseCoordinates } from './objects/base/baseCoord';
 import { CONST } from './const';
 
 export class Camera extends BaseCoordinates {

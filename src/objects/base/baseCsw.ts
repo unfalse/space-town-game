@@ -1,17 +1,15 @@
-import { CONST } from '../const';
-import { CollisionDirections, CollisionInfo, CollisionMatrix, Dimensions, Direction, ObjectType, Who } from '../types';
-import { DrawingManager } from '../drawingMan';
+import { CONST } from '../../const.js';
+import { InertiaDirections, Dimensions, Direction, ObjectType, Who } from '../../types.js';
+import { DrawingManager } from '../../drawingMan.js';
 import {
     BTankManager,
     CollisionGridColumns,
     CollisionGridRows,
-} from '../btank';
-import { ObjectsFactory } from '../objFactory';
-import { BaseGameObject } from './baseGameObj';
-import { Bullet } from '../bullet';
-import { PointXY } from './baseCoord';
-
-type InertiaDirections = { [key in Direction]: number };
+} from '../../btank.js';
+import { ObjectsFactory } from '../../objFactory.js';
+import { BaseGameObject } from './baseGameObj.js';
+import { Bullet } from '../bullet.js';
+import { PointXY } from './baseCoord.js';
 
 type CheckBoundsParameters = {
     ux: number;
@@ -33,16 +31,18 @@ export class BaseCSW extends BaseGameObject {
     d: Direction;
     stopAccel: boolean;
     MAXIMUM_ACCELERATION: number;
-    dimensions: Dimensions;
-    BTankInst: BTankManager;
-    drawingManagerInst: DrawingManager;
-    objectsFactoryInst: ObjectsFactory;
-    iam: Who;
-    maxlife: number;
-    life: number;
-    bulletsAmountOnFire: number;
-    type: ObjectType;
-    ghost: boolean;
+    dimensions: Dimensions|null = null;
+    declare BTankInst: BTankManager;
+    declare drawingManagerInst: DrawingManager;
+    declare objectsFactoryInst: ObjectsFactory;
+    iam: Who = Who.COMPUTER;
+    maxlife: number= 10;
+    life: number = 0;
+    bulletsAmountOnFire: number = 0;
+    type: ObjectType = ObjectType.BORDER;
+    ghost: boolean = false;
+    centerx: number = 0;
+    centery: number = 0;
 
     constructor() {
         super();
@@ -58,10 +58,7 @@ export class BaseCSW extends BaseGameObject {
         this.inertiaTimerIsRunning = false;
         this.d = 0; // direction
         this.stopAccel = true;
-        // this.PLAYER_BULLETS_INTERVAL = 600;
         this.MAXIMUM_ACCELERATION = 5;
-        this.dimensions = null;
-        this.BTankInst = null;
     }
 
     // TODO: place code from init above!
@@ -87,6 +84,7 @@ export class BaseCSW extends BaseGameObject {
         this.bulletsAmountOnFire = CONST.MAXBULLETS;
         this.dimensions = this.drawingManagerInst.initDimensions(who);
         //this.ghost = !!ghost; // only display this object
+        if (this.dimensions === null) return;
         const { width, height } = this.dimensions[
             CONST.DIRECTIONS.RIGHT as Direction
         ];
@@ -118,9 +116,7 @@ export class BaseCSW extends BaseGameObject {
     ): void {
         if (
             this.BTankInst.bulletsArr.filter(
-                function (b: Bullet) {
-                    return b.parentShip === this;
-                }.bind(this),
+                (b: Bullet) => b.parentShip === this,
             ).length === this.bulletsAmountOnFire
         )
             return;
@@ -128,7 +124,7 @@ export class BaseCSW extends BaseGameObject {
             this.objectsFactoryInst.createBaseObj(
                 startX,
                 startY,
-                whoFires,
+                whoFires ?? this.iam,
                 CONST.TYPES.BULLET,
             )
         );
@@ -151,9 +147,9 @@ export class BaseCSW extends BaseGameObject {
     }
 
     waitAndCall(callback: () => void, ms: number): void {
-        let waitStart: number = null;
+        let waitStart: number|null = null;
         const doThings = function (timestamp: number) {
-            if (waitStart == null) {
+            if (waitStart === null) {
                 waitStart = timestamp;
             }
             // naive
@@ -161,10 +157,10 @@ export class BaseCSW extends BaseGameObject {
                 waitStart = null;
                 callback();
             } else {
-                window.requestAnimationFrame(doThings.bind(this));
+                window.requestAnimationFrame(doThings);
             }
         };
-        window.requestAnimationFrame(doThings.bind(this));
+        window.requestAnimationFrame(doThings);
     }
 
     stop(): void {
@@ -230,6 +226,8 @@ export class BaseCSW extends BaseGameObject {
     
     */
     move(): void {
+        if (!this.dimensions) return;
+
         const { ux: uxR, uy: uyR } = this.getNewCoordinatesDelta(
             CONST.DIRECTIONS.RIGHT as Direction,
         );
@@ -396,30 +394,21 @@ export class BaseCSW extends BaseGameObject {
 
     // collision detection: broad phase
     updateCollisionGrid(direction: Direction): void {
+        if (!this.dimensions) return;
         const { width, height } = this.dimensions[direction];
         // TODO: check if object is already in grid's cell so there's no need to add it
         // pass only direction ?
-        this.addFourPointsToDynamicGrid(this.x, this.y, width, height);
+        this.addFourPointsToDynamicGrid(width, height);
     }
 
-    addFourPointsToDynamicGrid(
-        x: number,
-        y: number,
-        width: number,
-        height: number,
-    ): void {
+    addFourPointsToDynamicGrid(width: number, height: number): void {
         this.addThisObjectToDynamicGrid(this.x, this.y);
         this.addThisObjectToDynamicGrid(this.x + width, this.y);
         this.addThisObjectToDynamicGrid(this.x, this.y + height);
         this.addThisObjectToDynamicGrid(this.x + width, this.y + height);
     }
 
-    addFourPointsToStaticGrid(
-        x: number,
-        y: number,
-        width: number,
-        height: number,
-    ): void {
+    addFourPointsToStaticGrid(width: number, height: number): void {
         this.addThisObjectToStaticGrid(this.x, this.y);
         this.addThisObjectToStaticGrid(this.x + width, this.y);
         this.addThisObjectToStaticGrid(this.x, this.y + height);
@@ -473,7 +462,5 @@ export class BaseCSW extends BaseGameObject {
         }
     }
 
-    hitByBullet(_bulletInstance: Bullet): void {
-        return null;
-    }
+    hitByBullet(_bulletInstance: Bullet): void {}
 }

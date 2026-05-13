@@ -1,12 +1,16 @@
 // taken from: https://dev.to/robotspacefish/how-i-set-up-webpack-and-babel-with-vanilla-js-2k5e
 
-const path = require('path');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-const CopyPlugin = require('copy-webpack-plugin');
-const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+import path from 'path';
+import HtmlWebpackPlugin from 'html-webpack-plugin';
+import CopyPlugin from 'copy-webpack-plugin';
+import { CleanWebpackPlugin } from 'clean-webpack-plugin';
+import { fileURLToPath } from 'url';
 
-module.exports = {
-    mode: 'development',
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const config = {
+    mode: 'source-map',
     // devtool: 'inline-source-map',
     entry: './src/index.ts',
     output: {
@@ -20,7 +24,7 @@ module.exports = {
     plugins: [
         new CleanWebpackPlugin(),
         new CopyPlugin({
-            patterns: [{ from: 'assets' }, { from: 'src/styles' }],
+            patterns: [{ from: 'assets' }, { from: 'src/styles' }, { from: 'src/server/levels.json', to: 'server' }],
         }),
         new HtmlWebpackPlugin({
             template: 'src/index.html',
@@ -28,6 +32,9 @@ module.exports = {
     ],
     resolve: {
         extensions: ['.ts', '.js'],
+        extensionAlias: {
+            '.js': ['.ts', '.js'],
+        },
     },
     module: {
         rules: [
@@ -49,3 +56,5 @@ module.exports = {
         },
     },
 };
+
+export default config;

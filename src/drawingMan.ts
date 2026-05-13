@@ -1,36 +1,45 @@
+import { on } from 'process';
 import { Camera } from './camera';
 import { CONST } from './const';
-import { Images } from './images';
+import { Images, OnGetLoadingStatusHandler } from './images';
 import { Dimensions, Who, Direction, RectSize } from './types';
+
+const LOADING_STATUS_WIDTH = 400;
 
 export class ImagesStore {
     crashImages: Images[];
-    backgroundImage: Images;
+    backgroundImage!: Images;
     counterImages: Images[];
     cpuImages: Images[];
-    blackbackgroundImage: Images;
-    obstacleImage: Images;
-    borderImage: Images;
-    bulletImage: Images;
+    blackbackgroundImage!: Images;
+    obstacleImage!: Images;
+    borderImage!: Images;
+    bulletImage!: Images;
     spaceBrickImages: Images[];
     playerImages: Images[];
 
     constructor() {
         this.crashImages = [];
-        this.backgroundImage = null;
         this.counterImages = [];
         this.cpuImages = [];
-        this.blackbackgroundImage = null;
-        this.obstacleImage = null;
-        this.borderImage = null;
         this.spaceBrickImages = [];
         this.playerImages = [];
-        this.bulletImage = null;
     }
 
     init(): Promise<unknown[]> {
         const loadImage = Images.loadImage;
         const loadManyImages = Images.loadManyImages;
+        const onLoading: OnGetLoadingStatusHandler = (total, resolved) => {
+            const loadingStatus = document.querySelector('.loading-status') as HTMLDivElement;
+            const loadingStatusContainer = document.querySelector('.loading-status-container') as HTMLDivElement;
+            if (loadingStatusContainer && loadingStatusContainer.style.display === '') {
+                loadingStatusContainer.style.display = 'block';
+                loadingStatusContainer.style.width = `${LOADING_STATUS_WIDTH}px`;
+            }
+            if (loadingStatus) {
+                loadingStatus.style.width = `${(resolved / total) * LOADING_STATUS_WIDTH - 2}px`;
+            }
+        }
 
         const promises = [
             loadManyImages(
@@ -41,6 +50,7 @@ export class ImagesStore {
                     'images/csw-mt9bigger2x_0.png',
                 ],
                 this.playerImages,
+                onLoading,
             ),
 
             loadManyImages(
@@ -51,6 +61,7 @@ export class ImagesStore {
                     'images/csw-mt5bigger2x_0.png',
                 ],
                 this.cpuImages,
+                onLoading,
             ),
 
             loadManyImages(
@@ -63,6 +74,7 @@ export class ImagesStore {
                     'images/crash5.png',
                 ],
                 this.crashImages,
+                onLoading,
             ),
 
             // loadImage.call(this, "images/background-cats.jpg", function (image) {
@@ -71,15 +83,15 @@ export class ImagesStore {
 
             loadImage('images/skybox_right.png', (image: Images) => {
                 this.backgroundImage = image;
-            }),
+            }, onLoading),
 
             loadImage('images/blackbackground.png', (image: Images) => {
                 this.blackbackgroundImage = image;
-            }),
+            }, onLoading),
 
             loadImage('images/obstacle3.png', (image: Images) => {
                 this.obstacleImage = image;
-            }),
+            }, onLoading),
 
             loadManyImages(
                 [
@@ -90,16 +102,17 @@ export class ImagesStore {
                     'images/space_brick-0.png',
                 ],
                 this.spaceBrickImages,
+                onLoading,
             ),
 
             loadImage('images/border.png', (image: Images) => {
                 this.borderImage = image;
-            }),
+            }, onLoading),
 
             loadImage('images/border.png', (image: Images) => {
                 // TODO: create a picture of bullet in Aseprite later
                 this.bulletImage = image;
-            }),
+            }, onLoading),
 
             // loadImage.call(this, "images/border.png", this.borderImage),
 
@@ -117,6 +130,7 @@ export class ImagesStore {
                     'images/counter-9.png',
                 ],
                 this.counterImages,
+                onLoading,
             ),
         ];
         return Promise.all(promises);
@@ -126,7 +140,6 @@ export class ImagesStore {
 export class DrawingManager {
     imagesStore: ImagesStore;
     gameCam: Camera;
-    dimensions: Dimensions;
 
     constructor(imagesStoreInstance: ImagesStore, cameraInstance: Camera) {
         this.imagesStore = imagesStoreInstance;

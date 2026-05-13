@@ -1,5 +1,5 @@
-import { CONST } from '../const';
-import { Direction } from '../types';
+import { CONST } from '../../const.js';
+import { Direction } from '../../types.js';
 
 export type PointXY = {
     x: number;

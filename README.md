@@ -8,7 +8,7 @@ You can fly around here [https://archthink.taila66f39.ts.net/](https://archthink
 
 ## Contents
 
-Source code for the game and the map editor. Several maps are included in the server folder.
+Source code for the game and the map editor. Several maps are included in the server folder. The **`levels.json`** file format is described in [docs/levels-json.md](docs/levels-json.md).
 
 ## Commands
 

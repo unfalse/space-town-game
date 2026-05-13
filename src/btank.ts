@@ -1,12 +1,12 @@
 import { CONST } from './const';
-import { Bullet } from './bullet';
+import { Bullet } from './objects/bullet';
 import { Images } from './images';
-import { DelayedPic } from './delayedPic';
+import { DelayedPic } from './objects/delayedPic';
 import { CollisionDistance, ObjectType } from './types';
-import { BaseCSW } from './base/baseCsw';
-import { Player } from './player';
-import { Ghosts } from './ghosts';
-import { PointXY } from './base/baseCoord';
+import { BaseCSW } from './objects/base/baseCsw';
+import { Player } from './objects/player';
+import { Ghosts } from './objects/ghosts';
+import { PointXY } from './objects/base/baseCoord';
 // import { IPlayer } from './interfaces';
 
 export type CollisionGridColumns = {
@@ -16,6 +16,13 @@ export type CollisionGridColumns = {
 export type CollisionGridRows = {
     [key in number]: CollisionGridColumns;
 };
+
+function rectForCsw(
+    csw: BaseCSW,
+): { width: number; height: number } | null {
+    const d = csw.dimensions;
+    return d ? d[csw.d] : null;
+}
 
 // type CollisionMap = Array<number>[8];
 
@@ -35,15 +42,15 @@ export class BTankManager {
     ghosts: Ghosts;
     bulletsArr: Bullet[];
     delayedPics: DelayedPic[];
-    drawContext: CanvasRenderingContext2D;
+    drawContext!: CanvasRenderingContext2D;
     // infoContext: any;
-    againBtn: HTMLButtonElement;
-    gameOverBlock: HTMLDivElement;
+    againBtn!: HTMLButtonElement;
+    gameOverBlock!: HTMLDivElement;
 
     // cswAI: BaseCPU; // TODO: make it more easy to choose different AIs
-    gameInfo: HTMLCanvasElement;
-    titleBlock: HTMLDivElement;
-    gameFieldBlock: HTMLCanvasElement;
+    gameInfo?: HTMLCanvasElement;
+    titleBlock!: HTMLDivElement;
+    gameFieldBlock!: HTMLCanvasElement;
     // gameCam: Camera;
     playerInstance: Player;
 
@@ -56,9 +63,6 @@ export class BTankManager {
         this.ghosts = [];
         this.bulletsArr = [];
         this.delayedPics = [];
-        this.drawContext = null;
-        this.againBtn = null;
-        this.gameOverBlock = null;
         this.playerInstance = player;
         this.dynamicCollisionGrid = [];
         this.staticCollisionGrid = [];
@@ -80,12 +84,20 @@ export class BTankManager {
 
         // TODO: create new ui class and move these things to it
         // this.gameInfo = document.getElementById("gameInfo");
-        this.againBtn = document.querySelector('#playAgainBtn');
-        this.gameOverBlock = document.querySelector('#gameOverBlock');
-        this.titleBlock = document.querySelector('#titleBlock');
+        this.againBtn = document.querySelector(
+            '#playAgainBtn',
+        ) as HTMLButtonElement;
+        this.gameOverBlock = document.querySelector(
+            '#gameOverBlock',
+        ) as HTMLDivElement;
+        this.titleBlock = document.querySelector(
+            '#titleBlock',
+        ) as HTMLDivElement;
         this.gameFieldBlock = gameField;
 
-        this.drawContext = gameField.getContext('2d');
+        const ctx = gameField.getContext('2d');
+        if (!ctx) throw new Error('Unable to acquire 2D canvas context');
+        this.drawContext = ctx;
         Images.drawContext = this.drawContext;
         //this.infoContext = this.gameInfo.getContext("2d");
 
@@ -118,7 +130,9 @@ export class BTankManager {
             if (whoAsks === csw) {
                 return false;
             }
-            const { width, height } = csw.dimensions[csw.d];
+            const rect = rectForCsw(csw);
+            if (!rect) return false;
+            const { width, height } = rect;
             return (
                 x >= csw.x &&
                 x <= csw.x + width &&
@@ -144,13 +158,17 @@ export class BTankManager {
             CONST.TYPES.SPACEBRICK as ObjectType,
         ];
 
-        const { width: aw, height: ah } = whoAsks.dimensions[whoAsks.d];
+        const whoRect = rectForCsw(whoAsks);
+        if (!whoRect) return null;
+        const { width: aw, height: ah } = whoRect;
 
         for (const csw of this.cswArr) {
             if (csw === whoAsks || !blockingTypes.includes(csw.type)) {
                 continue;
             }
-            const { width: bw, height: bh } = csw.dimensions[csw.d];
+            const oppRect = rectForCsw(csw);
+            if (!oppRect) continue;
+            const { width: bw, height: bh } = oppRect;
             // Standard AABB intersection test
             if (
                 newX < csw.x + bw &&
@@ -169,7 +187,7 @@ export class BTankManager {
         ny: number,
         whoAsks: BaseCSW,
         typesToIgnore: ObjectType[],
-    ): BaseCSW {
+    ): BaseCSW | null {
         // const debugDraw = (function(x,y,w,h) {
         //     this.drawContext.strokeStyle = "#0f0";
         //     this.drawContext.strokeRect(x, y, w, h);
@@ -177,7 +195,9 @@ export class BTankManager {
         // const typeToCheck = typeToCheckParam || CONST.TYPES.SHIP;
 
         const checkSquare = (csw: BaseCSW, x: number, y: number) => {
-            let { width, height } = csw.dimensions[csw.d];
+            const rd = rectForCsw(csw);
+            if (!rd) return false;
+            let { width, height } = rd;
             width--;
             height--;
             // debugDraw(csw.x, csw.y, width, height);
@@ -190,12 +210,17 @@ export class BTankManager {
             );
         };
 
-        let { width, height } = whoAsks.dimensions[whoAsks.d];
+        const wr = rectForCsw(whoAsks);
+        if (!wr) return null;
+        let { width, height } = wr;
         width--;
         height--;
 
         const tArr = this.cswArr.filter((csw: BaseCSW) => {
-            if (whoAsks === csw || typesToIgnore?.indexOf(csw.type) >= 0) {
+            if (
+                whoAsks === csw ||
+                (typesToIgnore?.includes(csw.type) ?? false)
+            ) {
                 return false;
             }
 
@@ -228,7 +253,9 @@ export class BTankManager {
         // const typeToCheck = typeToCheckParam || CONST.TYPES.SHIP;
 
         const checkSquare = (csw: BaseCSW, x: number, y: number) => {
-            let { width, height } = csw.dimensions[csw.d];
+            const rd = rectForCsw(csw);
+            if (!rd) return false;
+            let { width, height } = rd;
             // width--;
             // height--;
             // debugDraw(csw.x, csw.y, width, height);
@@ -241,14 +268,19 @@ export class BTankManager {
             );
         };
 
-        let { width, height } = whoAsks.dimensions[whoAsks.d];
+        const wo = rectForCsw(whoAsks);
+        if (!wo) return null;
+        let { width, height } = wo;
         const { x, y } = newCoords || whoAsks;
         // width--;
         // height--;
 
         const tArr = objects
             .map((csw: BaseCSW) => {
-                if (whoAsks === csw || typesToIgnore?.indexOf(csw.type) >= 0) {
+                if (
+                    whoAsks === csw ||
+                    (typesToIgnore?.includes(csw.type) ?? false)
+                ) {
                     return false;
                 }
 
@@ -300,7 +332,7 @@ export class BTankManager {
             .reduce((prevValue: CollisionDistance[], currentCSW: BaseCSW) => {
                 if (
                     whoAsks === currentCSW ||
-                    typesToIgnore?.indexOf(currentCSW.type) >= 0
+                    (typesToIgnore?.includes(currentCSW.type) ?? false)
                 ) {
                     return prevValue;
                 }
@@ -339,8 +371,8 @@ export class BTankManager {
         y: number,
         parentShip: BaseCSW,
         bulletInst: Bullet,
-    ): Bullet {
-        const tArr = this.bulletsArr.filter(function (b: Bullet) {
+    ): Bullet | null {
+        const tArr = this.bulletsArr.filter((b: Bullet) => {
             return (
                 b.parentShip !== parentShip &&
                 b !== bulletInst &&
@@ -354,12 +386,18 @@ export class BTankManager {
     }
 
     // Returns CSW on coords in params (by pixel)
-    getCSWWithPixelPrecision(x: number, y: number, whoAsks: BaseCSW): BaseCSW {
+    getCSWWithPixelPrecision(
+        x: number,
+        y: number,
+        whoAsks: BaseCSW,
+    ): BaseCSW | null {
         const tArr = this.cswArr.filter((csw: BaseCSW) => {
             if (whoAsks === csw) {
                 return false;
             }
-            const { width, height } = csw.dimensions[csw.d];
+            const rect = rectForCsw(csw);
+            if (!rect) return false;
+            const { width, height } = rect;
             return (
                 x >= csw.x &&
                 x <= csw.x + width &&

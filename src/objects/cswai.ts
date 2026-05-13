@@ -1,10 +1,11 @@
 import { BaseCPU } from './base/baseCpu';
 import { BaseCSW } from './base/baseCsw';
 import { Bullet } from './bullet';
-import { CONST } from './const';
-import { Direction, PathUnit, WayPoints } from './types';
-import { Utils } from './utils';
+import { CONST } from '../const';
+import { Direction, PathUnit, WayPoints } from '../types';
+import { Utils } from '../utils';
 
+// TODO: unused class, analyze and delete if not needed
 class CSWAI_0 extends BaseCPU {
     pathPresetCount: number;
 
@@ -81,28 +82,12 @@ class CSWAI_0 extends BaseCPU {
     }
 
     AI_update(timestamp: number): void {
-        if (
-            this.pathUnit &&
-            timestamp - this.pathStartTime <= this.pathUnit.ms
-        ) {
-            super.setDirectionAndAccel(this.pathUnit.d, this.pathUnit.accel);
-        } else {
-            do {
-                this.pathUnit = this.AI_generateNewPath();
-                if (this.pathUnit.ms === 0) {
-                    super.setDirectionAndAccel(
-                        this.pathUnit.d,
-                        this.pathUnit.accel,
-                    );
-                }
-            } while (this.pathUnit.ms === 0);
-            this.pathStartTime = timestamp;
-        }
+        super.followPath(timestamp);
         super.fire(timestamp);
     }
 }
 
-// TODO: make class BaseAI with fields path, pathStartTime etc.
+// TODO: unused class, analyze and delete if not needed
 class CSWAI_1 extends BaseCPU {
     fireLastTime: number;
     newFireTime: number;
@@ -120,6 +105,10 @@ class CSWAI_1 extends BaseCPU {
         this.fireLastTime = -1;
         this.newFireTime = -1;
         this.disableAI = false;
+        this.msCount = 0;
+        this.msArray = [];
+        this.accels = [];
+        this.dirs = [];
         this.type = CONST.TYPES.SHIP;
         // d: 0...3, a: 0...1, ms: (0...1) *1000
     }
@@ -131,18 +120,11 @@ class CSWAI_1 extends BaseCPU {
         this.dirs = [3, 0, 2, 1];
     }
 
-    AI_generateNewPath(): { d: Direction; accel: number; ms: number } {
-        // TODO: get numbers for ms from array [1000, 2500, 1200, 900, 2300, 5450, 3567, 4444]
-        // this.msCount = this.msCount === this.msArray.length-1 ? 0 : (this.msCount + 1);
+    AI_generateNewPath(): PathUnit {
         return {
-            // d: this.Utils.getRandomInt(0, 3),
-            // accel: this.Utils.getRandomInt(0, 3),
-            d: this.dirs[
-                Utils.getRandomInt(0, this.dirs.length - 1)
-            ] as Direction,
+            d: this.dirs[Utils.getRandomInt(0, this.dirs.length - 1)] as Direction,
             accel: this.accels[Utils.getRandomInt(0, this.accels.length - 1)],
             ms: this.msArray[Utils.getRandomInt(0, this.msArray.length - 1)],
-            // ms: this.Utils.getRandomInt(0, 6) * 1000
         };
     }
 
@@ -152,34 +134,13 @@ class CSWAI_1 extends BaseCPU {
 
     update(timestamp: number): void {
         if (this.life > 0 && !this.disableAI) {
-            if (
-                this.pathUnit &&
-                timestamp - this.pathStartTime <= this.pathUnit.ms
-            ) {
-                this.setDirectionAndAccel(this.pathUnit.d, this.pathUnit.accel);
-            } else {
-                do {
-                    this.pathUnit = this.AI_generateNewPath();
-                    if (this.pathUnit.ms === 0) {
-                        this.setDirectionAndAccel(
-                            this.pathUnit.d,
-                            this.pathUnit.accel,
-                        );
-                    }
-                } while (this.pathUnit.ms === 0);
-                this.pathStartTime = timestamp;
-            }
-        }
+            this.followPath(timestamp);
 
-        if (this.life > 0 && !this.disableAI) {
             if (this.newFireTime < 0) {
                 this.newFireTime = this.AI_generateNewFireTime();
                 this.fireLastTime = timestamp;
             }
-            if (
-                this.newFireTime > 0 &&
-                timestamp - this.fireLastTime >= this.newFireTime
-            ) {
+            if (this.newFireTime > 0 && timestamp - this.fireLastTime >= this.newFireTime) {
                 this.fire(timestamp);
                 this.newFireTime = this.AI_generateNewFireTime();
                 this.fireLastTime = timestamp;
@@ -187,18 +148,13 @@ class CSWAI_1 extends BaseCPU {
         }
 
         super.update(timestamp);
-
-        // TODO: try to call the update of the parent prototype (CSW !)
-        // this way i don't need to check if this.iam equals CONST.COMPUTER in csw.update anymore!!
-        // this.__proto__.update.call(this, timestamp);
-        // this.baseUpdate(timestamp);
     }
 }
 
 class CSWAI_customPaths extends BaseCPU {
     wpCounter: number;
     wpStartTime: number;
-    currentWp: WayPoints;
+    currentWp: WayPoints | null;
     wayPoints: WayPoints[];
 
     constructor() {
@@ -212,13 +168,6 @@ class CSWAI_customPaths extends BaseCPU {
     }
 
     childInit(): void {
-        // const FIRST_PATH = [
-        //     [80, 0],
-        //     [80, 80],
-        //     [0, 80],
-        //     [0, 0],
-        // ];
-        return null;
     }
 
     setWaypoints(wayPoints?: WayPoints[]): void {
@@ -258,7 +207,7 @@ class CSWAI_customPaths extends BaseCPU {
             }
         }
 
-        const scanResult: Direction = this.BTankInst.playerInstance.isHidden
+        const scanResult: Direction | null = this.BTankInst.playerInstance.isHidden
             ? -1
             : this.plusShapedScan(10);
         if (scanResult !== null && scanResult > -1) {
@@ -277,80 +226,8 @@ class CSWAI_customPaths extends BaseCPU {
     }
 }
 
-class Obstacle extends BaseCSW {
-    constructor() {
-        super();
-        this.type = CONST.TYPES.OBSTACLE;
-    }
-
-    childInit(): void {
-        this.addThisObjectToStaticGrid(this.x, this.y);
-    }
-
-    draw(): void {
-        this.drawingManagerInst.drawObstacle(this.x, this.y);
-    }
-}
-
-class Border extends BaseCSW {
-    constructor() {
-        super();
-        this.type = CONST.TYPES.BORDER;
-    }
-
-    draw(): void {
-        this.drawingManagerInst.drawBorder(this.x, this.y);
-    }
-}
-
-class StaticShip extends BaseCSW {
-    constructor() {
-        super();
-        this.type = CONST.TYPES.SHIP;
-        // this.BTankInst.staticCollisionGrid
-    }
-
-    draw(): void {
-        this.drawingManagerInst.drawStaticShip(this.x, this.y);
-    }
-}
-
-const SPACEBRICK_MAX_HITS = 10;
-
-class SpaceBrick extends BaseCSW {
-    constructor() {
-        super();
-        this.type = CONST.TYPES.SPACEBRICK;
-    }
-
-    childInit(): void {
-        this.maxlife = SPACEBRICK_MAX_HITS;
-        this.life = SPACEBRICK_MAX_HITS;
-        this.addThisObjectToStaticGrid(this.x, this.y);
-    }
-
-    draw(): void {
-        const rawFrame = Math.floor((this.life > 0 ? this.life : 0) / 2);
-        const frame = Math.min(4, rawFrame);
-        this.drawingManagerInst.drawSpaceBrick(this.x, this.y, frame);
-    }
-
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    hitByBullet(_bulletInstance: Bullet): void {
-        this.life--;
-        if (this.life <= 0) {
-            this.removeSelfFromStaticGrid();
-            this.BTankInst.removeShip(this);
-        }
-    }
-}
-
 export {
     CSWAI_0,
     CSWAI_1,
     CSWAI_customPaths,
-    Border,
-    SpaceBrick,
-    StaticShip,
-    Obstacle,
 };

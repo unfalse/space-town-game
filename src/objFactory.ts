@@ -1,21 +1,19 @@
 import { DrawingManager } from './drawingMan';
 import { BTankManager } from './btank';
-import { BaseCSW } from './base/baseCsw';
-import { BaseGameObject } from './base/baseGameObj';
-import { Bullet } from './bullet';
+import { BaseCSW } from './objects/base/baseCsw';
+import { BaseGameObject } from './objects/base/baseGameObj';
+import { Bullet } from './objects/bullet';
 import { CONST } from './const';
-import { Player } from './player';
-import {
-    Border,
-    CSWAI_customPaths,
-    Obstacle,
-    SpaceBrick,
-    StaticShip,
-} from './cswai';
-import { Counter } from './counter';
+import { Player } from './objects/player';
+import { CSWAI_customPaths } from './objects/cswai';
+import { Border } from './objects/border';
+import { Obstacle } from './objects/obstacle';
+import { SpaceBrick } from './objects/space-brick';
+import { StaticShip } from './objects/static-ship';
+import { Counter } from './objects/counter';
 
 import { ObjectType, Who, WayPoints, Direction } from './types';
-import { DelayedPic } from './delayedPic';
+import { DelayedPic } from './objects/delayedPic';
 
 type FactoryTypes =
     | Player
@@ -128,6 +126,7 @@ export class ObjectsFactory {
             this.initBaseGameObject(c1, x, y);
             return c1;
         }
+        throw new Error(`Unsupported object type for base object: ${type}`);
     }
 
     initBaseCSW(
@@ -154,6 +153,13 @@ export class ObjectsFactory {
         y: number,
         d?: Direction,
     ): void {
-        obj.init(x, y, d, this.drawingManagerInst, this.bTankManagerInst, this);
+        obj.init(
+            x,
+            y,
+            d ?? (CONST.DIRECTIONS.RIGHT as Direction),
+            this.drawingManagerInst,
+            this.bTankManagerInst,
+            this,
+        );
     }
 }

@@ -1,9 +1,16 @@
 import cors from 'cors';
-import express from 'express';
+import dotenv from 'dotenv';
+import express, { Request, Response } from 'express';
 import fs from 'fs';
+import os from 'os';
+import { fileURLToPath } from 'url';
 import path from 'path';
 
-import { port as PORT } from '../shared/config.json';
+dotenv.config();
+
+const PORT = 80;
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 type Level = {
     id: string;
@@ -15,11 +22,13 @@ type Contents = {
     levels: Array<Level>;
 };
 
-const filename = 'levels.json';
+const resolvePath = (p: string) => p.replace(/^~/, os.homedir());
+const LEVELS_PATH = resolvePath(process.env.LEVELS_PATH ?? path.join(__dirname, 'levels.json'));
 
 const gameApp = (file?: string) => path.join(__dirname, '../', file || '');
 
 const app = express();
+
 app.use(express.json());
 app.use(cors());
 app.options('*', cors());
@@ -31,50 +40,63 @@ console.log(
     PORT,
 );
 
-const getFileContents = (): Contents =>
-    JSON.parse(
-        fs.readFileSync(process.cwd() + '/src/server/' + filename).toString(),
-    );
-
-app.get('/', (_req, res) => {
+const getFileContents = (): Contents => {
+    try {
+        const levelsContents = fs.readFileSync(LEVELS_PATH).toString();
+        return JSON.parse(levelsContents);
+    } catch(error) {
+        console.error('Loading levels.json error: ', JSON.stringify(error));
+    }
+    
+    return {
+        levels: []
+    };
+}
+    
+app.get('/', (_req: Request, res: Response) => {
     res.sendFile(gameApp('index.html'));
 });
 
-app.get('/list', function (request: any, response: any) {
+app.get('/list', function (_request: Request, response: Response) {
     const contents = getFileContents();
     const names = contents.levels.map(level => ({
         id: level.id,
         name: level.name,
     }));
+
     response.send(names);
 });
 
-app.get('/new', function (request: any) {
-    const newLevelData = request.body;
+app.post('/new', function (request: Request, response: Response) {
+    const levelName = request.body?.name ?? '';
     const contents = getFileContents();
     const lastId = contents.levels.slice(-1)[0];
-    const newId = lastId === undefined ? 0 : +lastId + 1;
+    const newId = lastId === undefined ? 0 : Number(lastId.id) + 1;
     const levelData: Level = {
         id: newId.toString(),
-        name: 'level' + newId,
-        data: newLevelData,
+        name: levelName,
+        data: '',
     };
-
     const newContents = { levels: contents.levels.concat([levelData]) };
-    fs.writeFileSync(
-        process.cwd() + '/src/server/' + 'levelsTest.json',
-        JSON.stringify(newContents),
-    );
+
+    try {
+        fs.writeFileSync(LEVELS_PATH, JSON.stringify(newContents));
+    } catch(error) {
+        console.error('Error on creating a new level: ', JSON.stringify(error));
+        response.sendStatus(500);
+        return;
+    }
+    response.sendStatus(200);
 });
 
-app.get('/level', function (request: any, response: any) {
+app.get('/level', function (request: Request, response: Response) {
     const contents = getFileContents();
     const id = request.query.id;
     const level = contents.levels.find(level => level.id === id);
     response.send(level);
 });
 
-app.post('/save', function (request: any, response: any) {
+app.post('/save', function (request: Request, response: Response) {
     const newLevel = request.body;
     const contents = getFileContents();
     const newLevels = contents.levels.map(level => {
@@ -84,10 +106,14 @@ app.post('/save', function (request: any, response: any) {
         return level;
     });
     const newContents = { levels: newLevels };
-    fs.writeFileSync(
-        process.cwd() + '/src/server/' + filename,
-        JSON.stringify(newContents),
-    );
+
+    try {
+        fs.writeFileSync(LEVELS_PATH, JSON.stringify(newContents));
+    } catch(error) {
+        console.error('Error on saving a level: ', JSON.stringify(error));
+        response.sendStatus(500);
+        return;
+    }
     response.sendStatus(200);
 });
 

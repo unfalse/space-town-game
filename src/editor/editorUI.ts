@@ -1,27 +1,34 @@
 import { Editor } from './editor';
 
+const queryOrThrow = (id: string) => {
+    const element = document.querySelector(id);
+    if (element === null) throw new Error('Element not found on page');
+    return element;
+}
+
 class EditorUI {
     editorInst: Editor;
-    editorBlock: HTMLDivElement;
-    editorCurrentObject: HTMLDivElement;
+    editorBlock!: HTMLDivElement;
+    editorCurrentObject!: HTMLDivElement;
 
     constructor(editorInst: Editor) {
         this.editorInst = editorInst;
+        
     }
 
     init(): void {
-        this.editorBlock = document.querySelector('#editorBlock');
-        this.editorCurrentObject = document.querySelector(
+        this.editorBlock = queryOrThrow('#editorBlock') as HTMLDivElement;
+        this.editorCurrentObject = queryOrThrow(
             '#editorCurrentObject',
-        );
-        const editorNewBtn = document.querySelector('#editorNewBtn');
-        const editorPlayBtn = document.querySelector('#editorPlayBtn');
-        const editorSaveBtn = document.querySelector('#editorSaveBtn');
-        const editorSaveAsBtn = document.querySelector('#editorSaveAsBtn');
-        const editorLoadBtn = document.querySelector('#editorLoadBtn');
-        const editorFileListContainer = document.querySelector(
+        ) as HTMLDivElement;
+        const editorNewBtn = queryOrThrow('#editorNewBtn');
+        const editorPlayBtn = queryOrThrow('#editorPlayBtn');
+        const editorSaveBtn = queryOrThrow('#editorSaveBtn');
+        const editorSaveAsBtn = queryOrThrow('#editorSaveAsBtn');
+        const editorLoadBtn = queryOrThrow('#editorLoadBtn');
+        const editorFileListContainer = queryOrThrow(
             '#editorFileList',
-        );
+        ) as HTMLDivElement;
 
         editorNewBtn.addEventListener(
             'click',
@@ -29,8 +36,10 @@ class EditorUI {
         );
 
         editorPlayBtn.addEventListener(
-            'click',
-            this.editorInst.playEditorLevel.bind(this.editorInst),
+            'click', () => {
+                this.editorInst.playEditorLevel();
+                this.toggleEditorControls();
+            }
         );
 
         editorSaveBtn.addEventListener(
@@ -81,6 +90,15 @@ class EditorUI {
     toggleVideoHint(): void {
         const videoHint: HTMLDivElement | null = document.querySelector('.waypoints-hint');
         if (videoHint) {
+            // Load video source on first hint open to save bandwidth and speed up initial load time
+            const source = document.querySelector('.waypoints-hint video source') as HTMLSourceElement;
+            if (source.src === '') {
+                source.src = source.dataset.src || '';
+                const videoElement: HTMLVideoElement | null = document.querySelector('.waypoints-hint video');
+                if (videoElement) {                    
+                    videoElement.load();
+                }   
+            }
             videoHint.style.display = videoHint.style.display === 'none' ? 'block' : 'none';
         }
     }
