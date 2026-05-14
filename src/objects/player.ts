@@ -4,6 +4,8 @@ import { CONST } from '../const.js';
 import { Direction, InertiaDirections, Who } from '../types.js';
 
 const MAX_LIFE = 1;
+const MAX_LIVES = 3;
+const RESPAWN_INVINCIBILITY_MS = 2000;
 
 type InertiaBuffer = {
     direction: Direction;
@@ -16,18 +18,49 @@ class Player extends BaseCSW {
     isImmortal: boolean;
     inertiaBuffer: InertiaBuffer[];
     declare inertiaDirections: InertiaDirections;
+    lives: number;
+    spawnX: number;
+    spawnY: number;
+    private respawnTime: number;
 
     constructor() {
         super();
         this.PLAYER_BULLETS_INTERVAL = 700;
         this.isHidden = false;
-        this.isImmortal = true;
+        this.isImmortal = false;
         this.inertiaBuffer = [];
+        this.lives = MAX_LIVES;
+        this.spawnX = 0;
+        this.spawnY = 0;
+        this.respawnTime = -1;
+        this.MAXIMUM_ACCELERATION = 2;
     }
 
     childInit(): void {
         this.maxlife = MAX_LIFE;
         this.life = this.maxlife;
+    }
+
+    setSpawn(x: number, y: number): void {
+        this.spawnX = x;
+        this.spawnY = y;
+    }
+
+    respawn(timestamp: number): void {
+        this.x = this.spawnX;
+        this.y = this.spawnY;
+        this.life = MAX_LIFE;
+        this.stop();
+        this.isImmortal = true;
+        this.respawnTime = timestamp + RESPAWN_INVINCIBILITY_MS;
+    }
+
+    update(timestamp: number): void {
+        if (this.isImmortal && this.respawnTime > 0 && timestamp >= this.respawnTime) {
+            this.isImmortal = false;
+            this.respawnTime = -1;
+        }
+        this.move();
     }
 
     draw(ghost?: boolean): void {

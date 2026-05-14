@@ -23,7 +23,7 @@ export class Bullet extends BaseGameObject {
         super();
         //this.BULLETSPEED = whoFire ? (whoFire.iam === CONST.USER ? 2.5 : 2.5) : 2.5;
         // this.BULLETSPEED = whoFire ? (whoFire.iam === CONST.USER ? 10 : 5) : 5;
-        this.BULLETSPEED = 30; //100; // 30;
+        this.BULLETSPEED = 3; //100; // 30;
     }
 
     initBullet(

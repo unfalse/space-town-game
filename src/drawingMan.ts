@@ -286,6 +286,16 @@ export class DrawingManager {
         // this.crashImage.draw(x, y, 0, onDelayEnd);
     }
 
+    drawLives(lives: number): void {
+        const ctx = Images.drawContext;
+        const padding = 12;
+        ctx.save();
+        ctx.font = 'bold 14pt monospace';
+        ctx.fillStyle = '#fff';
+        ctx.fillText(`LIVES: ${lives}`, padding, ctx.canvas.height - padding);
+        ctx.restore();
+    }
+
     drawPlayerBullet(x: number, y: number): void {
         Images.drawContext.fillStyle = '#F00';
         const relXY = this.gameCam.getRelCoords(x, y);

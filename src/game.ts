@@ -97,6 +97,7 @@ class Game {
                     600,
                     CONST.USER,
                 ) as Player;
+                this.player1.setSpawn(this.player1.x, this.player1.y);
                 this.BTankInst.pushNewObjects([this.player1]);
 
                 placeBorders(this.objFactoryGameInst, this.BTankInst);
@@ -171,10 +172,19 @@ class Game {
     }
 
     gameCycle(timestamp: number) {
-        if (this.player1 && this.player1.life > 0) {
+        const player = this.player1;
+
+        if (player && player.life <= 0 && !this.gameOver) {
+            player.lives--;
+            if (player.lives > 0) {
+                player.respawn(timestamp);
+            }
+        }
+
+        if (player && player.life > 0) {
             this.detectMovement(timestamp);
-            this.player1.update(timestamp);
-            this.cameraInst.setCoords(this.player1.x, this.player1.y);
+            player.update(timestamp);
+            this.cameraInst.setCoords(player.x, player.y);
         }
 
         this.BTankInst.getAllShips().forEach((ship: BaseCSW) => {
@@ -205,8 +215,11 @@ class Game {
             ghost.draw();
         });
 
+        if (player) {
+            this.drawingManagerInst.drawLives(player.lives);
+        }
 
-        if (!this.gameOver && (this.win || (this.player1 && this.player1.life <= 0))) {
+        if (!this.gameOver && (this.win || (player && player.lives <= 0))) {
             if (this.win) {
                 Utils.text('YOU WIN');
                 this.BTankInst.showWin();
