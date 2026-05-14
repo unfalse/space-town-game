@@ -79,6 +79,7 @@ export class Editor {
     }
 
     playEditorLevel(): void {
+        // TODO: create player object from scratch, also make only single way to create a player
         const player = this.BTankInst.getAllShips()[0] as Player;
         this.BTankInst.destroyAll();
 
@@ -87,6 +88,7 @@ export class Editor {
         player.initCoords(this.playerCell.x, this.playerCell.y);
         this.BTankInst.addShip(player);
         this.BTankInst.setPlayer(player);
+        player.setSpawn(player.x, player.y);
 
         placeBorders(this.objFactoryInst, this.BTankInst);
 
