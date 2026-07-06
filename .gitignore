@@ -11,3 +11,5 @@ temp
 !.yarn/sdks
 !.yarn/versions
 .DS_Store
+.idea
+.claude

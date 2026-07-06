@@ -1,5 +1,11 @@
 import { CONST } from '../../const.js';
-import { InertiaDirections, Dimensions, Direction, ObjectType, Who } from '../../types.js';
+import {
+    InertiaDirections,
+    Dimensions,
+    Direction,
+    ObjectType,
+    Who,
+} from '../../types.js';
 import { DrawingManager } from '../../drawingMan.js';
 import {
     BTankManager,
@@ -31,23 +37,23 @@ export class BaseCSW extends BaseGameObject {
     d: Direction;
     stopAccel: boolean;
     MAXIMUM_ACCELERATION: number;
-    dimensions: Dimensions|null = null;
+    dimensions: Dimensions | null = null;
     declare BTankInst: BTankManager;
     declare drawingManagerInst: DrawingManager;
     declare objectsFactoryInst: ObjectsFactory;
     iam: Who = Who.COMPUTER;
-    maxlife: number= 10;
-    life: number = 0;
-    bulletsAmountOnFire: number = 0;
+    maxlife = 10;
+    life = 0;
+    bulletsAmountOnFire = 0;
     type: ObjectType = ObjectType.BORDER;
-    ghost: boolean = false;
-    centerx: number = 0;
-    centery: number = 0;
+    ghost = false;
+    centerx = 0;
+    centery = 0;
 
     constructor() {
         super();
         this.lastBulletTimeStamp = 0;
-        this.CSWSPEED = 0;
+        this.CSWSPEED = 0.1;
         this.inertiaDirections = {
             0: 0,
             1: 0,
@@ -58,7 +64,7 @@ export class BaseCSW extends BaseGameObject {
         this.inertiaTimerIsRunning = false;
         this.d = 0; // direction
         this.stopAccel = true;
-        this.MAXIMUM_ACCELERATION = 5;
+        this.MAXIMUM_ACCELERATION = 1;
     }
 
     // TODO: place code from init above!
@@ -85,16 +91,15 @@ export class BaseCSW extends BaseGameObject {
         this.dimensions = this.drawingManagerInst.initDimensions(who);
         //this.ghost = !!ghost; // only display this object
         if (this.dimensions === null) return;
-        const { width, height } = this.dimensions[
-            CONST.DIRECTIONS.RIGHT as Direction
-        ];
+        const { width, height } =
+            this.dimensions[CONST.DIRECTIONS.RIGHT as Direction];
         this.centerx = this.x + width / 2;
         this.centery = this.y + height / 2;
         this.childInit();
     }
 
-    childInit(): void {
-    }
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    childInit(): void {}
 
     setGhost(ghost: boolean): void {
         this.ghost = ghost;
@@ -147,7 +152,7 @@ export class BaseCSW extends BaseGameObject {
     }
 
     waitAndCall(callback: () => void, ms: number): void {
-        let waitStart: number|null = null;
+        let waitStart: number | null = null;
         const doThings = function (timestamp: number) {
             if (waitStart === null) {
                 waitStart = timestamp;
@@ -206,7 +211,7 @@ export class BaseCSW extends BaseGameObject {
 
     getNewCoordinatesDelta(direction: Direction): any {
         const nvxy = super.getVXY(direction);
-        const acceleration = this.CSWSPEED + this.inertiaDirections[direction];
+        const acceleration = this.inertiaDirections[direction];
         return {
             ux: nvxy.vx * acceleration,
             uy: nvxy.vy * acceleration,
@@ -240,9 +245,8 @@ export class BaseCSW extends BaseGameObject {
         const { ux: uxU, uy: uyU } = this.getNewCoordinatesDelta(
             CONST.DIRECTIONS.UP as Direction,
         );
-        let { width, height } = this.dimensions[
-            CONST.DIRECTIONS.RIGHT as Direction
-        ];
+        const { width, height } =
+            this.dimensions[CONST.DIRECTIONS.RIGHT as Direction];
 
         const horizontalUXY = {
             ux: uxR + uxL,
@@ -254,13 +258,13 @@ export class BaseCSW extends BaseGameObject {
             uy: uyD + uyU,
         };
 
-        let checkHorizontal = this.canItMove({
+        const checkHorizontal = this.canItMove({
             ux: horizontalUXY.ux,
             uy: horizontalUXY.uy,
             width,
             height,
         });
-        let checkVertical = this.canItMove({
+        const checkVertical = this.canItMove({
             ux: verticalUXY.ux,
             uy: verticalUXY.uy,
             width,
@@ -276,11 +280,7 @@ export class BaseCSW extends BaseGameObject {
         // on the blocked axes.
         if (
             (dx !== 0 || dy !== 0) &&
-            this.BTankInst.checkShipCollisionAt(
-                this.x + dx,
-                this.y + dy,
-                this,
-            )
+            this.BTankInst.checkShipCollisionAt(this.x + dx, this.y + dy, this)
         ) {
             const blockedX =
                 dx !== 0 &&
@@ -359,11 +359,12 @@ export class BaseCSW extends BaseGameObject {
                 const obstacles = column || [];
                 const objectsToCheck = ships.concat(obstacles);
                 if (objectsToCheck.length > 1) {
-                    const collision = this.BTankInst.getVectorsOfCollidedObjectsByCenter(
-                        gameObject,
-                        objectsToCheck,
-                        updatedCoords,
-                    );
+                    const collision =
+                        this.BTankInst.getVectorsOfCollidedObjectsByCenter(
+                            gameObject,
+                            objectsToCheck,
+                            updatedCoords,
+                        );
                     if (collision.length) collisions.push(collision);
                 }
             }

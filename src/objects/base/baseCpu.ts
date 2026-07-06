@@ -8,26 +8,32 @@ export class BaseCPU extends BaseCSW {
     pathStartTime: number;
     pathUnit: PathUnit | null = null;
     pathsPresets: PathUnit[];
-    x: number = 0;
-    y: number = 0;
+    x = 0;
+    y = 0;
 
     constructor() {
         super();
         this.type = CONST.COMPUTER;
-        this.CPU_BULLETS_INTERVAL = 700;
+        this.CPU_BULLETS_INTERVAL = 1400;
         this.fireStartTime = -1;
         this.pathStartTime = -1;
         this.pathsPresets = [];
     }
 
     followPath(timestamp: number): void {
-        if (this.pathUnit && timestamp - this.pathStartTime <= this.pathUnit.ms) {
+        if (
+            this.pathUnit &&
+            timestamp - this.pathStartTime <= this.pathUnit.ms
+        ) {
             this.setDirectionAndAccel(this.pathUnit.d, this.pathUnit.accel);
         } else {
             do {
                 this.pathUnit = this.AI_generateNewPath();
                 if (this.pathUnit.ms === 0) {
-                    this.setDirectionAndAccel(this.pathUnit.d, this.pathUnit.accel);
+                    this.setDirectionAndAccel(
+                        this.pathUnit.d,
+                        this.pathUnit.accel,
+                    );
                 }
             } while (this.pathUnit.ms === 0);
             this.pathStartTime = timestamp;
@@ -57,14 +63,14 @@ export class BaseCPU extends BaseCSW {
     }
 
     // distance is an amount of cells in 4 directions from the ship which is scanning
-    plusShapedScan(distance: number): Direction|null {
+    plusShapedScan(distance: number): Direction | null {
         const player = this.BTankInst.playerInstance;
         if (!player || player.life <= 0 || !this.dimensions) return null;
         const { width, height } = this.dimensions[this.d];
         distance *= CONST.CELLSIZES.MAXX;
         if (
             player.x >= this.x - distance &&
-            player.x <= this.x && 
+            player.x <= this.x &&
             player.y >= this.y &&
             player.y <= this.y + height
         )
@@ -74,7 +80,7 @@ export class BaseCPU extends BaseCSW {
             player.x <= this.x + width + distance &&
             player.y >= this.y &&
             player.y <= this.y + height
-        ) 
+        )
             return CONST.DIRECTIONS.RIGHT as Direction;
         if (
             player.y >= this.y - distance &&

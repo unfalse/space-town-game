@@ -30,16 +30,25 @@ export class ImagesStore {
         const loadImage = Images.loadImage;
         const loadManyImages = Images.loadManyImages;
         const onLoading: OnGetLoadingStatusHandler = (total, resolved) => {
-            const loadingStatus = document.querySelector('.loading-status') as HTMLDivElement;
-            const loadingStatusContainer = document.querySelector('.loading-status-container') as HTMLDivElement;
-            if (loadingStatusContainer && loadingStatusContainer.style.display === '') {
+            const loadingStatus = document.querySelector(
+                '.loading-status',
+            ) as HTMLDivElement;
+            const loadingStatusContainer = document.querySelector(
+                '.loading-status-container',
+            ) as HTMLDivElement;
+            if (
+                loadingStatusContainer &&
+                loadingStatusContainer.style.display === ''
+            ) {
                 loadingStatusContainer.style.display = 'block';
                 loadingStatusContainer.style.width = `${LOADING_STATUS_WIDTH}px`;
             }
             if (loadingStatus) {
-                loadingStatus.style.width = `${(resolved / total) * LOADING_STATUS_WIDTH - 2}px`;
+                loadingStatus.style.width = `${
+                    (resolved / total) * LOADING_STATUS_WIDTH - 2
+                }px`;
             }
-        }
+        };
 
         const promises = [
             loadManyImages(
@@ -81,17 +90,29 @@ export class ImagesStore {
             //     this.backgroundImage = image;
             // }),
 
-            loadImage('images/skybox_right.png', (image: Images) => {
-                this.backgroundImage = image;
-            }, onLoading),
+            loadImage(
+                'images/skybox_right.png',
+                (image: Images) => {
+                    this.backgroundImage = image;
+                },
+                onLoading,
+            ),
 
-            loadImage('images/blackbackground.png', (image: Images) => {
-                this.blackbackgroundImage = image;
-            }, onLoading),
+            loadImage(
+                'images/blackbackground.png',
+                (image: Images) => {
+                    this.blackbackgroundImage = image;
+                },
+                onLoading,
+            ),
 
-            loadImage('images/obstacle3.png', (image: Images) => {
-                this.obstacleImage = image;
-            }, onLoading),
+            loadImage(
+                'images/obstacle3.png',
+                (image: Images) => {
+                    this.obstacleImage = image;
+                },
+                onLoading,
+            ),
 
             loadManyImages(
                 [
@@ -105,14 +126,22 @@ export class ImagesStore {
                 onLoading,
             ),
 
-            loadImage('images/border.png', (image: Images) => {
-                this.borderImage = image;
-            }, onLoading),
+            loadImage(
+                'images/border.png',
+                (image: Images) => {
+                    this.borderImage = image;
+                },
+                onLoading,
+            ),
 
-            loadImage('images/border.png', (image: Images) => {
-                // TODO: create a picture of bullet in Aseprite later
-                this.bulletImage = image;
-            }, onLoading),
+            loadImage(
+                'images/border.png',
+                (image: Images) => {
+                    // TODO: create a picture of bullet in Aseprite later
+                    this.bulletImage = image;
+                },
+                onLoading,
+            ),
 
             // loadImage.call(this, "images/border.png", this.borderImage),
 
@@ -284,6 +313,50 @@ export class DrawingManager {
             20 * CONST.SCALE.Y * 2,
         );
         // this.crashImage.draw(x, y, 0, onDelayEnd);
+    }
+
+    drawFPS(fps: number): void {
+        const ctx = Images.drawContext;
+        const padding = 12;
+        ctx.save();
+        ctx.font = 'bold 14pt monospace';
+        ctx.fillStyle = '#fff';
+        ctx.fillText(`FPS: ${fps}`, padding, padding + 14);
+        ctx.restore();
+    }
+
+    drawLifeBar(life: number, maxLife: number): void {
+        const ctx = Images.drawContext;
+        const barWidth = 200;
+        const barHeight = 20;
+        const padding = 2;
+        const top = 12;
+        const left = (ctx.canvas.width - barWidth) / 2;
+
+        const segmentGap = 2;
+        const segmentWidth =
+            (barWidth - padding * 2 - segmentGap * (maxLife - 1)) / maxLife;
+
+        ctx.save();
+
+        ctx.fillStyle = '#000';
+        ctx.fillRect(left, top, barWidth, barHeight);
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(left, top, barWidth, barHeight);
+
+        for (let i = 0; i < maxLife; i++) {
+            const segX = left + padding + i * (segmentWidth + segmentGap);
+            ctx.fillStyle = i < life ? '#0f0' : '#333';
+            ctx.fillRect(
+                segX,
+                top + padding,
+                segmentWidth,
+                barHeight - padding * 2,
+            );
+        }
+
+        ctx.restore();
     }
 
     drawLives(lives: number): void {
