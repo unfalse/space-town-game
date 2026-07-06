@@ -42,10 +42,12 @@ type ControlsMap = {
 //        Основная логика
 // -----------------------------
 class Game {
-    mainIntervalId: number|null = null;
+    mainIntervalId: number | null = null;
     gameOver = false;
     win = false;
     keys: Keys = {} as Keys;
+    fps = 0;
+    lastFrameTime = 0;
 
     controlsMap: ControlsMap = {
         ArrowUp: 3,
@@ -60,7 +62,7 @@ class Game {
     };
 
     // TODO: move player1 into BTankManager
-    player1: Player|null = null;
+    player1: Player | null = null;
     cameraInst: Camera;
     imagesStoreInst: ImagesStore;
     drawingManagerInst: DrawingManager;
@@ -88,52 +90,48 @@ class Game {
     }
 
     start(levelId?: number) {
-        this.drawingManagerInst.init().then(
-            async () => {
-                this.EditorInst.init(this.BTankInst, this.EditorUIInst);
-                
-                this.player1 = this.objFactoryGameInst.createCSW(
-                    0,
-                    600,
-                    CONST.USER,
-                ) as Player;
-                this.player1.setSpawn(this.player1.x, this.player1.y);
-                this.BTankInst.pushNewObjects([this.player1]);
+        this.drawingManagerInst.init().then(async () => {
+            this.EditorInst.init(this.BTankInst, this.EditorUIInst);
 
-                placeBorders(this.objFactoryGameInst, this.BTankInst);
+            this.player1 = this.objFactoryGameInst.createCSW(
+                0,
+                600,
+                CONST.USER,
+            ) as Player;
+            this.player1.setSpawn(this.player1.x, this.player1.y);
+            this.BTankInst.pushNewObjects([this.player1]);
 
-                this.gameOver = false;
-                this.win = false;
+            placeBorders(this.objFactoryGameInst, this.BTankInst);
 
-                // uses the inputs import
-                document.addEventListener(
-                    'keydown',
-                    this.keysHandler.bind(this),
-                );
-                document.addEventListener('keyup', this.keysHandler.bind(this));
+            this.gameOver = false;
+            this.win = false;
 
-                this.BTankInst.gameFieldBlock.addEventListener(
-                    'mousedown',
-                    this.editorMouseDownHandler.bind(this),
-                );
-                this.BTankInst.gameFieldBlock.addEventListener(
-                    'mousemove',
-                    this.editorMouseDownHandler.bind(this),
-                );
+            // uses the inputs import
+            document.addEventListener('keydown', this.keysHandler.bind(this));
+            document.addEventListener('keyup', this.keysHandler.bind(this));
 
-                this.mainIntervalId = window.requestAnimationFrame(
-                    this.mainCycle.bind(this),
-                );
+            this.BTankInst.gameFieldBlock.addEventListener(
+                'mousedown',
+                this.editorMouseDownHandler.bind(this),
+            );
+            this.BTankInst.gameFieldBlock.addEventListener(
+                'mousemove',
+                this.editorMouseDownHandler.bind(this),
+            );
 
-                if (levelId !== undefined) {
-                    await this.EditorInst.loadTheEditorLevel(levelId);
-                    this.EditorInst.playEditorLevel();
-                }
-            },
-        );
+            this.mainIntervalId = window.requestAnimationFrame(
+                this.mainCycle.bind(this),
+            );
+
+            if (levelId !== undefined) {
+                await this.EditorInst.loadTheEditorLevel(levelId);
+                this.EditorInst.playEditorLevel();
+            }
+        });
     }
 
     mainCycle(timestamp: number) {
+        this.updateFPS(timestamp);
         this.drawingManagerInst.drawBackground();
 
         if (this.EditorInst.editorMode) {
@@ -142,9 +140,21 @@ class Game {
             this.gameCycle(timestamp);
         }
 
+        this.drawingManagerInst.drawFPS(this.fps);
+
         this.mainIntervalId = window.requestAnimationFrame(
             this.mainCycle.bind(this),
         );
+    }
+
+    updateFPS(timestamp: number) {
+        if (this.lastFrameTime) {
+            const delta = timestamp - this.lastFrameTime;
+            if (delta > 0) {
+                this.fps = Math.round(1000 / delta);
+            }
+        }
+        this.lastFrameTime = timestamp;
     }
 
     editorCycle(_timestamp: number) {
@@ -208,7 +218,7 @@ class Game {
         });
 
         this.BTankInst.getAllDelayedPics().forEach((pic: DelayedPic) => {
-            pic.draw();
+            pic.draw(timestamp);
         });
 
         this.BTankInst.getAllGhosts().forEach((ghost: BaseCSW) => {
@@ -217,6 +227,7 @@ class Game {
 
         if (player) {
             this.drawingManagerInst.drawLives(player.lives);
+            this.drawingManagerInst.drawLifeBar(player.life, player.maxlife);
         }
 
         if (!this.gameOver && (this.win || (player && player.lives <= 0))) {

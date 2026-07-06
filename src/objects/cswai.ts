@@ -122,7 +122,9 @@ class CSWAI_1 extends BaseCPU {
 
     AI_generateNewPath(): PathUnit {
         return {
-            d: this.dirs[Utils.getRandomInt(0, this.dirs.length - 1)] as Direction,
+            d: this.dirs[
+                Utils.getRandomInt(0, this.dirs.length - 1)
+            ] as Direction,
             accel: this.accels[Utils.getRandomInt(0, this.accels.length - 1)],
             ms: this.msArray[Utils.getRandomInt(0, this.msArray.length - 1)],
         };
@@ -140,7 +142,10 @@ class CSWAI_1 extends BaseCPU {
                 this.newFireTime = this.AI_generateNewFireTime();
                 this.fireLastTime = timestamp;
             }
-            if (this.newFireTime > 0 && timestamp - this.fireLastTime >= this.newFireTime) {
+            if (
+                this.newFireTime > 0 &&
+                timestamp - this.fireLastTime >= this.newFireTime
+            ) {
                 this.fire(timestamp);
                 this.newFireTime = this.AI_generateNewFireTime();
                 this.fireLastTime = timestamp;
@@ -167,8 +172,8 @@ class CSWAI_customPaths extends BaseCPU {
         // this.d = 0;
     }
 
-    childInit(): void {
-    }
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    childInit(): void {}
 
     setWaypoints(wayPoints?: WayPoints[]): void {
         this.wayPoints = wayPoints || [];
@@ -176,7 +181,7 @@ class CSWAI_customPaths extends BaseCPU {
 
     update(timestamp: number): void {
         let currentWp = this.currentWp;
-        const accel = 2;
+        const accel = 1;
         let d = -1;
 
         if (this.wayPoints.length !== 0) {
@@ -226,8 +231,4 @@ class CSWAI_customPaths extends BaseCPU {
     }
 }
 
-export {
-    CSWAI_0,
-    CSWAI_1,
-    CSWAI_customPaths,
-};
+export { CSWAI_0, CSWAI_1, CSWAI_customPaths };

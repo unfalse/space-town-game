@@ -3,7 +3,7 @@ import { Bullet } from './bullet.js';
 import { CONST } from '../const.js';
 import { Direction, InertiaDirections, Who } from '../types.js';
 
-const MAX_LIFE = 1;
+const MAX_LIFE = 5;
 const MAX_LIVES = 3;
 const RESPAWN_INVINCIBILITY_MS = 2000;
 
@@ -25,7 +25,7 @@ class Player extends BaseCSW {
 
     constructor() {
         super();
-        this.PLAYER_BULLETS_INTERVAL = 700;
+        this.PLAYER_BULLETS_INTERVAL = 1400;
         this.isHidden = false;
         this.isImmortal = false;
         this.inertiaBuffer = [];
@@ -33,7 +33,7 @@ class Player extends BaseCSW {
         this.spawnX = 0;
         this.spawnY = 0;
         this.respawnTime = -1;
-        this.MAXIMUM_ACCELERATION = 2;
+        this.MAXIMUM_ACCELERATION = 1.5;
     }
 
     childInit(): void {
@@ -56,7 +56,11 @@ class Player extends BaseCSW {
     }
 
     update(timestamp: number): void {
-        if (this.isImmortal && this.respawnTime > 0 && timestamp >= this.respawnTime) {
+        if (
+            this.isImmortal &&
+            this.respawnTime > 0 &&
+            timestamp >= this.respawnTime
+        ) {
             this.isImmortal = false;
             this.respawnTime = -1;
         }
@@ -91,9 +95,8 @@ class Player extends BaseCSW {
 
         // TODO: not sure if it's a right place to change inertia directions
         if (this.inertiaDirections[CONST.DIR_OPPOSITES[d] as Direction] > 0) {
-            this.inertiaDirections[
-                CONST.DIR_OPPOSITES[d] as Direction
-            ] -= accel;
+            this.inertiaDirections[CONST.DIR_OPPOSITES[d] as Direction] -=
+                accel;
             if (
                 this.inertiaDirections[CONST.DIR_OPPOSITES[d] as Direction] < 0
             ) {

@@ -17,9 +17,7 @@ export type CollisionGridRows = {
     [key in number]: CollisionGridColumns;
 };
 
-function rectForCsw(
-    csw: BaseCSW,
-): { width: number; height: number } | null {
+function rectForCsw(csw: BaseCSW): { width: number; height: number } | null {
     const d = csw.dimensions;
     return d ? d[csw.d] : null;
 }
@@ -270,10 +268,8 @@ export class BTankManager {
 
         const wo = rectForCsw(whoAsks);
         if (!wo) return null;
-        let { width, height } = wo;
+        const { width, height } = wo;
         const { x, y } = newCoords || whoAsks;
-        // width--;
-        // height--;
 
         const tArr = objects
             .map((csw: BaseCSW) => {
