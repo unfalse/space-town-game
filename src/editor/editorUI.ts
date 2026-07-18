@@ -81,9 +81,14 @@ class EditorUI {
     }
 
     toggleEditorHint(): void {
-        const editorHint: HTMLDivElement | null = document.querySelector('.editor-hint');
+        const editorHint: HTMLDivElement | null =
+            document.querySelector('.editor-hint');
         if (editorHint) {
-            editorHint.style.display = editorHint.style.display === 'none' ? 'block' : 'none';
+            const hintStyleDisplay = editorHint.style.display;
+            editorHint.style.display =
+                hintStyleDisplay === 'none' || hintStyleDisplay === ''
+                    ? 'block'
+                    : 'none';
         }
     }
 
