@@ -12,7 +12,7 @@ import { Player } from '../objects/player.js';
 const EDITOR_SERVER_ADDRESS = `${window.location.protocol}//${window.location.hostname}`;
 
 type LevelObject = {
-    id: number|null;
+    id: number | null;
     name: string;
     data: string;
 };
@@ -31,7 +31,7 @@ export class Editor {
     editorMode!: boolean;
     editorUnits!: BaseCSW[];
     editorGhosts!: Ghosts;
-    currentShipWithWaypoints!: CSWAI_customPaths|null;
+    currentShipWithWaypoints!: CSWAI_customPaths | null;
     playerCell!: Point;
     objFactoryInst: ObjectsFactory;
     editorUI!: EditorUI;
@@ -74,7 +74,7 @@ export class Editor {
                 'Content-Type': 'application/json',
             },
             body: undefined,
-        })
+        });
         alert('Level has been added!');
     }
 
@@ -120,30 +120,27 @@ export class Editor {
     prepareLevelForSaving(): string {
         let levelData = [this.playerCell.x, this.playerCell.y].join(';') + '|';
 
-        levelData += this.editorUnits.reduce(
-            (prev: string, curr: BaseCSW) => {
-                let wayPoints = '';
-                if (curr.type === CONST.TYPES.SHIP) {
-                    wayPoints = JSON.stringify(
-                        (curr as CSWAI_customPaths).wayPoints,
-                    );
-                }
-                return (
-                    prev +
-                    wayPoints +
-                    ';' +
-                    !!curr.ghost +
-                    ';' +
-                    curr.type +
-                    ';' +
-                    curr.y +
-                    ';' +
-                    curr.x +
-                    '|'
+        levelData += this.editorUnits.reduce((prev: string, curr: BaseCSW) => {
+            let wayPoints = '';
+            if (curr.type === CONST.TYPES.SHIP) {
+                wayPoints = JSON.stringify(
+                    (curr as CSWAI_customPaths).wayPoints,
                 );
-            },
-            '',
-        );
+            }
+            return (
+                prev +
+                wayPoints +
+                ';' +
+                !!curr.ghost +
+                ';' +
+                curr.type +
+                ';' +
+                curr.y +
+                ';' +
+                curr.x +
+                '|'
+            );
+        }, '');
 
         return levelData;
     }
@@ -158,8 +155,7 @@ export class Editor {
                 },
                 body: JSON.stringify(this.currentLevelObj),
             });
-        }
-        catch (error) {
+        } catch (error) {
             console.log('Error while saving: ', JSON.stringify(error));
         } finally {
             alert('Done');
@@ -168,7 +164,7 @@ export class Editor {
 
     saveEditorLevel(): void {
         const levelString = this.prepareLevelForSaving();
-        this.updateLevelData(levelString)
+        this.updateLevelData(levelString);
         this.uploadLevel();
     }
 
@@ -176,7 +172,7 @@ export class Editor {
         // TODO: show an input to enter the new name and ok and cancel buttons
     }
 
-    setCurrentShipWithWaypoints(ship: CSWAI_customPaths|null): void {
+    setCurrentShipWithWaypoints(ship: CSWAI_customPaths | null): void {
         this.currentShipWithWaypoints = ship as CSWAI_customPaths;
     }
 
@@ -188,10 +184,12 @@ export class Editor {
         this.currentLevelObj.data = levelData;
     }
 
-    async showLevelChooseDialog(editorFileListContainer: HTMLDivElement): Promise<void> {
+    async showLevelChooseDialog(
+        editorFileListContainer: HTMLDivElement,
+    ): Promise<void> {
         // this.editorGhosts = [];
         try {
-            const result = await fetch(`${EDITOR_SERVER_ADDRESS}/list`)
+            const result = await fetch(`${EDITOR_SERVER_ADDRESS}/list`);
             const r = await result.json();
 
             editorFileListContainer.style.display = 'block';
@@ -205,18 +203,15 @@ export class Editor {
             r.forEach((level: LevelObject) => {
                 const li = document.createElement('li');
                 li.innerText = level.name;
-                li.addEventListener(
-                    'click',
-                    async () => {
-                        await this.loadTheEditorLevel(level.id as number);
-                        editorFileListContainer.style.display = 'none';
-                        title.innerText = '';
-                        editorFileListContainer.removeChild(ul);
-                    },
-                );
+                li.addEventListener('click', async () => {
+                    await this.loadTheEditorLevel(level.id as number);
+                    editorFileListContainer.style.display = 'none';
+                    title.innerText = '';
+                    editorFileListContainer.removeChild(ul);
+                });
                 ul.append(li);
             });
-        
+
             editorFileListContainer.append(ul);
         } catch (e) {
             console.log(e);
@@ -226,10 +221,14 @@ export class Editor {
     async loadTheEditorLevel(id: number): Promise<void> {
         const DATA_SEPARATOR = '|';
         const response = await fetch(`${EDITOR_SERVER_ADDRESS}/level?id=${id}`);
-        const levelObj = await response.json() as LevelObject;
+        const levelObj = (await response.json()) as LevelObject;
         this.setCurrentLevel(levelObj);
 
-        levelObj.data.split(DATA_SEPARATOR)
+        // console.log({ editorUnits: this.editorUnits });
+        this.editorUnits = [];
+
+        levelObj.data
+            .split(DATA_SEPARATOR)
             .forEach((objStr: string, strIndex: number) => {
                 const fields = objStr.split(';');
 
@@ -249,11 +248,7 @@ export class Editor {
                             const splitted = fields[0].split(',');
                             const [type, x, y] = splitted;
 
-                            this.createEditorUnit(
-                                +x,
-                                +y,
-                                +type,
-                            );
+                            this.createEditorUnit(+x, +y, +type);
                         } else {
                             const [waypoints, , type, y, x] = fields;
 
@@ -274,7 +269,8 @@ export class Editor {
         const DATA_SEPARATOR = '|';
         const response = await fetch(`${EDITOR_SERVER_ADDRESS}/level?id=${id}`);
         const r = await response.json();
-        r.data.split(DATA_SEPARATOR)
+        r.data
+            .split(DATA_SEPARATOR)
             .forEach((objStr: string, strIndex: number) => {
                 const fields = objStr.split(';');
                 if (strIndex === 0) {
@@ -401,11 +397,10 @@ export class Editor {
 
     removeEditorWaypointAt(x: number, y: number): void {
         if (!this.currentShipWithWaypoints) return;
-        this.currentShipWithWaypoints.wayPoints = this.currentShipWithWaypoints.wayPoints.filter(
-            (wp: WayPoints) => {
+        this.currentShipWithWaypoints.wayPoints =
+            this.currentShipWithWaypoints.wayPoints.filter((wp: WayPoints) => {
                 return !(wp[0] === x && wp[1] === y);
-            },
-        );
+            });
     }
 
     setCurrentEditorBrushObject(brushObjectType: ObjectType): void {
