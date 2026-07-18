@@ -3,8 +3,11 @@ FROM node:24.10.0-alpine AS builder
 
 WORKDIR /app
 
-COPY package.json yarn.lock* ./
-RUN yarn install --frozen-lockfile
+RUN corepack enable && corepack prepare yarn@4.x --activate
+
+COPY package.json yarn.lock .yarnrc.yml ./
+COPY .yarn ./.yarn
+RUN yarn install --immutable
 
 COPY . .
 # Build client bundle (webpack, production mode so NODE_ENV=production → port 80)
@@ -15,9 +18,12 @@ FROM node:24.10.0-alpine
 
 WORKDIR /app
 
+RUN corepack enable && corepack prepare yarn@4.x --activate
+
 # Install only production runtime deps (cors, express)
-COPY package.json yarn.lock* ./
-RUN yarn install --production --frozen-lockfile
+COPY package.json yarn.lock .yarnrc.yml ./
+COPY .yarn ./.yarn
+RUN yarn install --immutable
 
 # Copy compiled Express server
 COPY --from=builder /app/dist ./dist
