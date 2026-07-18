@@ -23,7 +23,9 @@ type Contents = {
 };
 
 const resolvePath = (p: string) => p.replace(/^~/, os.homedir());
-const LEVELS_PATH = resolvePath(process.env.LEVELS_PATH ?? path.join(__dirname, 'levels.json'));
+const LEVELS_PATH = resolvePath(
+    process.env.LEVELS_PATH ?? path.join(__dirname, 'levels.json'),
+);
 
 const gameApp = (file?: string) => path.join(__dirname, '../', file || '');
 
@@ -44,15 +46,15 @@ const getFileContents = (): Contents => {
     try {
         const levelsContents = fs.readFileSync(LEVELS_PATH).toString();
         return JSON.parse(levelsContents);
-    } catch(error) {
+    } catch (error) {
         console.error('Loading levels.json error: ', JSON.stringify(error));
     }
-    
+
     return {
-        levels: []
+        levels: [],
     };
-}
-    
+};
+
 app.get('/', (_req: Request, res: Response) => {
     res.sendFile(gameApp('index.html'));
 });
@@ -81,7 +83,7 @@ app.post('/new', function (request: Request, response: Response) {
 
     try {
         fs.writeFileSync(LEVELS_PATH, JSON.stringify(newContents));
-    } catch(error) {
+    } catch (error) {
         console.error('Error on creating a new level: ', JSON.stringify(error));
         response.sendStatus(500);
         return;
@@ -109,7 +111,7 @@ app.post('/save', function (request: Request, response: Response) {
 
     try {
         fs.writeFileSync(LEVELS_PATH, JSON.stringify(newContents));
-    } catch(error) {
+    } catch (error) {
         console.error('Error on saving a level: ', JSON.stringify(error));
         response.sendStatus(500);
         return;
