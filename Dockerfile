@@ -6,7 +6,6 @@ WORKDIR /app
 RUN corepack enable && corepack prepare yarn@4.x --activate
 
 COPY package.json yarn.lock .yarnrc.yml ./
-COPY .yarn ./.yarn
 RUN yarn install --immutable
 
 COPY . .
@@ -22,7 +21,6 @@ RUN corepack enable && corepack prepare yarn@4.x --activate
 
 # Install only production runtime deps (cors, express)
 COPY package.json yarn.lock .yarnrc.yml ./
-COPY .yarn ./.yarn
 RUN yarn install --immutable
 
 # Copy compiled Express server
