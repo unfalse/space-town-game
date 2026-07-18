@@ -1,4 +1,3 @@
-import { on } from 'process';
 import { Camera } from './camera';
 import { CONST } from './const';
 import { Images, OnGetLoadingStatusHandler } from './images';
@@ -365,7 +364,11 @@ export class DrawingManager {
         ctx.save();
         ctx.font = 'bold 14pt monospace';
         ctx.fillStyle = '#fff';
-        ctx.fillText(`LIVES: ${lives}`, padding, ctx.canvas.height - padding);
+        ctx.fillText(
+            `(press "t" for help) LIVES: ${lives}`,
+            padding,
+            ctx.canvas.height - padding,
+        );
         ctx.restore();
     }
 
