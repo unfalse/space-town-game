@@ -8,7 +8,7 @@ import path from 'path';
 
 dotenv.config();
 
-const PORT = 80;
+const PORT = Number(process.env.PORT) || 80;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 

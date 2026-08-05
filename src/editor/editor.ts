@@ -9,8 +9,6 @@ import { EditorUI } from './editorUI';
 import { Ghosts } from '../objects/ghosts.js';
 import { Player } from '../objects/player.js';
 
-const EDITOR_SERVER_ADDRESS = `${window.location.protocol}//${window.location.hostname}`;
-
 type LevelObject = {
     id: number | null;
     name: string;
@@ -67,7 +65,7 @@ export class Editor {
     }
 
     async uploadNewLevel(): Promise<void> {
-        await fetch(`${EDITOR_SERVER_ADDRESS}/new`, {
+        await fetch('/new', {
             method: 'post',
             headers: {
                 Accept: 'application/json',
@@ -147,7 +145,7 @@ export class Editor {
 
     async uploadLevel(): Promise<void> {
         try {
-            await fetch(`${EDITOR_SERVER_ADDRESS}/save`, {
+            await fetch('/save', {
                 method: 'post',
                 headers: {
                     Accept: 'application/json',
@@ -189,7 +187,7 @@ export class Editor {
     ): Promise<void> {
         // this.editorGhosts = [];
         try {
-            const result = await fetch(`${EDITOR_SERVER_ADDRESS}/list`);
+            const result = await fetch('/list');
             const r = await result.json();
 
             editorFileListContainer.style.display = 'block';
@@ -220,7 +218,7 @@ export class Editor {
 
     async loadTheEditorLevel(id: number): Promise<void> {
         const DATA_SEPARATOR = '|';
-        const response = await fetch(`${EDITOR_SERVER_ADDRESS}/level?id=${id}`);
+        const response = await fetch(`/level?id=${id}`);
         const levelObj = (await response.json()) as LevelObject;
         this.setCurrentLevel(levelObj);
 
@@ -267,7 +265,7 @@ export class Editor {
 
     async loadTheGameLevel(id: number): Promise<void> {
         const DATA_SEPARATOR = '|';
-        const response = await fetch(`${EDITOR_SERVER_ADDRESS}/level?id=${id}`);
+        const response = await fetch(`/level?id=${id}`);
         const r = await response.json();
         r.data
             .split(DATA_SEPARATOR)
