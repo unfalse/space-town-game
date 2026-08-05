@@ -1,8 +1,10 @@
 services:
   game:
     build: .
+    environment:
+      - PORT=${PORT:-80}
     ports:
-      - "80:80"
+      - "${PORT:-80}:${PORT:-80}"
     volumes:
       - levels-data:/app/src/server
     restart: unless-stopped

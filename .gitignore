@@ -13,3 +13,5 @@ temp
 .DS_Store
 .idea
 .claude
+.env
+assets/.DS_Store

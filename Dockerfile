@@ -32,7 +32,9 @@ COPY --from=builder /app/src/server/levels.json ./src/server/levels.json
 # Copy server config
 COPY --from=builder /app/src/shared/config.json ./src/shared/config.json
 
-# Expose only port 80
-EXPOSE 80
+# Port the server listens on (process.env.PORT); override with
+# `docker run -e PORT=... -p ...:...` or via docker-compose
+ENV PORT=80
+EXPOSE ${PORT}
 
 CMD node dist/server/index.js
