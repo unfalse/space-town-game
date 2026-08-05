@@ -2,9 +2,9 @@ services:
   game:
     build: .
     environment:
-      - PORT=${PORT:-80}
+      - PORT=3000
     ports:
-      - "${PORT:-80}:${PORT:-80}"
+      - "127.0.0.1:${HOST_PORT:-3000}:3000"
     volumes:
       - levels-data:/app/src/server
     restart: unless-stopped
