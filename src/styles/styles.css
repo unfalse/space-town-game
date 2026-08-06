@@ -91,7 +91,6 @@ canvas {
     font-size: 12pt;
     font-family: monospace;
     padding: 10px;
-    display: none;
 }
 
 .waypoints-hint {
