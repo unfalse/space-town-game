@@ -23,9 +23,7 @@ type Contents = {
 };
 
 const resolvePath = (p: string) => p.replace(/^~/, os.homedir());
-const LEVELS_PATH = resolvePath(
-    process.env.LEVELS_PATH ?? path.join(__dirname, 'levels.json'),
-);
+const LEVELS_PATH = resolvePath(path.join(__dirname, 'levels.json'));
 
 const gameApp = (file?: string) => path.join(__dirname, '../', file || '');
 
