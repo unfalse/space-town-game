@@ -1,10 +1,10 @@
 #### [EN]
 # SPACE TOWN
 
-A 2D browser-based four-way scroll shooter with a space background. Written in pure TypeScript without any third-party libraries, excluding Webpack and Express. The game is a prototype: the player is immortal, can destroy bots, and bots can destroy each other. The AI is primitive, capable of chasing the player and shooting if they are nearby, as well as flying along predefined waypoints.
+A 2D browser-based four-way scroll shooter with a space background. Written in pure TypeScript without any third-party libraries, excluding Webpack and Express. The game is a prototype: the player has 5 hits and 3 lives, can destroy bots, and bots can destroy each other. The AI is primitive, capable of chasing the player and shooting if they are nearby, as well as flying along predefined waypoints.
 Bugs and crashes may occur.
 
-You can fly around here [https://archthink.taila66f39.ts.net/](https://archthink.taila66f39.ts.net/) without having to deal with the build process.
+You can try it here [https://st.unfalsecoding.net/](https://st.unfalsecoding.net/).
 
 ## Contents
 
@@ -77,10 +77,10 @@ If the first waypoint is not placed directly on the bot, the bot may deviate fro
 #### [RU]
 # SPACE TOWN
 
-Двухмерный браузерный четырёхсторонний скроллшутер с космическим фоном. Написан на чистом Typescript без библиотек от третьей стороны, не считая webpack и express. Игра является заготовкой, игрок бессмертен, может уничтожать ботов, боты могут уничтожать друг друга. Искусственный интеллект здесь самый примитивный и умеет преследовать игрока и стрелять в него, если он поблизости, а также летать по заранее указанным точкам следования.
+Двухмерный браузерный четырёхсторонний скроллшутер с космическим фоном. Написан на чистом Typescript без библиотек от третьей стороны, не считая webpack и express. Игра является заготовкой, у игрока 5 хитов и 3 жизни, он может уничтожать ботов, боты могут уничтожать друг друга. Искусственный интеллект здесь самый примитивный и умеет преследовать игрока и стрелять в него, если он поблизости, а также летать по заранее указанным точкам следования.
 Возможны баги и падения.
 
-**Здесь [https://archthink.taila66f39.ts.net/](https://archthink.taila66f39.ts.net/) можно полетать и не мучиться со сборкой.**
+**Здесь [https://st.unfalsecoding.net/](https://st.unfalsecoding.net/) можно попробовать в действии.**
 
 ## Содержимое
 
