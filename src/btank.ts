@@ -1,69 +1,44 @@
 import { CONST } from './const';
-import { Bullet } from './objects/bullet';
 import { Images } from './images';
-import { DelayedPic } from './objects/delayedPic';
-import { CollisionDistance, ObjectType } from './types';
-import { BaseCSW } from './objects/base/baseCsw';
-import { Player } from './objects/player';
-import { Ghosts } from './objects/ghosts';
-import { PointXY } from './objects/base/baseCoord';
-// import { IPlayer } from './interfaces';
+import { CollisionDistance, ObjectType, Point } from './types';
+import { EntityId } from './ecs/world';
+import {
+    transforms,
+    shipDimensions,
+    typeTags,
+    bulletLinks,
+    destroyEntity,
+} from './ecs/components';
 
-export type CollisionGridColumns = {
-    [key in number]: BaseCSW[];
-};
-
-export type CollisionGridRows = {
-    [key in number]: CollisionGridColumns;
-};
-
-function rectForCsw(csw: BaseCSW): { width: number; height: number } | null {
-    const d = csw.dimensions;
-    return d ? d[csw.d] : null;
+function rectForEntity(id: EntityId): { width: number; height: number } | null {
+    const dims = shipDimensions.get(id)?.dimensions;
+    const t = transforms.get(id);
+    if (!dims || !t) return null;
+    return dims[t.d];
 }
 
-// type CollisionMap = Array<number>[8];
-
-// type CheckObjectsCrossResult = {
-//     result: CollisionMap;
-//     collidedObject: BaseCSW;
-// } | false;
-
-// -------------------------------------
-//    TOFIX! bullet dep propagation
-// -------------------------------------
-
-// Tanks manager and draw manager
-// BattleTankGame.deps.BTankManager = function (
+// Tanks manager and draw manager: owns the live entity lists and the
+// broad/narrow-phase collision queries every system relies on.
 export class BTankManager {
-    cswArr: BaseCSW[];
-    ghosts: Ghosts;
-    bulletsArr: Bullet[];
-    delayedPics: DelayedPic[];
-    drawContext!: CanvasRenderingContext2D;
+    cswArr: EntityId[];
+    ghosts: EntityId[];
+    bulletsArr: EntityId[];
+    delayedPics: EntityId[];
     // infoContext: any;
     againBtn!: HTMLButtonElement;
     gameOverBlock!: HTMLDivElement;
 
-    // cswAI: BaseCPU; // TODO: make it more easy to choose different AIs
     gameInfo?: HTMLCanvasElement;
     titleBlock!: HTMLDivElement;
     gameFieldBlock!: HTMLCanvasElement;
-    // gameCam: Camera;
-    playerInstance: Player;
+    playerInstance: EntityId | null;
 
-    dynamicCollisionGrid: CollisionGridRows;
-    staticCollisionGrid: CollisionGridRows;
-
-    constructor(player: Player) {
-        // TODO: write the full paths to classes
+    constructor(player: EntityId | null) {
         this.cswArr = [];
         this.ghosts = [];
         this.bulletsArr = [];
         this.delayedPics = [];
         this.playerInstance = player;
-        this.dynamicCollisionGrid = [];
-        this.staticCollisionGrid = [];
     }
 
     init(): void {
@@ -72,16 +47,11 @@ export class BTankManager {
         ) as HTMLCanvasElement;
 
         gameField.height = document.body.clientHeight;
-        // CONST.SCREENMAXY * CONST.CELLSIZES.MAXY * CONST.SCALE.Y;
-
         gameField.width = document.body.clientWidth;
-        // CONST.SCREENMAXX * CONST.CELLSIZES.MAXX * CONST.SCALE.X;
 
         CONST.CAM.CENTERY = gameField.height / 2;
         CONST.CAM.CENTERX = gameField.width / 2;
 
-        // TODO: create new ui class and move these things to it
-        // this.gameInfo = document.getElementById("gameInfo");
         this.againBtn = document.querySelector(
             '#playAgainBtn',
         ) as HTMLButtonElement;
@@ -95,59 +65,29 @@ export class BTankManager {
 
         const ctx = gameField.getContext('2d');
         if (!ctx) throw new Error('Unable to acquire 2D canvas context');
-        this.drawContext = ctx;
-        Images.drawContext = this.drawContext;
-        //this.infoContext = this.gameInfo.getContext("2d");
-
-        // TODO: make separate editor class?
-        // current object chosen to place on the map
-        // this.gameCam = new Camera(this);
-
-        // TODO: it should be a function which will preload images.
-        // First it should collect paths to images from classes (csw, cswai, obstacle, etc.)
-        // Every class will have a variable with image. Now it can only call the "draw" function.
-        // Image field should be in csw class. This way player should have a separate class.
+        Images.drawContext = ctx;
     }
 
-    pushNewObjects(objects: Array<BaseCSW>, ghost?: boolean): void {
+    pushNewObjects(entityIds: EntityId[], ghost?: boolean): void {
         if (ghost) {
-            this.ghosts = this.ghosts.concat(objects);
+            this.ghosts = this.ghosts.concat(entityIds);
         } else {
-            this.cswArr = this.cswArr.concat(objects);
+            this.cswArr = this.cswArr.concat(entityIds);
         }
     }
 
     // x, y - coordinates of pixels, not cells
-    checkCSWWithPixelPrecision(
-        x: number,
-        y: number,
-        whoAsks: BaseCSW,
-    ): boolean {
-        const result = this.cswArr.filter((csw: BaseCSW) => {
-            // console.log(whoAsks === csw);
-            if (whoAsks === csw) {
-                return false;
-            }
-            const rect = rectForCsw(csw);
-            if (!rect) return false;
-            const { width, height } = rect;
-            return (
-                x >= csw.x &&
-                x <= csw.x + width &&
-                y >= csw.y &&
-                y <= csw.y + height
-            );
-        });
-        return result.length > 0;
+    checkCSWWithPixelPrecision(x: number, y: number, whoAsks: EntityId): boolean {
+        return this.getCSWWithPixelPrecision(x, y, whoAsks) !== null;
     }
 
     // Precise AABB check between `whoAsks` placed at (newX, newY) and any
-    // blocking object: ships (PLAYER, SHIP, STATICSHIP), OBSTACLE, SPACEBRICK.
+    // blocking entity: ships (PLAYER, SHIP, STATICSHIP), OBSTACLE, SPACEBRICK.
     checkShipCollisionAt(
         newX: number,
         newY: number,
-        whoAsks: BaseCSW,
-    ): BaseCSW | null {
+        whoAsks: EntityId,
+    ): EntityId | null {
         const blockingTypes: ObjectType[] = [
             CONST.TYPES.PLAYER as ObjectType,
             CONST.TYPES.SHIP as ObjectType,
@@ -156,25 +96,27 @@ export class BTankManager {
             CONST.TYPES.SPACEBRICK as ObjectType,
         ];
 
-        const whoRect = rectForCsw(whoAsks);
+        const whoRect = rectForEntity(whoAsks);
         if (!whoRect) return null;
         const { width: aw, height: ah } = whoRect;
 
-        for (const csw of this.cswArr) {
-            if (csw === whoAsks || !blockingTypes.includes(csw.type)) {
+        for (const id of this.cswArr) {
+            const type = typeTags.get(id)?.type;
+            if (id === whoAsks || type === undefined || !blockingTypes.includes(type)) {
                 continue;
             }
-            const oppRect = rectForCsw(csw);
-            if (!oppRect) continue;
+            const oppRect = rectForEntity(id);
+            const oppT = transforms.get(id);
+            if (!oppRect || !oppT) continue;
             const { width: bw, height: bh } = oppRect;
             // Standard AABB intersection test
             if (
-                newX < csw.x + bw &&
-                newX + aw > csw.x &&
-                newY < csw.y + bh &&
-                newY + ah > csw.y
+                newX < oppT.x + bw &&
+                newX + aw > oppT.x &&
+                newY < oppT.y + bh &&
+                newY + ah > oppT.y
             ) {
-                return csw;
+                return id;
             }
         }
         return null;
@@ -183,288 +125,238 @@ export class BTankManager {
     checkIfTwoShipsCross(
         nx: number,
         ny: number,
-        whoAsks: BaseCSW,
+        whoAsks: EntityId,
         typesToIgnore: ObjectType[],
-    ): BaseCSW | null {
-        // const debugDraw = (function(x,y,w,h) {
-        //     this.drawContext.strokeStyle = "#0f0";
-        //     this.drawContext.strokeRect(x, y, w, h);
-        // }).bind(this);
-        // const typeToCheck = typeToCheckParam || CONST.TYPES.SHIP;
-
-        const checkSquare = (csw: BaseCSW, x: number, y: number) => {
-            const rd = rectForCsw(csw);
-            if (!rd) return false;
+    ): EntityId | null {
+        const checkSquare = (id: EntityId, x: number, y: number) => {
+            const rd = rectForEntity(id);
+            const t = transforms.get(id);
+            if (!rd || !t) return false;
             let { width, height } = rd;
             width--;
             height--;
-            // debugDraw(csw.x, csw.y, width, height);
-
-            return (
-                x >= csw.x &&
-                x <= csw.x + width &&
-                y >= csw.y &&
-                y <= csw.y + height
-            );
+            return x >= t.x && x <= t.x + width && y >= t.y && y <= t.y + height;
         };
 
-        const wr = rectForCsw(whoAsks);
+        const wr = rectForEntity(whoAsks);
         if (!wr) return null;
         let { width, height } = wr;
         width--;
         height--;
 
-        const tArr = this.cswArr.filter((csw: BaseCSW) => {
+        const tArr = this.cswArr.filter((id: EntityId) => {
+            const type = typeTags.get(id)?.type;
             if (
-                whoAsks === csw ||
-                (typesToIgnore?.includes(csw.type) ?? false)
+                whoAsks === id ||
+                (type !== undefined && typesToIgnore?.includes(type))
             ) {
                 return false;
             }
 
-            const checkResult =
-                checkSquare(csw, nx, ny) ||
-                checkSquare(csw, nx + width, ny) ||
-                checkSquare(csw, nx, ny + height) ||
-                checkSquare(csw, nx + width, ny + height) ||
-                checkSquare(csw, nx + width / 2, ny) ||
-                checkSquare(csw, nx, ny + height / 2) ||
-                checkSquare(csw, nx + width, ny + height / 2) ||
-                checkSquare(csw, nx + width / 2, ny + height);
-            return checkResult;
-        }, this);
+            return (
+                checkSquare(id, nx, ny) ||
+                checkSquare(id, nx + width, ny) ||
+                checkSquare(id, nx, ny + height) ||
+                checkSquare(id, nx + width, ny + height) ||
+                checkSquare(id, nx + width / 2, ny) ||
+                checkSquare(id, nx, ny + height / 2) ||
+                checkSquare(id, nx + width, ny + height / 2) ||
+                checkSquare(id, nx + width / 2, ny + height)
+            );
+        });
 
         return tArr.length > 0 ? tArr[0] : null;
     }
 
     checkIfTwoObjectsCrossInsideACell(
-        whoAsks: BaseCSW,
-        objects: BaseCSW[],
-        newCoords?: PointXY,
+        whoAsks: EntityId,
+        objects: EntityId[],
+        newCoords?: Point,
         typesToIgnore?: ObjectType[],
     ): any {
-        // ): CheckObjectsCrossResult {
-        // const debugDraw = (function(x,y,w,h) {
-        //     this.drawContext.strokeStyle = "#0f0";
-        //     this.drawContext.strokeRect(x, y, w, h);
-        // }).bind(this);
-        // const typeToCheck = typeToCheckParam || CONST.TYPES.SHIP;
-
-        const checkSquare = (csw: BaseCSW, x: number, y: number) => {
-            const rd = rectForCsw(csw);
-            if (!rd) return false;
-            let { width, height } = rd;
-            // width--;
-            // height--;
-            // debugDraw(csw.x, csw.y, width, height);
-
-            return (
-                x >= csw.x &&
-                x <= csw.x + width &&
-                y >= csw.y &&
-                y <= csw.y + height
-            );
+        const checkSquare = (id: EntityId, x: number, y: number) => {
+            const rd = rectForEntity(id);
+            const t = transforms.get(id);
+            if (!rd || !t) return false;
+            const { width, height } = rd;
+            return x >= t.x && x <= t.x + width && y >= t.y && y <= t.y + height;
         };
 
-        const wo = rectForCsw(whoAsks);
-        if (!wo) return null;
+        const wo = rectForEntity(whoAsks);
+        const whoT = transforms.get(whoAsks);
+        if (!wo || !whoT) return null;
         const { width, height } = wo;
-        const { x, y } = newCoords || whoAsks;
+        const { x, y } = newCoords || whoT;
 
         const tArr = objects
-            .map((csw: BaseCSW) => {
+            .map((id: EntityId) => {
+                const type = typeTags.get(id)?.type;
                 if (
-                    whoAsks === csw ||
-                    (typesToIgnore?.includes(csw.type) ?? false)
+                    whoAsks === id ||
+                    (type !== undefined && typesToIgnore?.includes(type))
                 ) {
                     return false;
                 }
 
                 const result = [
-                    // left top
-                    +checkSquare(csw, x, y),
-                    // center top
-                    +checkSquare(csw, x + width / 2, y),
-                    // right top
-                    +checkSquare(csw, x + width, y),
-                    // left center
-                    +checkSquare(csw, x, y + height / 2),
-                    // center center (index = 4)
-                    +checkSquare(csw, x + width / 2, y + height / 2),
-                    // right center
-                    +checkSquare(csw, x + width, y + height / 2),
-                    // left bottom
-                    +checkSquare(csw, x, y + height),
-                    // center bottom
-                    +checkSquare(csw, x + width / 2, y + height),
-                    // right bottom
-                    +checkSquare(csw, x + width, y + height),
+                    +checkSquare(id, x, y),
+                    +checkSquare(id, x + width / 2, y),
+                    +checkSquare(id, x + width, y),
+                    +checkSquare(id, x, y + height / 2),
+                    +checkSquare(id, x + width / 2, y + height / 2),
+                    +checkSquare(id, x + width, y + height / 2),
+                    +checkSquare(id, x, y + height),
+                    +checkSquare(id, x + width / 2, y + height),
+                    +checkSquare(id, x + width, y + height),
                 ];
                 return result.some(r => r !== 0)
-                    ? { result, collidedObject: csw }
+                    ? { result, collidedObject: id }
                     : undefined;
-            }, this)
+            })
             .filter(obj => !!obj === true);
 
         if (tArr.length > 0) {
             return tArr;
-            // return tArr[0];
         }
         return null;
     }
 
     getVectorsOfCollidedObjectsByCenter(
-        whoAsks: BaseCSW,
-        objects: BaseCSW[],
-        newCoords?: PointXY, // x and y coordinates of object's center
+        whoAsks: EntityId,
+        objects: EntityId[],
+        newCoords?: Point, // x and y coordinates of object's center
         typesToIgnore?: ObjectType[],
     ): CollisionDistance[] {
-        const { x, y } = newCoords || whoAsks;
+        const whoT = transforms.get(whoAsks);
+        const { x, y } = newCoords || whoT || { x: 0, y: 0 };
 
-        const collidedObjects = objects
-            // .filter(
-            //     obj => whoAsks !== obj || typesToIgnore?.indexOf(obj.type) < 0,
-            // )
-            .reduce((prevValue: CollisionDistance[], currentCSW: BaseCSW) => {
-                if (
-                    whoAsks === currentCSW ||
-                    (typesToIgnore?.includes(currentCSW.type) ?? false)
-                ) {
-                    return prevValue;
-                }
-
-                const objToCheck: PointXY = {
-                    x: currentCSW.centerx,
-                    y: currentCSW.centery,
-                };
-
-                const distance = Math.sqrt(
-                    (objToCheck.x - x) * (objToCheck.x - x) +
-                        (objToCheck.y - y) * (objToCheck.y - y),
-                );
-
-                if (distance < CONST.CELLSIZES.MAXX) {
-                    const distanceX = objToCheck.x - x;
-
-                    const distanceY = objToCheck.y - y;
-
-                    return prevValue.concat({
-                        distance,
-                        distanceX,
-                        distanceY,
-                        collidedObject: currentCSW,
-                    });
-                }
-
+        return objects.reduce((prevValue: CollisionDistance[], id: EntityId) => {
+            const type = typeTags.get(id)?.type;
+            if (whoAsks === id || (type !== undefined && typesToIgnore?.includes(type))) {
                 return prevValue;
-            }, []);
+            }
 
-        return collidedObjects;
+            const t = transforms.get(id);
+            if (!t) return prevValue;
+
+            const distance = Math.sqrt(
+                (t.centerx - x) * (t.centerx - x) +
+                    (t.centery - y) * (t.centery - y),
+            );
+
+            if (distance < CONST.CELLSIZES.MAXX) {
+                return prevValue.concat({
+                    distance,
+                    distanceX: t.centerx - x,
+                    distanceY: t.centery - y,
+                    collidedObject: id,
+                });
+            }
+
+            return prevValue;
+        }, []);
     }
 
     getBulletWithPixelPrecision(
         x: number,
         y: number,
-        parentShip: BaseCSW,
-        bulletInst: Bullet,
-    ): Bullet | null {
-        const tArr = this.bulletsArr.filter((b: Bullet) => {
+        parentShip: EntityId,
+        bulletInst: EntityId,
+    ): EntityId | null {
+        const tArr = this.bulletsArr.filter((id: EntityId) => {
+            const link = bulletLinks.get(id);
+            const t = transforms.get(id);
+            if (!link || !t) return false;
             return (
-                b.parentShip !== parentShip &&
-                b !== bulletInst &&
-                x >= b.x &&
-                x <= b.x + 4 &&
-                y >= b.y &&
-                y <= b.y + 4
+                link.parentShip !== parentShip &&
+                id !== bulletInst &&
+                x >= t.x &&
+                x <= t.x + 4 &&
+                y >= t.y &&
+                y <= t.y + 4
             );
         });
         return tArr.length ? tArr[0] : null;
     }
 
-    // Returns CSW on coords in params (by pixel)
+    // Returns entity on coords in params (by pixel)
     getCSWWithPixelPrecision(
         x: number,
         y: number,
-        whoAsks: BaseCSW,
-    ): BaseCSW | null {
-        const tArr = this.cswArr.filter((csw: BaseCSW) => {
-            if (whoAsks === csw) {
-                return false;
-            }
-            const rect = rectForCsw(csw);
-            if (!rect) return false;
-            const { width, height } = rect;
+        whoAsks: EntityId,
+    ): EntityId | null {
+        const tArr = this.cswArr.filter((id: EntityId) => {
+            if (whoAsks === id) return false;
+            const rect = rectForEntity(id);
+            const t = transforms.get(id);
+            if (!rect || !t) return false;
             return (
-                x >= csw.x &&
-                x <= csw.x + width &&
-                y >= csw.y &&
-                y <= csw.y + height
+                x >= t.x &&
+                x <= t.x + rect.width &&
+                y >= t.y &&
+                y <= t.y + rect.height
             );
         });
 
         return tArr.length ? tArr[0] : null;
     }
 
-    getAllGhosts(): Ghosts {
+    getAllGhosts(): EntityId[] {
         return this.ghosts;
     }
 
-    getAllShips(): BaseCSW[] {
-        const filtered = this.cswArr.filter(ship =>
-            [CONST.TYPES.PLAYER, CONST.TYPES.SHIP].includes(ship.type),
-        );
-        return filtered;
-    }
-
-    getAllObstacles(): BaseCSW[] {
-        const filtered = this.cswArr.filter(ship => {
-            return ![CONST.TYPES.PLAYER, CONST.TYPES.SHIP].includes(ship.type);
+    getAllShips(): EntityId[] {
+        return this.cswArr.filter(id => {
+            const type = typeTags.get(id)?.type;
+            return type === CONST.TYPES.PLAYER || type === CONST.TYPES.SHIP;
         });
-        return filtered;
     }
 
-    getAllBullets(): Bullet[] {
+    getAllObstacles(): EntityId[] {
+        return this.cswArr.filter(id => {
+            const type = typeTags.get(id)?.type;
+            return type !== CONST.TYPES.PLAYER && type !== CONST.TYPES.SHIP;
+        });
+    }
+
+    getAllBullets(): EntityId[] {
         return this.bulletsArr;
     }
 
-    addShip(ship: BaseCSW): void {
+    addShip(ship: EntityId): void {
         this.cswArr.push(ship);
     }
 
-    setPlayer(player: Player): void {
+    setPlayer(player: EntityId): void {
         this.playerInstance = player;
     }
 
-    // TODO: move into the ParticleManager (define it firstly)
-    // createDelayedPic(x: number, y: number) {
-    //     const dp = new DelayedPic();
-    //     // const relXY = this.gameCam.getRelCoords(x, y);
-    //     // dp.init(relXY.x, relXY.y, this);
-    //     // dp.init(x, y, this, );
-    //     dp.delayedPicInit();
-    //     this.delayedPics.push(dp);
-    // }
-
-    removeDelayedPic(dpObj: DelayedPic): void {
+    removeDelayedPic(dpObj: EntityId): void {
+        destroyEntity(dpObj);
         this.delayedPics = this.delayedPics.filter(dp => dp !== dpObj);
     }
 
-    getAllDelayedPics(): DelayedPic[] {
+    getAllDelayedPics(): EntityId[] {
         return this.delayedPics;
     }
 
-    removeBullet(bullet: Bullet): void {
+    removeBullet(bullet: EntityId): void {
+        destroyEntity(bullet);
         this.bulletsArr = this.bulletsArr.filter(b => b !== bullet);
     }
 
-    removeShip(ship: BaseCSW): void {
+    removeShip(ship: EntityId): void {
+        destroyEntity(ship);
         this.cswArr = this.cswArr.filter(s => s !== ship);
     }
 
-    destroyAll(): void {
+    // disposes every ship except `keep`, so it can be reused (e.g. the
+    // player entity when the editor restarts a play session)
+    destroyAll(keep?: EntityId): void {
+        this.cswArr.forEach(id => {
+            if (id !== keep) destroyEntity(id);
+        });
         this.cswArr = [];
-        this.dynamicCollisionGrid = [];
-        this.staticCollisionGrid = [];
     }
 
     showGameOver(): void {

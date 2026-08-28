@@ -1,13 +1,13 @@
-import { BaseCSW } from '../objects/base/baseCsw.js';
 import { BTankManager } from '../btank';
 import { CONST } from '../const';
 import { ObjectType, Point, WayPoints } from '../types';
-import { CSWAI_customPaths } from '../objects/cswai.js';
 import { ObjectsFactory } from '../objFactory';
 import { placeBorders } from '../drawUtils';
 import { EditorUI } from './editorUI';
 import { Ghosts } from '../objects/ghosts.js';
-import { Player } from '../objects/player.js';
+import { EntityId } from '../ecs/world';
+import { transforms, typeTags, ghostFlags, waypointPaths, setTransform } from '../ecs/components';
+import { playerSetSpawn } from '../ecs/systems/playerSystem';
 
 type LevelObject = {
     id: number | null;
@@ -27,9 +27,9 @@ export class Editor {
     editorCurrentObject!: HTMLDivElement;
     editorCurrentObjectBrush!: ObjectBrush;
     editorMode!: boolean;
-    editorUnits!: BaseCSW[];
+    editorUnits!: EntityId[];
     editorGhosts!: Ghosts;
-    currentShipWithWaypoints!: CSWAI_customPaths | null;
+    currentShipWithWaypoints!: EntityId | null;
     playerCell!: Point;
     objFactoryInst: ObjectsFactory;
     editorUI!: EditorUI;
@@ -61,7 +61,7 @@ export class Editor {
     }
 
     newEditorLevel(): void {
-        const levelData = this.prepareLevelForSaving();
+        this.prepareLevelForSaving();
     }
 
     async uploadNewLevel(): Promise<void> {
@@ -77,39 +77,38 @@ export class Editor {
     }
 
     playEditorLevel(): void {
-        // TODO: create player object from scratch, also make only single way to create a player
-        const player = this.BTankInst.getAllShips()[0] as Player;
-        this.BTankInst.destroyAll();
+        // TODO: create player entity from scratch, also make only single way to create a player
+        const player = this.BTankInst.getAllShips()[0];
+        if (player === undefined) return;
+        this.BTankInst.destroyAll(player);
 
-        // TODO: add player1 to the empty array
-        // player.init(this.playerCell.x, this.playerCell.y, CONST.USER, this.BTankInst);
-        player.initCoords(this.playerCell.x, this.playerCell.y);
+        setTransform(player, this.playerCell.x, this.playerCell.y);
         this.BTankInst.addShip(player);
         this.BTankInst.setPlayer(player);
-        player.setSpawn(player.x, player.y);
+        const playerT = transforms.get(player);
+        if (playerT) playerSetSpawn(player, playerT.x, playerT.y);
 
         placeBorders(this.objFactoryInst, this.BTankInst);
 
         this.editorUnits.forEach(unit => {
-            if (unit.type === CONST.TYPES.SHIP) {
+            const unitT = transforms.get(unit);
+            const unitType = typeTags.get(unit)?.type;
+            if (!unitT || unitType === undefined) return;
+
+            if (unitType === CONST.TYPES.SHIP) {
                 this.BTankInst.addShip(
                     this.objFactoryInst.createCSW(
-                        unit.x,
-                        unit.y,
+                        unitT.x,
+                        unitT.y,
                         CONST.COMPUTER,
                         CONST.TYPES.SHIP,
                         false,
-                        (unit as CSWAI_customPaths).wayPoints,
+                        waypointPaths.get(unit)?.wayPoints,
                     ),
                 );
             } else {
                 this.BTankInst.addShip(
-                    this.objFactoryInst.createCSW(
-                        unit.x,
-                        unit.y,
-                        CONST.COMPUTER,
-                        unit.type,
-                    ),
+                    this.objFactoryInst.createCSW(unitT.x, unitT.y, CONST.COMPUTER, unitType),
                 );
             }
         });
@@ -118,26 +117,17 @@ export class Editor {
     prepareLevelForSaving(): string {
         let levelData = [this.playerCell.x, this.playerCell.y].join(';') + '|';
 
-        levelData += this.editorUnits.reduce((prev: string, curr: BaseCSW) => {
+        levelData += this.editorUnits.reduce((prev: string, curr: EntityId) => {
+            const t = transforms.get(curr);
+            const type = typeTags.get(curr)?.type;
+            const ghost = ghostFlags.get(curr)?.ghost ?? false;
+            if (!t || type === undefined) return prev;
+
             let wayPoints = '';
-            if (curr.type === CONST.TYPES.SHIP) {
-                wayPoints = JSON.stringify(
-                    (curr as CSWAI_customPaths).wayPoints,
-                );
+            if (type === CONST.TYPES.SHIP) {
+                wayPoints = JSON.stringify(waypointPaths.get(curr)?.wayPoints ?? []);
             }
-            return (
-                prev +
-                wayPoints +
-                ';' +
-                !!curr.ghost +
-                ';' +
-                curr.type +
-                ';' +
-                curr.y +
-                ';' +
-                curr.x +
-                '|'
-            );
+            return prev + wayPoints + ';' + ghost + ';' + type + ';' + t.y + ';' + t.x + '|';
         }, '');
 
         return levelData;
@@ -170,8 +160,8 @@ export class Editor {
         // TODO: show an input to enter the new name and ok and cancel buttons
     }
 
-    setCurrentShipWithWaypoints(ship: CSWAI_customPaths | null): void {
-        this.currentShipWithWaypoints = ship as CSWAI_customPaths;
+    setCurrentShipWithWaypoints(ship: EntityId | null): void {
+        this.currentShipWithWaypoints = ship;
     }
 
     setCurrentLevel(levelObj: LevelObject): void {
@@ -182,10 +172,7 @@ export class Editor {
         this.currentLevelObj.data = levelData;
     }
 
-    async showLevelChooseDialog(
-        editorFileListContainer: HTMLDivElement,
-    ): Promise<void> {
-        // this.editorGhosts = [];
+    async showLevelChooseDialog(editorFileListContainer: HTMLDivElement): Promise<void> {
         try {
             const result = await fetch('/list');
             const r = await result.json();
@@ -222,99 +209,76 @@ export class Editor {
         const levelObj = (await response.json()) as LevelObject;
         this.setCurrentLevel(levelObj);
 
-        // console.log({ editorUnits: this.editorUnits });
         this.editorUnits = [];
 
-        levelObj.data
-            .split(DATA_SEPARATOR)
-            .forEach((objStr: string, strIndex: number) => {
-                const fields = objStr.split(';');
+        levelObj.data.split(DATA_SEPARATOR).forEach((objStr: string, strIndex: number) => {
+            const fields = objStr.split(';');
 
-                if (strIndex === 0) {
-                    const playerStartPosition = { x: fields[0], y: fields[1] };
+            if (strIndex === 0) {
+                const playerStartPosition = { x: fields[0], y: fields[1] };
+
+                this.createEditorUnit(
+                    +playerStartPosition.x,
+                    +playerStartPosition.y,
+                    CONST.TYPES.PLAYER,
+                    true,
+                );
+            }
+            if (strIndex > 0 && objStr !== '') {
+                if (fields.length === 1) {
+                    const splitted = fields[0].split(',');
+                    const [type, x, y] = splitted;
+
+                    this.createEditorUnit(+x, +y, +type);
+                } else {
+                    const [waypoints, , type, y, x] = fields;
 
                     this.createEditorUnit(
-                        +playerStartPosition.x,
-                        +playerStartPosition.y,
-                        CONST.TYPES.PLAYER,
-                        true,
+                        +x,
+                        +y,
+                        +type,
+                        false,
+                        waypoints ? JSON.parse(waypoints) : [],
                     );
                 }
-                if (strIndex > 0 && objStr !== '') {
-                    if (objStr !== '') {
-                        if (fields.length === 1) {
-                            const splitted = fields[0].split(',');
-                            const [type, x, y] = splitted;
-
-                            this.createEditorUnit(+x, +y, +type);
-                        } else {
-                            const [waypoints, , type, y, x] = fields;
-
-                            this.createEditorUnit(
-                                +x,
-                                +y,
-                                +type,
-                                false,
-                                waypoints ? JSON.parse(waypoints) : [],
-                            );
-                        }
-                    }
-                }
-            });
+            }
+        });
     }
 
     async loadTheGameLevel(id: number): Promise<void> {
         const DATA_SEPARATOR = '|';
         const response = await fetch(`/level?id=${id}`);
         const r = await response.json();
-        r.data
-            .split(DATA_SEPARATOR)
-            .forEach((objStr: string, strIndex: number) => {
-                const fields = objStr.split(';');
-                if (strIndex === 0) {
-                    if (objStr !== '') {
+        r.data.split(DATA_SEPARATOR).forEach((objStr: string, strIndex: number) => {
+            const fields = objStr.split(';');
+            if (strIndex === 0) {
+                if (objStr !== '') {
+                    if (fields.length === 1) {
+                        const splitted = fields[0].split(',');
+                        this.createEditorUnit(+splitted[1], +splitted[2], +splitted[0]);
+                    } else {
+                        this.createEditorUnit(+fields[0], +fields[1], CONST.TYPES.PLAYER, true);
+                    }
+                    if (strIndex > 0 && objStr !== '') {
                         if (fields.length === 1) {
                             const splitted = fields[0].split(',');
-                            this.createEditorUnit(
-                                +splitted[1], // x
-                                +splitted[2], // y
-                                +splitted[0], // type
-                            );
+                            this.createEditorUnit(+splitted[1], +splitted[2], +splitted[0]);
                         } else {
                             this.createEditorUnit(
-                                +fields[0],
-                                +fields[1],
-                                CONST.TYPES.PLAYER,
-                                true,
+                                +fields[4],
+                                +fields[3],
+                                +fields[2],
+                                false,
+                                fields[0] ? JSON.parse(fields[0]) : [],
                             );
-                        }
-                        if (strIndex > 0 && objStr !== '') {
-                            if (objStr !== '') {
-                                if (fields.length === 1) {
-                                    const splitted = fields[0].split(',');
-                                    this.createEditorUnit(
-                                        +splitted[1], // x
-                                        +splitted[2], // y
-                                        +splitted[0], // type
-                                    );
-                                } else {
-                                    this.createEditorUnit(
-                                        +fields[4], // x
-                                        +fields[3], // y
-                                        +fields[2], // type
-                                        //fields[1], // ghost
-                                        false,
-                                        fields[0] ? JSON.parse(fields[0]) : [], // wayPoints
-                                    );
-                                }
-                            }
                         }
                     }
                 }
-            });
+            }
+        });
     }
 
-    pushNewObjects(objects: Array<BaseCSW>, ghost: boolean): void {
+    pushNewObjects(objects: EntityId[], ghost: boolean): void {
         if (ghost) {
             this.editorGhosts = this.editorGhosts.concat(objects);
         } else {
@@ -322,17 +286,17 @@ export class Editor {
         }
     }
 
-    getEditorUnitAt(x: number, y: number): BaseCSW | undefined {
-        return this.editorUnits.find((unit: BaseCSW) => {
-            return unit.x === x && unit.y === y;
+    getEditorUnitAt(x: number, y: number): EntityId | undefined {
+        return this.editorUnits.find((unit: EntityId) => {
+            const t = transforms.get(unit);
+            return t?.x === x && t?.y === y;
         });
     }
 
     getEditorWaypointAt(x: number, y: number): WayPoints | undefined {
         if (!this.currentShipWithWaypoints) return undefined;
-        return this.currentShipWithWaypoints.wayPoints.find((wp: number[]) => {
-            return wp[0] === x && wp[1] === y;
-        });
+        const wayPoints = waypointPaths.get(this.currentShipWithWaypoints)?.wayPoints ?? [];
+        return wayPoints.find((wp: number[]) => wp[0] === x && wp[1] === y);
     }
 
     createEditorUnit(
@@ -345,20 +309,18 @@ export class Editor {
         let who = CONST.COMPUTER;
 
         if (
-            this.editorUnits.some((unit: BaseCSW) => {
-                return unit.x === x && unit.y === y;
+            this.editorUnits.some((unit: EntityId) => {
+                const t = transforms.get(unit);
+                return t?.x === x && t?.y === y;
             })
         ) {
             return;
         }
 
         if (
-            this.editorGhosts.some((ghost: BaseCSW, index: number) => {
-                if (!ghost) {
-                    console.log(index);
-                    debugger;
-                }
-                return ghost.x === x && ghost.y === y;
+            this.editorGhosts.some((ghostId: EntityId) => {
+                const t = transforms.get(ghostId);
+                return t?.x === x && t?.y === y;
             })
         ) {
             return;
@@ -369,36 +331,31 @@ export class Editor {
             who = CONST.USER;
         }
 
-        const newCSW = this.objFactoryInst.createCSW(
-            x,
-            y,
-            who,
-            type,
-            false,
-            wayPoints,
-        );
-        if (!newCSW) debugger;
+        const newCSW = this.objFactoryInst.createCSW(x, y, who, type, false, wayPoints);
         this.pushNewObjects([newCSW], ghost ?? false);
     }
 
     addEditorWaypoint(x: number, y: number): void {
         if (!this.currentShipWithWaypoints) return;
-        const newWp = [x, y];
-        this.currentShipWithWaypoints.wayPoints.push(newWp);
+        const wp = waypointPaths.get(this.currentShipWithWaypoints);
+        if (!wp) return;
+        wp.wayPoints.push([x, y]);
     }
 
     removeEditorObjectAt(x: number, y: number): void {
-        this.editorUnits = this.editorUnits.filter((unit: BaseCSW) => {
-            return !(unit.x === x && unit.y === y);
+        this.editorUnits = this.editorUnits.filter((unit: EntityId) => {
+            const t = transforms.get(unit);
+            return !(t?.x === x && t?.y === y);
         });
     }
 
     removeEditorWaypointAt(x: number, y: number): void {
         if (!this.currentShipWithWaypoints) return;
-        this.currentShipWithWaypoints.wayPoints =
-            this.currentShipWithWaypoints.wayPoints.filter((wp: WayPoints) => {
-                return !(wp[0] === x && wp[1] === y);
-            });
+        const wp = waypointPaths.get(this.currentShipWithWaypoints);
+        if (!wp) return;
+        wp.wayPoints = wp.wayPoints.filter((point: WayPoints) => {
+            return !(point[0] === x && point[1] === y);
+        });
     }
 
     setCurrentEditorBrushObject(brushObjectType: ObjectType): void {

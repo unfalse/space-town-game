@@ -1,5 +1,5 @@
-import { BaseCSW } from './base/baseCsw';
+import { EntityId } from '../ecs/world';
 
-type Ghosts = BaseCSW[];
+type Ghosts = EntityId[];
 
 export type { Ghosts };

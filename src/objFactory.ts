@@ -1,29 +1,14 @@
 import { DrawingManager } from './drawingMan';
 import { BTankManager } from './btank';
-import { BaseCSW } from './objects/base/baseCsw';
-import { BaseGameObject } from './objects/base/baseGameObj';
-import { Bullet } from './objects/bullet';
 import { CONST } from './const';
-import { Player } from './objects/player';
-import { CSWAI_customPaths } from './objects/cswai';
-import { Border } from './objects/border';
-import { Obstacle } from './objects/obstacle';
-import { SpaceBrick } from './objects/space-brick';
-import { StaticShip } from './objects/static-ship';
-import { Counter } from './objects/counter';
-
 import { ObjectType, Who, WayPoints, Direction } from './types';
-import { DelayedPic } from './objects/delayedPic';
-
-type FactoryTypes =
-    | Player
-    | CSWAI_customPaths
-    | Obstacle
-    | SpaceBrick
-    | CSWAI_customPaths
-    | Border
-    | StaticShip
-    | DelayedPic;
+import { EntityId } from './ecs/world';
+import {
+    createShip,
+    createBullet as spawnBullet,
+    createDelayedPic,
+    createCounter,
+} from './ecs/factory';
 
 export class ObjectsFactory {
     drawingManagerInst: DrawingManager;
@@ -34,132 +19,32 @@ export class ObjectsFactory {
         this.bTankManagerInst = bTankInst;
     }
 
-    // TODO: is it good that BTankManager knows which fields CSW class contains ?
     createCSW(
         x: number,
         y: number,
-        who: Who, // TODO: this field should be in ship class (csw or cswai or obstacle)
-        typeParam?: ObjectType,
-        ghost?: boolean,
-        wayPoints?: WayPoints[],
-    ): FactoryTypes {
-        let c1 = null;
-        const type = typeParam || ObjectType.SHIP;
-        if (who === CONST.USER) {
-            c1 = new Player();
-            // this.playerInstance = c1;
-            this.initBaseCSW(c1, x, y, who, type);
-            c1.setGhost(ghost ?? false);
-            return c1;
-        } else if (who === CONST.COMPUTER) {
-            // TODO: make delayed parameter as a field in class so BTankManager should decide from this field how to create new instance
-            // this code should be extendable
-            // TODO: implement some pattern to not write thousands if-s
-            if (type === ObjectType.SHIP) {
-                c1 = new CSWAI_customPaths();
-                this.initBaseCSW(c1, x, y, who, type);
-                c1.setWaypoints(wayPoints);
-                c1.setGhost(ghost ?? false);
-                return c1;
-            }
-
-            if (type === ObjectType.STATICSHIP) {
-                c1 = new StaticShip();
-                this.initBaseCSW(c1, x, y, who, type);
-                c1.setGhost(ghost ?? false);
-                return c1;
-            }
-
-            if (type === ObjectType.OBSTACLE) {
-                c1 = new Obstacle();
-                this.initBaseCSW(c1, x, y, who, type);
-                c1.setGhost(ghost ?? false);
-                return c1;
-            }
-
-            if (type === ObjectType.SPACEBRICK) {
-                c1 = new SpaceBrick();
-                this.initBaseCSW(c1, x, y, who, type);
-                c1.setGhost(ghost ?? false);
-                return c1;
-            }
-
-            if (type === ObjectType.COUNTER) {
-                c1 = new Counter();
-                this.initBaseCSW(c1, x, y, who, type);
-                c1.setGhost(ghost ?? false);
-                return c1;
-            }
-
-            if (type == ObjectType.BORDER) {
-                c1 = new Border();
-                this.initBaseCSW(c1, x, y, who, type);
-                c1.setGhost(ghost ?? false);
-                return c1;
-            }
-
-            if (type == ObjectType.DELAYED_PIC) {
-                c1 = new DelayedPic();
-                this.initBaseCSW(c1, x, y, who, type);
-                c1.setGhost(ghost ?? false);
-                return c1;
-            }
-
-            // Add this to handle unsupported types
-            throw new Error(`Unsupported object type: ${type}`);
-        }
-        // Add this to handle unsupported 'who' values
-        throw new Error(`Unsupported 'who' value: ${who}`);
-    }
-
-    createBaseObj(
-        x: number,
-        y: number,
-        _who: Who, // TODO: this field should be in ship class (csw or cswai or obstacle)
+        who: Who,
         typeParam?: ObjectType,
         _ghost?: boolean,
-    ): BaseGameObject {
-        let c1 = null;
-        const type = typeParam || ObjectType.SHIP;
-        if (type === ObjectType.BULLET) {
-            c1 = new Bullet();
-            this.initBaseGameObject(c1, x, y);
-            return c1;
+        wayPoints?: WayPoints[],
+    ): EntityId {
+        const type = typeParam ?? ObjectType.SHIP;
+
+        if (type === ObjectType.DELAYED_PIC) {
+            return createDelayedPic(x, y);
         }
-        throw new Error(`Unsupported object type for base object: ${type}`);
+        if (type === ObjectType.COUNTER && who !== CONST.USER) {
+            return createCounter(x, y);
+        }
+        return createShip(x, y, who, type, this.drawingManagerInst, wayPoints);
     }
 
-    initBaseCSW(
-        obj: BaseCSW,
+    createBullet(
         x: number,
         y: number,
-        who: Who,
-        type: ObjectType,
-    ): void {
-        obj.init(
-            x,
-            y,
-            who,
-            this.drawingManagerInst,
-            this.bTankManagerInst,
-            this,
-        );
-        obj.setType(type);
-    }
-
-    initBaseGameObject(
-        obj: BaseGameObject,
-        x: number,
-        y: number,
-        d?: Direction,
-    ): void {
-        obj.init(
-            x,
-            y,
-            d ?? (CONST.DIRECTIONS.RIGHT as Direction),
-            this.drawingManagerInst,
-            this.bTankManagerInst,
-            this,
-        );
+        d: Direction,
+        parentShip: EntityId,
+        parentIam: Who,
+    ): EntityId {
+        return spawnBullet(x, y, d, parentShip, parentIam);
     }
 }

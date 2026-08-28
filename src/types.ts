@@ -1,5 +1,5 @@
-import { BaseCSW } from './objects/base/baseCsw';
 import { CONST } from './const';
+import { EntityId } from './ecs/world';
 
 export enum Who {
     COMPUTER = CONST.COMPUTER,
@@ -59,14 +59,14 @@ export type CollisionDirections = {
 
 export type CollisionInfo = {
     cd: CollisionDirections;
-    object: BaseCSW;
+    object: EntityId;
 };
 
 export type CollisionDistance = {
     distance: number;
     distanceX: number;
     distanceY: number;
-    collidedObject: BaseCSW;
+    collidedObject: EntityId;
 };
 
 export type InertiaDirections = { [key in Direction]: number };

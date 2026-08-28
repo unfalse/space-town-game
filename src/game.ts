@@ -3,16 +3,25 @@ import { BTankManager } from './btank';
 import { ImagesStore, DrawingManager } from './drawingMan';
 import { Editor } from './editor/editor';
 import { Utils } from './utils';
-import { CSWAI_customPaths } from './objects/cswai';
-import { Player } from './objects/player';
 import { Camera } from './camera';
-import { Direction, WayPoints } from './types';
-import { BaseCSW } from './objects/base/baseCsw';
-import { Bullet } from './objects/bullet';
-import { DelayedPic } from './objects/delayedPic';
+import { Direction, WayPoints, Who } from './types';
 import { ObjectsFactory } from './objFactory';
 import { placeBorders } from './drawUtils';
 import { EditorUI } from './editor/editorUI';
+import { EntityId } from './ecs/world';
+import { transforms, owners, healths, playerControls, waypointPaths } from './ecs/components';
+import {
+    playerAddAccel,
+    playerStop,
+    playerUpdate,
+    playerRespawn,
+    playerSetSpawn,
+} from './ecs/systems/playerSystem';
+import { playerFire } from './ecs/systems/weaponSystem';
+import { updateAIShip } from './ecs/systems/aiSystem';
+import { flyBullet } from './ecs/systems/bulletSystem';
+import { updateCrash } from './ecs/systems/crashSystem';
+import { renderEntity } from './ecs/systems/renderSystem';
 
 type Keys = {
     ArrowRight: boolean;
@@ -62,7 +71,7 @@ class Game {
     };
 
     // TODO: move player1 into BTankManager
-    player1: Player | null = null;
+    player1: EntityId | null = null;
     cameraInst: Camera;
     imagesStoreInst: ImagesStore;
     drawingManagerInst: DrawingManager;
@@ -78,7 +87,7 @@ class Game {
             this.imagesStoreInst,
             this.cameraInst,
         );
-        this.BTankInst = new BTankManager(this.player1 as Player);
+        this.BTankInst = new BTankManager(this.player1);
         this.BTankInst.init();
 
         this.objFactoryGameInst = new ObjectsFactory(
@@ -93,12 +102,9 @@ class Game {
         this.drawingManagerInst.init().then(async () => {
             this.EditorInst.init(this.BTankInst, this.EditorUIInst);
 
-            this.player1 = this.objFactoryGameInst.createCSW(
-                0,
-                600,
-                CONST.USER,
-            ) as Player;
-            this.player1.setSpawn(this.player1.x, this.player1.y);
+            this.player1 = this.objFactoryGameInst.createCSW(0, 600, CONST.USER);
+            const playerT = transforms.get(this.player1);
+            if (playerT) playerSetSpawn(this.player1, playerT.x, playerT.y);
             this.BTankInst.pushNewObjects([this.player1]);
 
             placeBorders(this.objFactoryGameInst, this.BTankInst);
@@ -160,77 +166,81 @@ class Game {
     editorCycle(_timestamp: number) {
         this.detectEditorMovement();
 
-        this.EditorInst.editorUnits.forEach((unit: BaseCSW) => {
-            unit.draw();
+        this.EditorInst.editorUnits.forEach((unit: EntityId) => {
+            renderEntity(unit, this.drawingManagerInst);
         });
 
-        this.EditorInst.editorGhosts.forEach((ghost: BaseCSW) => {
-            ghost.draw();
+        this.EditorInst.editorGhosts.forEach((ghost: EntityId) => {
+            renderEntity(ghost, this.drawingManagerInst);
         });
 
-        if (this.EditorInst.currentShipWithWaypoints) {
-            this.EditorInst.currentShipWithWaypoints.wayPoints.forEach(
-                (wp: WayPoints, wpIndex: number) => {
-                    this.drawingManagerInst.drawWayPoint(
-                        wp[0],
-                        wp[1],
-                        wpIndex + 1,
-                    );
-                },
-            );
+        const currentShip = this.EditorInst.currentShipWithWaypoints;
+        if (currentShip !== null) {
+            const wayPoints = waypointPaths.get(currentShip)?.wayPoints ?? [];
+            wayPoints.forEach((wp: WayPoints, wpIndex: number) => {
+                this.drawingManagerInst.drawWayPoint(wp[0], wp[1], wpIndex + 1);
+            });
         }
     }
 
     gameCycle(timestamp: number) {
         const player = this.player1;
+        const playerHealth = player ? healths.get(player) : undefined;
+        const playerCtrl = player ? playerControls.get(player) : undefined;
 
-        if (player && player.life <= 0 && !this.gameOver) {
-            player.lives--;
-            if (player.lives > 0) {
-                player.respawn(timestamp);
+        if (player && playerHealth && playerHealth.life <= 0 && !this.gameOver) {
+            if (playerCtrl) {
+                playerCtrl.lives--;
+                if (playerCtrl.lives > 0) {
+                    playerRespawn(player, timestamp);
+                }
             }
         }
 
-        if (player && player.life > 0) {
+        if (player && playerHealth && playerHealth.life > 0) {
             this.detectMovement(timestamp);
-            player.update(timestamp);
-            this.cameraInst.setCoords(player.x, player.y);
+            playerUpdate(player, timestamp, this.BTankInst);
+            const playerT = transforms.get(player);
+            if (playerT) this.cameraInst.setCoords(playerT.x, playerT.y);
         }
 
-        this.BTankInst.getAllShips().forEach((ship: BaseCSW) => {
-            if (ship.iam !== 1) ship.update(timestamp);
+        this.BTankInst.getAllShips().forEach((ship: EntityId) => {
+            if (owners.get(ship)?.iam !== Who.USER) {
+                updateAIShip(ship, timestamp, this.BTankInst, this.objFactoryGameInst);
+            }
         });
 
-        [...this.BTankInst.getAllBullets()].forEach((bullet: Bullet) => {
-            bullet.fly();
+        [...this.BTankInst.getAllBullets()].forEach((bullet: EntityId) => {
+            flyBullet(bullet, this.BTankInst, this.objFactoryGameInst);
         });
 
-        this.BTankInst.getAllShips().forEach((ship: BaseCSW) => {
-            ship.draw();
+        this.BTankInst.getAllShips().forEach((ship: EntityId) => {
+            renderEntity(ship, this.drawingManagerInst);
         });
 
-        this.BTankInst.getAllObstacles().forEach((ship: BaseCSW) => {
-            ship.draw();
+        this.BTankInst.getAllObstacles().forEach((obstacle: EntityId) => {
+            renderEntity(obstacle, this.drawingManagerInst);
         });
 
-        this.BTankInst.getAllBullets().forEach((bullet: Bullet) => {
-            bullet.draw();
+        this.BTankInst.getAllBullets().forEach((bullet: EntityId) => {
+            renderEntity(bullet, this.drawingManagerInst);
         });
 
-        this.BTankInst.getAllDelayedPics().forEach((pic: DelayedPic) => {
-            pic.draw(timestamp);
+        this.BTankInst.getAllDelayedPics().forEach((pic: EntityId) => {
+            renderEntity(pic, this.drawingManagerInst);
+            updateCrash(pic, timestamp, this.BTankInst);
         });
 
-        this.BTankInst.getAllGhosts().forEach((ghost: BaseCSW) => {
-            ghost.draw();
+        this.BTankInst.getAllGhosts().forEach((ghost: EntityId) => {
+            renderEntity(ghost, this.drawingManagerInst);
         });
 
-        if (player) {
-            this.drawingManagerInst.drawLives(player.lives);
-            this.drawingManagerInst.drawLifeBar(player.life, player.maxlife);
+        if (player && playerCtrl && playerHealth) {
+            this.drawingManagerInst.drawLives(playerCtrl.lives);
+            this.drawingManagerInst.drawLifeBar(playerHealth.life, playerHealth.maxlife);
         }
 
-        if (!this.gameOver && (this.win || (player && player.lives <= 0))) {
+        if (!this.gameOver && (this.win || (playerCtrl && playerCtrl.lives <= 0))) {
             if (this.win) {
                 Utils.text('YOU WIN');
                 this.BTankInst.showWin();
@@ -292,9 +302,7 @@ class Game {
             ) {
                 if (!this.EditorInst.currentShipWithWaypoints) {
                     const unit = this.EditorInst.getEditorUnitAt(cellx, celly);
-                    this.EditorInst.setCurrentShipWithWaypoints(
-                        unit as unknown as CSWAI_customPaths,
-                    );
+                    this.EditorInst.setCurrentShipWithWaypoints(unit ?? null);
                 } else {
                     if (!this.EditorInst.getEditorWaypointAt(cellx, celly)) {
                         this.EditorInst.addEditorWaypoint(cellx, celly);
@@ -321,9 +329,6 @@ class Game {
     }
 
     keyUpHandler(kc: string) {
-        // TODO: keysUp array for keys that are up to know which direction isn't getting acceleration
-        (this.player1 as Player).stopAccel = true;
-
         if (kc === Utils.KEY_CODE.F1_KEY) {
             this.EditorInst.editorUI.toggleEditorControls();
         }
@@ -418,12 +423,13 @@ class Game {
 
     // TODO: move to keyboard.js or something like controls.js
     detectMovement(timestamp: number) {
-        const player = this.player1 as Player;
+        const player = this.player1 as EntityId;
         // code here must change ONLY DIRECTION
         const ACCEL = 0.5; // 0.7; // 0.3;
 
         if (this.keys[Utils.KEY_CODE.w_KEY as keyof Keys]) {
-            player.setDirectionAndAddAccel(
+            playerAddAccel(
+                player,
                 this.controlsMap[
                     Utils.KEY_CODE.w_KEY as keyof ControlsMap
                 ] as Direction,
@@ -431,7 +437,8 @@ class Game {
             );
         }
         if (this.keys[Utils.KEY_CODE.a_KEY as keyof Keys]) {
-            player.setDirectionAndAddAccel(
+            playerAddAccel(
+                player,
                 this.controlsMap[
                     Utils.KEY_CODE.a_KEY as keyof ControlsMap
                 ] as Direction,
@@ -439,7 +446,8 @@ class Game {
             );
         }
         if (this.keys[Utils.KEY_CODE.d_KEY as keyof Keys]) {
-            player.setDirectionAndAddAccel(
+            playerAddAccel(
+                player,
                 this.controlsMap[
                     Utils.KEY_CODE.d_KEY as keyof ControlsMap
                 ] as Direction,
@@ -447,7 +455,8 @@ class Game {
             );
         }
         if (this.keys[Utils.KEY_CODE.s_KEY as keyof Keys]) {
-            player.setDirectionAndAddAccel(
+            playerAddAccel(
+                player,
                 this.controlsMap[
                     Utils.KEY_CODE.s_KEY as keyof ControlsMap
                 ] as Direction,
@@ -455,14 +464,11 @@ class Game {
             );
         }
         if (this.keys[Utils.KEY_CODE.SPACE as keyof Keys]) {
-            player.fire(timestamp);
+            playerFire(player, timestamp, this.objFactoryGameInst, this.BTankInst);
         }
         if (this.keys[Utils.KEY_CODE.h_KEY as keyof Keys]) {
-            player.stop();
+            playerStop(player);
         }
-        // if (this.keys[Utils.KEY_CODE.h_KEY as keyof Keys]) {
-        //     player.isHidden = !player.isHidden;
-        // }
     }
 }
 
